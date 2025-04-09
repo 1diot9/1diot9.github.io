@@ -9,6 +9,8 @@
     
     <title>
         
+            SpringBoot-Interceptor内存马 |
+        
         1diot9&#39;s Blog
     </title>
     
@@ -159,7 +161,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        
+                        SpringBoot-Interceptor内存马
                     </div>
                 
 
@@ -193,7 +195,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Wed Apr 09 2025 23:40:42 GMT+0800">2025-04-09 23:40:42</span>
+                    <span class="datetime" data-updated="Wed Apr 09 2025 23:52:36 GMT+0800">2025-04-09 23:52:36</span>
                 </span>
             
         
@@ -220,7 +222,27 @@
                     
 
                     
-                         <p>just a little test</p>
+                         <p>这里主要讲一下SpringBoot里的各种组件和它们的作用与关系。</p>
+<p>首先需要知道什么是SpringMVC。MVC就是Model-View-Controller。SpringBoot中内置了SpringMVC，并帮助你把一些繁琐的配置做好了(不需要写web.xml)，使程序员只需要关注业务代码。</p>
+<p>SpringMVC里有几个重要的部分，分别是DispatcherServlet，HandlerAdapter，Handler。下面简单介绍一下。</p>
+<p>先看一张图，建立基本认识：</p>
+<p><img   src="D:\Blogs\source\images\1.jpg"  alt="1"></p>
+<p>下面的内容是我问AI的，还挺清楚，大家有什么不懂的也可以直接问AI。</p>
+<p><strong>首先是HandlerAdapter和Handler：</strong></p>
+<p>在 Spring MVC 中，HandlerAdapter 和 Handler 是两个非常重要的概念，它们在请求处理过程中扮演着不同的角色。为了更好地理解它们的区别和作用，我们先分别解释一下这两个概念，然后再对比它们的不同之处。</p>
+<h1 id="Handler-HandlerAdapter"><a href="#Handler-HandlerAdapter" class="headerlink" title="Handler&amp;HandlerAdapter"></a>Handler&amp;HandlerAdapter</h1><h2 id="1-Handler（处理器）"><a href="#1-Handler（处理器）" class="headerlink" title="1. Handler（处理器）"></a>1. Handler（处理器）</h2><ul>
+<li><p>定义：Handler 是一个接口，表示能够处理 HTTP 请求的对象。它通常是控制器（Controller）的一个实例，负责处理特定的 URL 请求。</p>
+</li>
+<li><p>功能：Handler 的主要职责是根据传入的请求参数执行相应的业务逻辑，并返回一个 ModelAndView 或其他类型的响应结果。</p>
+</li>
+<li><p>实现方式：</p>
+</li>
+<li><ul>
+<li>在 Spring MVC 中，最常见的是使用注解驱动的控制器（如 @Controller 或 @RestController），这些控制器类就是 Handler 的具体实现。</li>
+<li>除了注解驱动的方式，Spring MVC 还支持基于接口的控制器（如 Controller 接口），但这种方式已经较少使用。</li>
+</ul>
+</li>
+</ul>
 
                     
                 </div>
