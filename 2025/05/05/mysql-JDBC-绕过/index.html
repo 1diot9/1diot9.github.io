@@ -9,7 +9,7 @@
     
     <title>
         
-            标签 |
+            mysql JDBC 绕过 |
         
         1diot9&#39;s Blog
     </title>
@@ -104,7 +104,7 @@
                         </li>
                     
                         
-                        <li class="menu-item flex-start border-box active">
+                        <li class="menu-item flex-start border-box">
                             <a class="menu-text-color border-box" href="/tags">
                                 
                                 标签
@@ -179,7 +179,7 @@
                 </li>
             
                 
-                <li class="drawer-menu-item border-box not-sub-menu active">
+                <li class="drawer-menu-item border-box not-sub-menu">
                     <label class="drawer-menu-label border-box">
                         <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
                             
@@ -229,15 +229,263 @@
             <div class="main-content border-box">
                 
 
-                    <div class="fade-in-down-animation">
-    <div class="tag-page-container">
-        
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
             
-                <div class="tagcloud-content">
-                    <a href="/tags/Java%E5%AE%89%E5%85%A8/" style="font-size: 1rem;">Java安全</a>
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        mysql JDBC 绕过
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv1</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-05-05 19:58:39</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon May 05 2025 19:59:21 GMT+0800">2025-05-05 19:59:21</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>471 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这里提到的绕过方法很基础。就是大小写，URL编码，参数拼接，#注释等，感觉跟php里的绕过很像。</p>
+<p>具体代码参考文末链接。</p>
+<p>fake-mysql可以使用<a class="link"   target="_blank" rel="noopener" href="https://github.com/4ra1n/mysql-fake-server" >4ra1n&#x2F;mysql-fake-server: MySQL Fake Server (纯Java实现，支持GUI版和命令行版，提供Dockerfile，支持多种常见JDBC利用)<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><h2 id="大小写绕过"><a href="#大小写绕过" class="headerlink" title="大小写绕过"></a>大小写绕过</h2><p>如果是这样检查的：<img   src="/2025/05/03/JNI/l-JDBC-%E7%BB%95%E8%BF%87/image.png"  alt="img"></p>
+<p>那么可以直接大小写绕过。</p>
+<p>由于mysql里是这样判断参数值的：BooleanPropertyDefinition#parseObject()<img   src="/2025/05/03/JNI/l-JDBC-%E7%BB%95%E8%BF%87/image.png"  alt="img"></p>
+<p>所以大小写不影响autoDeserialize的结果。</p>
+<p>另外，图片中看到YES和TRUE都可以，所以true被禁止时，不妨试试YES。还有，据说在低版本驱动中，1也可以。</p>
+<h2 id="URL编码"><a href="#URL编码" class="headerlink" title="URL编码"></a>URL编码</h2><p>当检查通过URI类获取参数时，会自动解码URL，此时无法通过URL编码绕过，如下图：<img   src="/2025/05/03/JNI/l-JDBC-%E7%BB%95%E8%BF%87/image.png"  alt="img"></p>
+<p>但是如果没有用URI类，那就可能存在URL编码绕过，如下图：<img   src="/2025/05/03/JNI/l-JDBC-%E7%BB%95%E8%BF%87/image.png"  alt="img"></p>
+<h2 id="参数拼接"><a href="#参数拼接" class="headerlink" title="参数拼接"></a>参数拼接</h2><p>这个很常用，就是在可控输入点输入一长串达到恶意拼接参数的效果，最后用#把后面的语句注释掉，跟sql注入有点像。</p>
+<p>值得一提的是，6.x.x版本的mysql需要在末尾用&amp;#来注释，否则会报错，而8.x.x版本的#或&amp;#都可以。</p>
+<p>报错如下：<img   src="/2025/05/03/JNI/l-JDBC-%E7%BB%95%E8%BF%87/image.png"  alt="img"></p>
+<p>这里应该是6.x.x以&amp;来分割参数，所以并不会把#当作结束符，而是继续当作参数读取。最后就会导致参数格式不合法，从而产生报错。</p>
+<h2 id="address绕过"><a href="#address绕过" class="headerlink" title="address绕过"></a>address绕过</h2><p>第一次遇到是在suctf2025的ezjava</p>
+<p>通过jdbc连接时支持这种语法：jdbc:mysql:&#x2F;&#x2F;address&#x3D;(host&#x3D;myhost)(port&#x3D;1111)(key1&#x3D;value1)&#x2F;db</p>
+<p>如果题目通过正则表达式匹配，可以通过这样的方法绕过，同时结合URL编码绕过关键字</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/lmoWKK41ZQzZOh-P26VUng" >JDBC Attack URL 绕过合集<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
                 </div>
-            
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                mysql JDBC 绕过
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/05/05/mysql-JDBC-绕过/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-05-05 19:58</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2025/05/05/sqlite%E6%94%BB%E5%87%BB/"
+                                   title="sqlite攻击"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">sqlite攻击</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/05/05/WebHandler%E5%86%85%E5%AD%98%E9%A9%AC/"
+                                   title="WebHandler内存马"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">WebHandler内存马</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
         
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%A7%E5%B0%8F%E5%86%99%E7%BB%95%E8%BF%87"><span class="nav-number">2.1.</span> <span class="nav-text">大小写绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#URL%E7%BC%96%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">URL编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E6%8B%BC%E6%8E%A5"><span class="nav-number">2.3.</span> <span class="nav-text">参数拼接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#address%E7%BB%95%E8%BF%87"><span class="nav-number">2.4.</span> <span class="nav-text">address绕过</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
         
     </div>
 </div>
@@ -303,6 +551,31 @@
 
     <!-- post tools -->
     
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
 
     <!-- side tools -->
     <div class="side-tools">
@@ -333,6 +606,10 @@
     </ul>
 
     <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
         
 
         
@@ -390,6 +667,17 @@
 
     <!-- tablet toc -->
     
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%A7%E5%B0%8F%E5%86%99%E7%BB%95%E8%BF%87"><span class="nav-number">2.1.</span> <span class="nav-text">大小写绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#URL%E7%BC%96%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">URL编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E6%8B%BC%E6%8E%A5"><span class="nav-number">2.3.</span> <span class="nav-text">参数拼接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#address%E7%BB%95%E8%BF%87"><span class="nav-number">2.4.</span> <span class="nav-text">address绕过</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
 </main>
 
 
@@ -428,6 +716,28 @@
     
 
     <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
     
 
     <!-- categories page -->
