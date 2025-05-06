@@ -9,8 +9,6 @@
     
     <title>
         
-            404 |
-        
         1diot9&#39;s Blog
     </title>
     
@@ -62,10 +60,10 @@
     
 
     <!-- page content -->
-    <div class="page-main-content border-box">
+    <div class="page-main-content border-box is-home">
         <div class="page-main-content-top">
             
-<header class="header-wrapper">
+<header class="header-wrapper transparent-1">
 
     <div class="border-box header-content">
         <div class="left flex-start border-box">
@@ -229,16 +227,117 @@
             <div class="main-content border-box">
                 
 
-                    <div class="fade-in-down-animation">
-    <div class="error-404-container border-box">
-        <div class="text-1 border-box flex-center">404</div>
-        <div class="text-2 border-box flex-center">
-            页面找不到
+                    <div class="home-content-container fade-in-down-animation">
+    
+    <ul class="home-post-list border-box">
+        
+            <li class="home-post-item">
+
+                
+
+                <div class="home-post-item-bottom border-box">
+                    
+                    <h3 class="home-post-title border-box">
+                        <a href="/2025/05/03/JNI/">
+                            JNI
+                        </a>
+                    </h3>
+
+                    <div class="home-post-content keep-markdown-body">
+                        
+                            利用手法目前知道的有两种，一种是.c直接编译成.dll；第二种是得到.h后编写对应.c，然后编译成.jnilib
+.c直接编译12345678#include &lt;stdlib.h&gt;#include &lt;stdio.h&gt;#incl...
+                        
+                    </div>
+
+                    
+
+<div class="post-meta-info-container border-box home">
+    <div class="post-meta-info border-box">
+        
+            <span class="meta-info-item border-box">
+                <i class="icon fa-solid fa-history"></i>&nbsp;<span class="home-post-history"
+                                                                                data-updated="Mon May 05 2025 11:11:47 GMT+0800"
+                >2025-05-05 11:11:47</span>
+            </span>
+        
+
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+        <a class="home-read-more" href="/2025/05/03/JNI/">阅读全文&nbsp;<i class="icon fas fa-angle-right"></i></a>
+    
+</div>
+
+                </div>
+            </li>
+        
+    </ul>
+    
+    <div class="paginator border-box flex-center">
+        <div class="border-box first-page paginator-btn allowed">
+            <a class="border-box"><i class="fa-solid fa-angle-double-left"></i></a>
         </div>
-        <div class="text-3 border-box flex-center">
-            <a class="go-home" href="/">前往首页</a>
+
+        <div class="border-box paginator-btn allowed">
+            <a class="border-box"
+               href="/"
+            ><i class="fa-solid fa-chevron-left"></i></a>
+        </div>
+
+
+        <div class="page-number-box border-box flex-center">
+            <input class="page-number-input border-box base-style"
+                   type="number"
+                   value="2"
+                   min="1"
+                   max="2"
+            /><span class="delimiter base-style">/</span><span class="base-style">2</span>
+        </div>
+
+
+        <div class="border-box paginator-btn">
+            <a class="border-box"
+               href="/"
+            ><i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+
+        <div class="border-box last-page paginator-btn not-allow">
+            <a class="border-box"><i class="fa-solid fa-angle-double-right"></i></a>
         </div>
     </div>
+
+
+
+
 </div>
 
 
@@ -305,7 +404,7 @@
 
     <!-- side tools -->
     <div class="side-tools">
-        <div class="side-tools-container border-box ">
+        <div class="side-tools-container border-box side-tools-show-handle">
     <ul class="side-tools-list side-tools-show-handle border-box">
         <li class="tools-item tool-font-adjust-plus flex-center">
             <i class="fas fa-search-plus"></i>
@@ -395,6 +494,7 @@
 
 
 
+
 <!-- common js -->
 
 <script src="/js/utils.js"></script>
@@ -424,6 +524,10 @@
 
 <div class="pjax">
     <!-- home page -->
+    
+        
+<script src="/js/page/home-page.js"></script>
+
     
 
     <!-- post page -->

