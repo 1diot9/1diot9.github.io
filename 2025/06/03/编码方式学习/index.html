@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            编码方式学习 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        编码方式学习
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv3</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-06-03 15:28:45</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Jun 03 2025 15:30:01 GMT+0800">2025-06-03 15:30:01</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E5%85%B6%E4%BB%96%E7%9F%A5%E8%AF%86/">其他知识</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E5%85%B6%E4%BB%96%E7%9F%A5%E8%AF%86-Java-Python/">其他知识 Java Python</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.8k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>7 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>学一下utf8等编码方式。</p>
+<p>相信大家都接触过乱码文本，就是锟斤拷之类的，这个就是由编码问题导致的。而编码问题的本质，就是用不同的方式读同一段字节，有些可能两个两个字节读，有些可能四个四个字节读。</p>
+<p>在CTF里，遇到过UTF8 Overlong Encoding 绕过，也遇到过由于高字节丢弃产生的绕过，但由于对缺乏对编码的知识，所以不是很理解，因此现在来学习一下。</p>
+<h1 id="UTF8"><a href="#UTF8" class="headerlink" title="UTF8"></a>UTF8</h1><p>UTF-8 是一种<strong>可变长度</strong>的 Unicode 编码方式，使用 <strong>1~4 个字节</strong> 表示一个字符，兼容 ASCII，并广泛用于互联网和文件存储。它的设计目标是<strong>节省空间</strong>（英文字符仅需 1 字节），同时支持所有 Unicode 字符（包括中文、emoji 等）。</p>
+<hr>
+<h2 id="UTF-8-的编码规则"><a href="#UTF-8-的编码规则" class="headerlink" title="UTF-8 的编码规则"></a><strong>UTF-8 的编码规则</strong></h2><p>UTF-8 的编码方式根据 Unicode 码点（Code Point）的范围，采用不同长度的字节序列：</p>
+<table>
+<thead>
+<tr>
+<th>Unicode 码点范围（十六进制）</th>
+<th>码点位数</th>
+<th>UTF-8 字节序列格式（二进制）</th>
+<th>字节数</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>U+0000</code> ~ <code>U+007F</code></td>
+<td>7 bits</td>
+<td><code>0xxxxxxx</code></td>
+<td>1</td>
+<td><code>&#39;A&#39;</code> (0x41)</td>
+</tr>
+<tr>
+<td><code>U+0080</code> ~ <code>U+07FF</code></td>
+<td>11 bits</td>
+<td><code>110xxxxx 10xxxxxx</code></td>
+<td>2</td>
+<td><code>&#39;é&#39;</code> (0xC3A9)</td>
+</tr>
+<tr>
+<td><code>U+0800</code> ~ <code>U+FFFF</code></td>
+<td>16 bits</td>
+<td><code>1110xxxx 10xxxxxx 10xxxxxx</code></td>
+<td>3</td>
+<td><code>&#39;你&#39;</code> (0xE4BDA0)</td>
+</tr>
+<tr>
+<td><code>U+10000</code> ~ <code>U+10FFFF</code></td>
+<td>21 bits</td>
+<td><code>11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</code></td>
+<td>4</td>
+<td><code>&#39;𠀀&#39;</code> (0xF0A08080)</td>
+</tr>
+</tbody></table>
+<h3 id="编码步骤"><a href="#编码步骤" class="headerlink" title="编码步骤"></a><strong>编码步骤</strong></h3><ol>
+<li><strong>确定码点范围</strong> → 选择对应的 UTF-8 字节格式。</li>
+<li><strong>将 Unicode 码点转换为二进制</strong>，填充到 UTF-8 的模板中。</li>
+<li><strong>转换为十六进制字节</strong>，得到最终的 UTF-8 编码。</li>
+</ol>
+<hr>
+<h2 id="示例：-你-的-UTF-8-编码"><a href="#示例：-你-的-UTF-8-编码" class="headerlink" title="示例：&#39;你&#39; 的 UTF-8 编码"></a><strong>示例：</strong><code>&#39;你&#39;</code> <strong>的 UTF-8 编码</strong></h2><h3 id="1-获取-Unicode-码点"><a href="#1-获取-Unicode-码点" class="headerlink" title="1. 获取 Unicode 码点"></a><strong>1. 获取 Unicode 码点</strong></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ord</span>(<span class="string">&#x27;你&#x27;</span>)  <span class="comment"># 20320（十进制） → 十六进制 `U+4F60`</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-确定-UTF-8-编码格式"><a href="#2-确定-UTF-8-编码格式" class="headerlink" title="2. 确定 UTF-8 编码格式"></a><strong>2. 确定 UTF-8 编码格式</strong></h3><p><code>U+4F60</code> 属于 <code>U+0800 ~ U+FFFF</code> 范围 → <strong>3 字节</strong>，格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1110xxxx 10xxxxxx 10xxxxxx</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-将-U-4F60-转换为二进制"><a href="#3-将-U-4F60-转换为二进制" class="headerlink" title="3. 将 U+4F60 转换为二进制"></a><strong>3. 将</strong> <code>U+4F60</code> <strong>转换为二进制</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">4F60 (十六进制) → 0100 1111 0110 0000 (二进制)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-填充-UTF-8-模板"><a href="#4-填充-UTF-8-模板" class="headerlink" title="4. 填充 UTF-8 模板"></a><strong>4. 填充 UTF-8 模板</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">码点二进制：0100 111101 100000</span><br><span class="line">填充模板：1110xxxx 10xxxxxx 10xxxxxx</span><br><span class="line">结果：</span><br><span class="line">1110**0100** 10**111101** 10**100000**</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-转换为十六进制"><a href="#5-转换为十六进制" class="headerlink" title="5. 转换为十六进制"></a><strong>5. 转换为十六进制</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">11100100 → 0xE4</span><br><span class="line">10111101 → 0xBD</span><br><span class="line">10100000 → 0xA0</span><br></pre></td></tr></table></figure>
+
+<p>最终 UTF-8 编码：<code>\xE4\xBD\xA0</code>（3 字节）</p>
+<h3 id="Python-验证"><a href="#Python-验证" class="headerlink" title="Python 验证"></a><strong>Python 验证</strong></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;你&#x27;</span>.encode(<span class="string">&#x27;utf-8&#x27;</span>)  <span class="comment"># b&#x27;\xe4\xbd\xa0&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="UTF-8-的特点"><a href="#UTF-8-的特点" class="headerlink" title="UTF-8 的特点"></a><strong>UTF-8 的特点</strong></h2><ol>
+<li><strong>兼容 ASCII</strong>：<code>U+0000~U+007F</code> 的字符（如 <code>&#39;A&#39;</code>）编码与 ASCII 完全相同（1 字节）。</li>
+<li><strong>无字节序问题</strong>：UTF-8 的字节顺序固定，无需 BOM（但某些编辑器可能添加 <code>EF BB BF</code> 作为标记）。</li>
+<li><strong>空间高效</strong>：</li>
+</ol>
+<ul>
+<li><ul>
+<li>英文：1 字节（ASCII 兼容）。</li>
+<li>欧洲字符：2 字节（如 <code>&#39;é&#39;</code>）。</li>
+<li>中文&#x2F;日文：3 字节（如 <code>&#39;你&#39;</code>）。</li>
+<li>生僻字&#x2F;emoji：4 字节（如 <code>&#39;𠀀&#39;</code>）。</li>
+</ul>
+</li>
+</ul>
+<h1 id="UTF16"><a href="#UTF16" class="headerlink" title="UTF16"></a>UTF16</h1><p>UTF-16 是一种<strong>定长或变长</strong>的 Unicode 编码方式，使用 <strong>2 或 4 字节</strong> 表示一个字符。它的核心特点是：</p>
+<ul>
+<li><strong>基本多文种平面（BMP）字符</strong>（<code>U+0000</code> ~ <code>U+FFFF</code>）用 <strong>2 字节</strong> 直接存储。</li>
+<li><strong>辅助平面字符</strong>（<code>U+10000</code> ~ <code>U+10FFFF</code>）用 <strong>4 字节</strong>（代理对，Surrogate Pair）存储。</li>
+</ul>
+<hr>
+<h2 id="UTF-16-的编码规则"><a href="#UTF-16-的编码规则" class="headerlink" title="UTF-16 的编码规则"></a><strong>UTF-16 的编码规则</strong></h2><h3 id="1-基本多文种平面（BMP，2-字节）"><a href="#1-基本多文种平面（BMP，2-字节）" class="headerlink" title="1. 基本多文种平面（BMP，2 字节）"></a><strong>1. 基本多文种平面（BMP，2 字节）</strong></h3><ul>
+<li><p><strong>范围</strong>：<code>U+0000</code> ~ <code>U+FFFF</code>（不包括代理区 <code>U+D800</code> ~ <code>U+DFFF</code>）。</p>
+</li>
+<li><p><strong>直接存储</strong>：码点数值直接转为 2 字节。</p>
+</li>
+<li><ul>
+<li>示例：</li>
+</ul>
+</li>
+<li><ul>
+<li><ul>
+<li><code>&#39;A&#39;</code>（<code>U+0041</code>）→ <code>0x0041</code>（大端：<code>00 41</code>，小端：<code>41 00</code>）</li>
+<li><code>&#39;你&#39;</code>（<code>U+4F60</code>）→ <code>0x4F60</code>（大端：<code>4F 60</code>，小端：<code>60 4F</code>）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>辅助平面这个略看一下就行。</p>
+<h3 id="2-辅助平面（4-字节，代理对）"><a href="#2-辅助平面（4-字节，代理对）" class="headerlink" title="2. 辅助平面（4 字节，代理对）"></a><strong>2. 辅助平面（4 字节，代理对）</strong></h3><ul>
+<li><strong>范围</strong>：<code>U+10000</code> ~ <code>U+10FFFF</code>（如 emoji <code>&#39;𠀀&#39;</code> <code>U+20000</code>）。</li>
+<li><strong>代理对计算</strong>：</li>
+</ul>
+<ol>
+<li><ol>
+<li>码点减去 <code>0x10000</code>，得到 20 位中间值。</li>
+<li>高 10 位 + <code>0xD800</code> → <strong>高位代理（High Surrogate）</strong>。</li>
+<li>低 10 位 + <code>0xDC00</code> → <strong>低位代理（Low Surrogate）</strong>。</li>
+</ol>
+</li>
+</ol>
+<ul>
+<li><ul>
+<li>示例：</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算 &#x27;𠀀&#x27;（U+20000）的 UTF-16 代理对</span></span><br><span class="line">code_point = <span class="number">0x20000</span></span><br><span class="line">temp = code_point - <span class="number">0x10000</span>  <span class="comment"># 0x10000</span></span><br><span class="line">high_surrogate = (temp &gt;&gt; <span class="number">10</span>) + <span class="number">0xD800</span>  <span class="comment"># 0xD840</span></span><br><span class="line">low_surrogate = (temp &amp; <span class="number">0x3FF</span>) + <span class="number">0xDC00</span>  <span class="comment"># 0xDC00</span></span><br><span class="line"><span class="comment"># 最终代理对：0xD840 0xDC00</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="字节序（大端-vs-小端）"><a href="#字节序（大端-vs-小端）" class="headerlink" title="字节序（大端 vs 小端）"></a><strong>字节序（大端 vs 小端）</strong></h2><p>UTF-16 的 2 字节或 4 字节序列需要明确字节序：</p>
+<ul>
+<li><p><strong>大端（BE）</strong>：高位字节在前（如 <code>0x4F60</code> → <code>4F 60</code>）。</p>
+</li>
+<li><p><strong>小端（LE）</strong>：低位字节在前（如 <code>0x4F60</code> → <code>60 4F</code>）。</p>
+</li>
+<li><p><strong>BOM（字节顺序标记）</strong>：</p>
+</li>
+<li><ul>
+<li><code>0xFEFF</code>（大端 BOM，存储为 <code>FE FF</code>）。</li>
+<li><code>0xFFFE</code>（小端 BOM，存储为 <code>FF FE</code>）。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="Python-示例"><a href="#Python-示例" class="headerlink" title="Python 示例"></a><strong>Python 示例</strong></h2><p>这里遇到过一个坑，python如果只指定utf16，输出是带BOM的，当时不知道，一直想不明白为什么会输出四个字节。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 默认 UTF-16（带 BOM，小端）</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;你&#x27;</span>.encode(<span class="string">&#x27;utf-16&#x27;</span>))  <span class="comment"># b&#x27;\xff\xfe\x60\x4f&#x27;（BOM + 小端）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显式指定大端（无 BOM）</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;你&#x27;</span>.encode(<span class="string">&#x27;utf-16be&#x27;</span>))  <span class="comment"># b&#x27;\x4f\x60&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显式指定小端（无 BOM）</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;你&#x27;</span>.encode(<span class="string">&#x27;utf-16le&#x27;</span>))  <span class="comment"># b&#x27;\x60\x4f&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 辅助平面字符 &#x27;𠀀&#x27;（U+20000）</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;𠀀&#x27;</span>.encode(<span class="string">&#x27;utf-16be&#x27;</span>))  <span class="comment"># b&#x27;\xd8\x40\xdc\x00&#x27;（代理对）</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="UTF-16-的特点"><a href="#UTF-16-的特点" class="headerlink" title="UTF-16 的特点"></a><strong>UTF-16 的特点</strong></h2><ol>
+<li><strong>定长与变长混合</strong>：</li>
+</ol>
+<ul>
+<li><ul>
+<li>BMP 字符：2 字节。</li>
+<li>辅助平面字符：4 字节（代理对）。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><strong>字节序敏感</strong>：需明确大端或小端（或依赖 BOM）。</li>
+<li><strong>适用场景</strong>：</li>
+</ol>
+<ul>
+<li><ul>
+<li>Windows 系统内部（如 <code>wchar_t</code>）。</li>
+<li>Java&#x2F;C# 的字符串内存表示。</li>
+</ul>
+</li>
+</ul>
+<h1 id="UTF-8-vs-UTF-16"><a href="#UTF-8-vs-UTF-16" class="headerlink" title="UTF-8 vs. UTF-16"></a>UTF-8 vs. UTF-16</h1><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>UTF-8</th>
+<th>UTF-16</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>最小字节数</strong></td>
+<td>1（ASCII）</td>
+<td>2（基本字符）</td>
+</tr>
+<tr>
+<td><strong>最大字节数</strong></td>
+<td>4</td>
+<td>4（代理对）</td>
+</tr>
+<tr>
+<td><strong>字节序</strong></td>
+<td>无（单字节存储）</td>
+<td>需考虑大端&#x2F;小端（BOM）</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>互联网、文本文件、数据库</td>
+<td>操作系统内部（如 Windows&#x2F;Java）</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所有字符的Unicode码点是唯一的，可以通过hex(ord(str))的方式得到16进制格式的码点。根据得到的码点，套用不同的编码方式，就可以得到不同编码下的字符。</p>
+<h1 id="高位丢失情况"><a href="#高位丢失情况" class="headerlink" title="高位丢失情况"></a>高位丢失情况</h1><p>先看一个例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> solution;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">tmp</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">StringBuffer</span> <span class="variable">stringBuffer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuffer</span>();</span><br><span class="line">        stringBuffer.append(<span class="string">&quot;你&quot;</span>);</span><br><span class="line">        <span class="type">char</span> <span class="variable">c</span> <span class="operator">=</span> stringBuffer.charAt(<span class="number">0</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;字符转十进制整数（Unicode码点的整数形式）：&quot;</span>+(<span class="type">int</span>) c);</span><br><span class="line">        <span class="type">String</span> <span class="variable">format</span> <span class="operator">=</span> String.format(<span class="string">&quot;dec转hex：%04x&quot;</span>,(<span class="type">int</span>) c);</span><br><span class="line">        System.out.println(format);</span><br><span class="line">        <span class="type">byte</span> <span class="variable">c1</span> <span class="operator">=</span> (<span class="type">byte</span>) c;</span><br><span class="line">        System.out.println(<span class="string">&quot;转成byte类型（高位丢失,4f60剩60,60转dec就是96）：&quot;</span>+c1);</span><br><span class="line">        System.out.println((<span class="type">char</span>) c1);</span><br><span class="line">        <span class="type">byte</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">127</span>;   <span class="comment">//byte的范围是-128——127，用的补码表示法</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">字符转十进制整数（Unicode码点的整数形式）：<span class="number">20320</span></span><br><span class="line">dec转hex：4f60</span><br><span class="line">转成<span class="type">byte</span>类型（高位丢失,4f60剩<span class="number">60</span>,<span class="number">60</span>转dec就是<span class="number">96</span>）：<span class="number">96</span></span><br><span class="line">`</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这里很好地展示了高位丢失的情况。因为byte只有八个字节，而char有16个字节（char 在Java中本质上是一个16位的Unicode字符）。</p>
+<p>这个性质有时候可以用来绕过一些过滤。比如D^3CTF25的d3jtar那题。</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://1diot9.github.io/2025/06/01/D3CTF-d3jtar/" >D3CTF-d3jtar | 1diot9’s Blog<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="UTF8-Overlong-Encoding"><a href="#UTF8-Overlong-Encoding" class="headerlink" title="UTF8 Overlong Encoding"></a>UTF8 Overlong Encoding</h1><p>根据前面学习过的UTF8编码，我们知道，’A’对应的码点是41，转换成二进制就是0010 0001，然后根据0xxxxxxx的方式补位，得到的utf8编码就是0010 0001，转换成16进制就是 41。但是，我们可以在码点前面补零，将A的码点变成0000 0010 0001，然后根据<code>110xxxxx 10xxxxxx</code>补成两个字节。即11000000 10100001</p>
+<p>转成16进制就是C0A1</p>
+<p>这样就得到了’A’的UTF8 Overlong Encoding形式。</p>
+<p>如果没有对UTF8编码进行校验的话，就可以尝试通过这种方法绕过，比如Java的原生反序列化。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/utf-8-overlong-encoding.html" >UTF-8 Overlong Encoding导致的安全问题 | 离别歌<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                编码方式学习
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/06/03/编码方式学习/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-06-03 15:28</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E5%85%B6%E4%BB%96%E7%9F%A5%E8%AF%86-Java-Python/">其他知识 Java Python</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/06/01/D3CTF-d3jtar/"
+                                   title="D3CTF-d3jtar"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">D3CTF-d3jtar</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF8"><span class="nav-number">2.</span> <span class="nav-text">UTF8</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-8-%E7%9A%84%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99"><span class="nav-number">2.1.</span> <span class="nav-text">UTF-8 的编码规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.1.1.</span> <span class="nav-text">编码步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A-%E4%BD%A0-%E7%9A%84-UTF-8-%E7%BC%96%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">示例：&#39;你&#39; 的 UTF-8 编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%8E%B7%E5%8F%96-Unicode-%E7%A0%81%E7%82%B9"><span class="nav-number">2.2.1.</span> <span class="nav-text">1. 获取 Unicode 码点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%A1%AE%E5%AE%9A-UTF-8-%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.2.2.</span> <span class="nav-text">2. 确定 UTF-8 编码格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B0%86-U-4F60-%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BA%8C%E8%BF%9B%E5%88%B6"><span class="nav-number">2.2.3.</span> <span class="nav-text">3. 将 U+4F60 转换为二进制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%A1%AB%E5%85%85-UTF-8-%E6%A8%A1%E6%9D%BF"><span class="nav-number">2.2.4.</span> <span class="nav-text">4. 填充 UTF-8 模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6"><span class="nav-number">2.2.5.</span> <span class="nav-text">5. 转换为十六进制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python-%E9%AA%8C%E8%AF%81"><span class="nav-number">2.2.6.</span> <span class="nav-text">Python 验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-8-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">2.3.</span> <span class="nav-text">UTF-8 的特点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF16"><span class="nav-number">3.</span> <span class="nav-text">UTF16</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-16-%E7%9A%84%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99"><span class="nav-number">3.1.</span> <span class="nav-text">UTF-16 的编码规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E5%A4%9A%E6%96%87%E7%A7%8D%E5%B9%B3%E9%9D%A2%EF%BC%88BMP%EF%BC%8C2-%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">3.1.1.</span> <span class="nav-text">1. 基本多文种平面（BMP，2 字节）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%BE%85%E5%8A%A9%E5%B9%B3%E9%9D%A2%EF%BC%884-%E5%AD%97%E8%8A%82%EF%BC%8C%E4%BB%A3%E7%90%86%E5%AF%B9%EF%BC%89"><span class="nav-number">3.1.2.</span> <span class="nav-text">2. 辅助平面（4 字节，代理对）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E5%BA%8F%EF%BC%88%E5%A4%A7%E7%AB%AF-vs-%E5%B0%8F%E7%AB%AF%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">字节序（大端 vs 小端）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.3.</span> <span class="nav-text">Python 示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-16-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">3.4.</span> <span class="nav-text">UTF-16 的特点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF-8-vs-UTF-16"><span class="nav-number">4.</span> <span class="nav-text">UTF-8 vs. UTF-16</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E4%BD%8D%E4%B8%A2%E5%A4%B1%E6%83%85%E5%86%B5"><span class="nav-number">6.</span> <span class="nav-text">高位丢失情况</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF8-Overlong-Encoding"><span class="nav-number">7.</span> <span class="nav-text">UTF8 Overlong Encoding</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">22.8k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF8"><span class="nav-number">2.</span> <span class="nav-text">UTF8</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-8-%E7%9A%84%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99"><span class="nav-number">2.1.</span> <span class="nav-text">UTF-8 的编码规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.1.1.</span> <span class="nav-text">编码步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A-%E4%BD%A0-%E7%9A%84-UTF-8-%E7%BC%96%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">示例：&#39;你&#39; 的 UTF-8 编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%8E%B7%E5%8F%96-Unicode-%E7%A0%81%E7%82%B9"><span class="nav-number">2.2.1.</span> <span class="nav-text">1. 获取 Unicode 码点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%A1%AE%E5%AE%9A-UTF-8-%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.2.2.</span> <span class="nav-text">2. 确定 UTF-8 编码格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B0%86-U-4F60-%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BA%8C%E8%BF%9B%E5%88%B6"><span class="nav-number">2.2.3.</span> <span class="nav-text">3. 将 U+4F60 转换为二进制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%A1%AB%E5%85%85-UTF-8-%E6%A8%A1%E6%9D%BF"><span class="nav-number">2.2.4.</span> <span class="nav-text">4. 填充 UTF-8 模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6"><span class="nav-number">2.2.5.</span> <span class="nav-text">5. 转换为十六进制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python-%E9%AA%8C%E8%AF%81"><span class="nav-number">2.2.6.</span> <span class="nav-text">Python 验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-8-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">2.3.</span> <span class="nav-text">UTF-8 的特点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF16"><span class="nav-number">3.</span> <span class="nav-text">UTF16</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-16-%E7%9A%84%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99"><span class="nav-number">3.1.</span> <span class="nav-text">UTF-16 的编码规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E5%A4%9A%E6%96%87%E7%A7%8D%E5%B9%B3%E9%9D%A2%EF%BC%88BMP%EF%BC%8C2-%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">3.1.1.</span> <span class="nav-text">1. 基本多文种平面（BMP，2 字节）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%BE%85%E5%8A%A9%E5%B9%B3%E9%9D%A2%EF%BC%884-%E5%AD%97%E8%8A%82%EF%BC%8C%E4%BB%A3%E7%90%86%E5%AF%B9%EF%BC%89"><span class="nav-number">3.1.2.</span> <span class="nav-text">2. 辅助平面（4 字节，代理对）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E5%BA%8F%EF%BC%88%E5%A4%A7%E7%AB%AF-vs-%E5%B0%8F%E7%AB%AF%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">字节序（大端 vs 小端）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.3.</span> <span class="nav-text">Python 示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UTF-16-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">3.4.</span> <span class="nav-text">UTF-16 的特点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF-8-vs-UTF-16"><span class="nav-number">4.</span> <span class="nav-text">UTF-8 vs. UTF-16</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E4%BD%8D%E4%B8%A2%E5%A4%B1%E6%83%85%E5%86%B5"><span class="nav-number">6.</span> <span class="nav-text">高位丢失情况</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF8-Overlong-Encoding"><span class="nav-number">7.</span> <span class="nav-text">UTF8 Overlong Encoding</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>

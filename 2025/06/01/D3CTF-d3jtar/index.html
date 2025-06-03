@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Tue Jun 03 2025 15:14:17 GMT+0800">2025-06-03 15:14:17</span>
+                    <span class="datetime" data-updated="Tue Jun 03 2025 15:28:21 GMT+0800">2025-06-03 15:28:21</span>
                 </span>
             
         
@@ -302,7 +302,7 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>686 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>653 字</span>
             </span>
         
         
@@ -346,7 +346,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> solution;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">StringBuffer</span> <span class="variable">name</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuffer</span>();</span><br><span class="line">        name.append(<span class="string">&quot;你abc123&quot;</span>);</span><br><span class="line">        <span class="type">char</span> <span class="variable">c</span> <span class="operator">=</span> name.charAt(<span class="number">0</span>);</span><br><span class="line">        System.out.println(c);</span><br><span class="line">        System.out.println((<span class="type">byte</span>) c);</span><br><span class="line">        System.out.println((<span class="type">byte</span>) <span class="string">&#x27;j&#x27;</span>);</span><br><span class="line">        unicodeSearch();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">unicodeSearch</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">codePoint</span> <span class="operator">=</span> Character.MIN_CODE_POINT; codePoint &lt;= Character.MAX_CODE_POINT; codePoint++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!Character.isDigit(codePoint)) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Character.toChars(codePoint));</span><br><span class="line">            <span class="type">char</span> <span class="variable">c</span> <span class="operator">=</span> s.charAt(<span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span> ((<span class="type">byte</span>) c == <span class="number">106</span>)&#123;</span><br><span class="line">                System.out.println(String.format(<span class="string">&quot;%c: U+%04X%n&quot;</span>, c, codePoint));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>python脚本也行：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">unicode_high_lost</span>(<span class="params">c</span>):</span><br><span class="line">    unicode_format = c.encode(<span class="string">&quot;unicode-escape&quot;</span>).decode(<span class="string">&quot;ascii&quot;</span>)</span><br><span class="line">    hex_str = unicode_format[-<span class="number">2</span>:]</span><br><span class="line">    char = <span class="built_in">chr</span>(<span class="built_in">int</span>(hex_str, <span class="number">16</span>))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;c&#125;</span>--&gt;<span class="subst">&#123;char&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0x0000</span>, <span class="number">0xFFFF</span>+<span class="number">1</span>):</span><br><span class="line">        hex_str = <span class="built_in">format</span>(i, <span class="string">&quot;04x&quot;</span>)</span><br><span class="line">        last2 = hex_str[-<span class="number">2</span>:]</span><br><span class="line">        char_old = <span class="built_in">chr</span>(<span class="built_in">int</span>(hex_str, <span class="number">16</span>))</span><br><span class="line">        char_new = <span class="built_in">chr</span>(<span class="built_in">int</span>(last2, <span class="number">16</span>))</span><br><span class="line">        <span class="keyword">if</span> char_new == <span class="string">&#x27;j&#x27;</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;char_old&#125;</span>丢失高位后变成：<span class="subst">&#123;char_new&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0x0000</span>, <span class="number">0xFFFF</span>+<span class="number">1</span>):</span><br><span class="line">        hex_str = <span class="built_in">format</span>(i, <span class="string">&quot;04x&quot;</span>)</span><br><span class="line">        last2 = hex_str[-<span class="number">2</span>:]</span><br><span class="line">        char_old = <span class="built_in">chr</span>(<span class="built_in">int</span>(hex_str, <span class="number">16</span>))</span><br><span class="line">        char_new = <span class="built_in">chr</span>(<span class="built_in">int</span>(last2, <span class="number">16</span>))</span><br><span class="line">        <span class="keyword">if</span> char_new == <span class="string">&#x27;j&#x27;</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;char_old&#125;</span>丢失高位后变成：<span class="subst">&#123;char_new&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
 
 <p>找到一些能用的字符</p>
 <p>Ū(\u016a)丢失高位后变成：j</p>
@@ -441,6 +441,22 @@
                 
                     <div class="post-nav border-box">
                         
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2025/06/03/%E7%BC%96%E7%A0%81%E6%96%B9%E5%BC%8F%E5%AD%A6%E4%B9%A0/"
+                                   title="编码方式学习"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">编码方式学习</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
                         
                             <div class="next-post">
                                 <a class="next"
@@ -519,7 +535,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">21.1k</span>
+                    <span class="item-value border-box word">22.8k</span>
                 </span>
             
 
