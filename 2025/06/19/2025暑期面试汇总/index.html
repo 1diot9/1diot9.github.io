@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Thu Jun 19 2025 17:44:18 GMT+0800">2025-06-19 17:44:18</span>
+                    <span class="datetime" data-updated="Sat Jun 21 2025 14:54:05 GMT+0800">2025-06-21 14:54:05</span>
                 </span>
             
         
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>2.1k 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>2.9k 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>7 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>10 分钟</span>
             </span>
         
         
@@ -493,12 +493,44 @@
 </ul>
 <p>又被拷打了，简历上不该吹牛的。放假后得赶快把小工具写起来。</p>
 <ul>
-<li>静态分析工具，Tabby，CodeQL用过吗</li>
+<li><p>静态分析工具，Tabby，CodeQL用过吗</p>
+</li>
+<li><p>反问环节</p>
+</li>
+<li><h1 id="长亭科技–安全研究工程师"><a href="#长亭科技–安全研究工程师" class="headerlink" title="长亭科技–安全研究工程师"></a>长亭科技–安全研究工程师</h1><ul>
+<li>自我介绍</li>
+<li>学校是有人带还是一个人学？</li>
+<li>平时的学习方法，一天的学习规划</li>
+<li>安全开发主要用什么语言，java那里二开过什么工具</li>
+<li>比较擅长的漏洞类型有哪些</li>
+<li>简单讲一下CB链的优化方式，CB链的原理，CB链默认需要依赖CC组件吗；CC链的TransformerInvoker；CC链里toString为入口的链子；还有别的以toString为入口的链子吗</li>
+<li>黑盒场景，可以反序列化请求体，怎么探测可利用的gadgets；说一下DNS探测的原理；不报错，但是能探测</li>
+<li>fastjson利用链的注意点；有注意过一个随机的问题吗（应该指的是POJONode的那条链子）</li>
+<li>还是黑盒gadgets探测，但是不出网，也没有回显，怎么探测？（其实直接sleep一下就行，当时没想到）</li>
+</ul>
+<p>我一开始讲直接打内存马，但是反问我如果不知道远程是什么中间件</p>
+<ul>
+<li>讲一下文件上传的漏洞；图片马怎么生成，二次渲染绕过</li>
+<li>有了解过commons-upload组件吗</li>
+</ul>
+<p>没了解过，之后记得看</p>
+<ul>
+<li>Java的JDBC，JNDI利用有了解吗；常见JDBC及利用方式；有了解过postgreSQL的JDBC吗，p神师傅写过关于这个的文章，有看过吗（没看过，惭愧了，现在还是太功利，太着急，感觉比赛里不常考的就不想学）</li>
+<li>mysql JDBC不出网，怎么把pcap文件上传进去；ascii jar方法了解吗</li>
+</ul>
+<p>ascii jar是p神师傅文章里的非预期解<a class="link"   target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/springboot-xml-beans-exploit-without-network.html" >https://www.leavesongs.com/PENETRATION/springboot-xml-beans-exploit-without-network.html<i class="fas fa-external-link-alt"></i></a>  是结合postgre写文件的一种方法</p>
+<ul>
+<li>讲一下SSRF形成原理，黑盒怎么测；常见绕过技巧；URL跳转绕过有了解吗(没了解，记得看)</li>
+<li>Java中的绕过trick知道吗；比如ban了http协议（其实是问你别的协议，比如file协议除了写文件还能干嘛）；file协议能列目录吗，能相对目录读文件吗；netdoc协议知道吗（其实这里在问SSRF的代码审计了，可惜还没接触过）</li>
+<li>有Java代码审计基础吗，php的呢；web框架的基础不是特别好是吗</li>
+<li>有了解过web安全是做什么的吗，为什么想投这个岗位呢；能实习多久呢</li>
 <li>反问环节</li>
 </ul>
-<h1 id="长亭科技–安全研究工程师"><a href="#长亭科技–安全研究工程师" class="headerlink" title="长亭科技–安全研究工程师"></a>长亭科技–安全研究工程师</h1><ul>
-<li>自我介绍</li>
-<li></li>
+<p>工作内容：需要有代码审计基础，复现一些最新的漏洞，基于commit；做一些应急；打ctf和漏洞挖掘比赛；漏洞利用，waf绕过</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>最后阴差阳错的去绿盟的安全服务，那个面试没记录，因为当时觉得大概率不会进，因为毕竟是想去安全研究岗。没想到就那个安全服务岗过了，过的还特别快，面试到offer就3个小时左右。</p>
+<p>经过这么多面试，知道了很多自己的不足，也大致了解到安全研究岗的要求。说实话，一个安全研究的offer都没拿到还是有点失落的。</p>
+<p>后面需要把代码审计，工具二开搞好，再后面要尝试自己找系统审计，或者分析1day，或者利用链挖掘。总之，不能再急于求成了，需要静下心来学习。</p>
+</li>
 </ul>
 
                     
@@ -618,7 +650,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E4%BF%A1%E6%9C%8D%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">1.</span> <span class="nav-text">深信服一面–安全攻防实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9F%A5%E9%81%93%E5%88%9B%E5%AE%87%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">2.</span> <span class="nav-text">知道创宇–安全研究实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%BF%E7%9B%9F%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%91%98"><span class="nav-number">3.</span> <span class="nav-text">绿盟一面–安全研究员</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A5%87%E5%AE%89%E4%BF%A1%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6"><span class="nav-number">4.</span> <span class="nav-text">奇安信–安全研究</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9D%AD%E5%B7%9E%E9%BB%98%E5%AE%89%E7%A7%91%E6%8A%80"><span class="nav-number">5.</span> <span class="nav-text">杭州默安科技</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AE%E6%AD%A5%E5%9C%A8%E7%BA%BF-%E5%AE%89%E5%85%A8%E5%AE%9E%E4%B9%A0%E7%94%9F%EF%BC%88%E6%BC%8F%E6%B4%9E%E7%A0%94%E7%A9%B6%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">微步在线-安全实习生（漏洞研究）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%95%BF%E4%BA%AD%E7%A7%91%E6%8A%80%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%B7%A5%E7%A8%8B%E5%B8%88"><span class="nav-number">7.</span> <span class="nav-text">长亭科技–安全研究工程师</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E4%BF%A1%E6%9C%8D%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">1.</span> <span class="nav-text">深信服一面–安全攻防实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9F%A5%E9%81%93%E5%88%9B%E5%AE%87%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">2.</span> <span class="nav-text">知道创宇–安全研究实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%BF%E7%9B%9F%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%91%98"><span class="nav-number">3.</span> <span class="nav-text">绿盟一面–安全研究员</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A5%87%E5%AE%89%E4%BF%A1%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6"><span class="nav-number">4.</span> <span class="nav-text">奇安信–安全研究</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9D%AD%E5%B7%9E%E9%BB%98%E5%AE%89%E7%A7%91%E6%8A%80"><span class="nav-number">5.</span> <span class="nav-text">杭州默安科技</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AE%E6%AD%A5%E5%9C%A8%E7%BA%BF-%E5%AE%89%E5%85%A8%E5%AE%9E%E4%B9%A0%E7%94%9F%EF%BC%88%E6%BC%8F%E6%B4%9E%E7%A0%94%E7%A9%B6%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">微步在线-安全实习生（漏洞研究）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%95%BF%E4%BA%AD%E7%A7%91%E6%8A%80%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%B7%A5%E7%A8%8B%E5%B8%88"><span class="nav-number">7.</span> <span class="nav-text">长亭科技–安全研究工程师</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol>
     </div>
 </div>
 
@@ -660,7 +692,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">25.5k</span>
+                    <span class="item-value border-box word">26.3k</span>
                 </span>
             
 
@@ -808,7 +840,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E4%BF%A1%E6%9C%8D%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">1.</span> <span class="nav-text">深信服一面–安全攻防实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9F%A5%E9%81%93%E5%88%9B%E5%AE%87%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">2.</span> <span class="nav-text">知道创宇–安全研究实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%BF%E7%9B%9F%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%91%98"><span class="nav-number">3.</span> <span class="nav-text">绿盟一面–安全研究员</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A5%87%E5%AE%89%E4%BF%A1%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6"><span class="nav-number">4.</span> <span class="nav-text">奇安信–安全研究</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9D%AD%E5%B7%9E%E9%BB%98%E5%AE%89%E7%A7%91%E6%8A%80"><span class="nav-number">5.</span> <span class="nav-text">杭州默安科技</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AE%E6%AD%A5%E5%9C%A8%E7%BA%BF-%E5%AE%89%E5%85%A8%E5%AE%9E%E4%B9%A0%E7%94%9F%EF%BC%88%E6%BC%8F%E6%B4%9E%E7%A0%94%E7%A9%B6%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">微步在线-安全实习生（漏洞研究）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%95%BF%E4%BA%AD%E7%A7%91%E6%8A%80%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%B7%A5%E7%A8%8B%E5%B8%88"><span class="nav-number">7.</span> <span class="nav-text">长亭科技–安全研究工程师</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E4%BF%A1%E6%9C%8D%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">1.</span> <span class="nav-text">深信服一面–安全攻防实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9F%A5%E9%81%93%E5%88%9B%E5%AE%87%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%AE%9E%E4%B9%A0%E7%94%9F"><span class="nav-number">2.</span> <span class="nav-text">知道创宇–安全研究实习生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%BF%E7%9B%9F%E4%B8%80%E9%9D%A2%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%91%98"><span class="nav-number">3.</span> <span class="nav-text">绿盟一面–安全研究员</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A5%87%E5%AE%89%E4%BF%A1%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6"><span class="nav-number">4.</span> <span class="nav-text">奇安信–安全研究</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9D%AD%E5%B7%9E%E9%BB%98%E5%AE%89%E7%A7%91%E6%8A%80"><span class="nav-number">5.</span> <span class="nav-text">杭州默安科技</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AE%E6%AD%A5%E5%9C%A8%E7%BA%BF-%E5%AE%89%E5%85%A8%E5%AE%9E%E4%B9%A0%E7%94%9F%EF%BC%88%E6%BC%8F%E6%B4%9E%E7%A0%94%E7%A9%B6%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">微步在线-安全实习生（漏洞研究）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%95%BF%E4%BA%AD%E7%A7%91%E6%8A%80%E2%80%93%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6%E5%B7%A5%E7%A8%8B%E5%B8%88"><span class="nav-number">7.</span> <span class="nav-text">长亭科技–安全研究工程师</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol>
     </div>
 </div>
 
