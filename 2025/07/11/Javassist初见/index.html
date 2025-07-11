@@ -9,7 +9,7 @@
     
     <title>
         
-            suctf25-sujava |
+            Javassist初见 |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        suctf25-sujava
+                        Javassist初见
                     </div>
                 
 
@@ -266,13 +266,13 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-09 19:19:45</span>
+                <span class="datetime">2025-07-11 16:21:14</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Fri May 09 2025 19:20:05 GMT+0800">2025-05-09 19:20:05</span>
+                    <span class="datetime" data-updated="Fri Jul 11 2025 16:22:33 GMT+0800">2025-07-11 16:22:33</span>
                 </span>
             
         
@@ -281,7 +281,7 @@
             <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
                 <ul class="post-category-ul">
                     
-                            <li class="category-item"><a href="/categories/CTF-Java/">CTF-Java</a></li>
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
                         
                     
                 </ul>
@@ -292,7 +292,7 @@
             <span class="post-tag meta-info-item border-box">
                 <ul class="post-tag-ul">
                     
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/CTF-Java/">CTF-Java</a></li>
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
                         
                     
                 </ul>
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>50 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.4k 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>6 分钟</span>
             </span>
         
         
@@ -329,10 +329,34 @@
                     
 
                     
-                         <p>主要考察JDBC mysql</p>
-<p>这里主要学到一种新的连接语法</p>
-<p>jdbc:mysql:&#x2F;&#x2F;address&#x3D;(host&#x3D;myhost)(port&#x3D;1111)(key1&#x3D;value1)&#x2F;db#</p>
-<p>结合URL编码，这样可以绕过更多。</p>
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在写序列化数据生成工具时，TemplatesImpl里的bytes[][]往往都是由javassist动态生成的。javassist依赖相较于asm依赖，使用起来更加简单，因为javassist更像是在操作类，而asm就是在操作字节码了。这里介绍一下javassist的基本用法，另外自己在使用javassist时，遇到了不少坑，这里也来总结一下。</p>
+<h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>直接看代码，我写注释了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.idiot9;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javassist.*;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CreateMyTest</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> String address;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">CreateMyTest</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;ctConstrutor&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">MyTest</span> <span class="operator">=</span> pool.makeClass(<span class="string">&quot;MyTest&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//添加字段</span></span><br><span class="line">        <span class="type">CtField</span> <span class="variable">name</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CtField</span>(pool.get(<span class="string">&quot;java.lang.String&quot;</span>), <span class="string">&quot;name&quot;</span>, MyTest);</span><br><span class="line">        name.setModifiers(Modifier.PRIVATE);</span><br><span class="line">        MyTest.addField(name, CtField.Initializer.constant(<span class="string">&quot;1diot9&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="type">CtField</span> <span class="variable">address</span> <span class="operator">=</span> CtField.make(<span class="string">&quot;public String address;&quot;</span>, MyTest);</span><br><span class="line">        MyTest.addField(address);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//添加构造方法</span></span><br><span class="line">        <span class="type">CtConstructor</span> <span class="variable">ctConstructor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CtConstructor</span>(<span class="keyword">new</span> <span class="title class_">CtClass</span>[]&#123;&#125;, MyTest);</span><br><span class="line">        ctConstructor.setBody(<span class="string">&quot;System.out.println(\&quot;ctConstrutor\&quot;);&quot;</span>);</span><br><span class="line">        MyTest.addConstructor(ctConstructor);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//添加方法</span></span><br><span class="line">        <span class="type">CtMethod</span> <span class="variable">hello</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CtMethod</span>(CtClass.voidType, <span class="string">&quot;hello&quot;</span>, <span class="keyword">new</span> <span class="title class_">CtClass</span>[]&#123;&#125;, MyTest);</span><br><span class="line">        hello.setModifiers(Modifier.PUBLIC);</span><br><span class="line">        hello.setBody(<span class="string">&quot;System.out.println(\&quot;hello\&quot; + name);&quot;</span>);</span><br><span class="line">        MyTest.addMethod(hello);</span><br><span class="line"></span><br><span class="line">        <span class="type">CtMethod</span> <span class="variable">tmp</span> <span class="operator">=</span> CtMethod.make(<span class="string">&quot;    public void tmp()&#123;\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;        System.out.println(\&quot;tmp\&quot;);\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;    &#125;&quot;</span>, MyTest);</span><br><span class="line">        MyTest.addMethod(tmp);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//添加静态代码块</span></span><br><span class="line">        <span class="type">CtConstructor</span> <span class="variable">staticBlock</span> <span class="operator">=</span> MyTest.makeClassInitializer();</span><br><span class="line">        staticBlock.setBody(<span class="string">&quot;System.out.println(\&quot;staticBlock\&quot;);&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;System.out.println(\&quot;staticBlock2\&quot;);&quot;</span>;</span><br><span class="line">        MyTest.makeClassInitializer().insertAfter(s);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//添加父类</span></span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">superClass</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet&quot;</span>);</span><br><span class="line">        MyTest.setSuperclass(superClass);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//输出字节码</span></span><br><span class="line">        MyTest.writeFile(<span class="string">&quot;./src/main/java/&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">tmp</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;tmp&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里介绍了几种常用的方法：创建字段，创建方法，创建构造方法，创建静态代码块，继承父类</p>
+<h1 id="类搜索相关"><a href="#类搜索相关" class="headerlink" title="类搜索相关"></a>类搜索相关</h1><p>javassist必须要找到对应的类才能进行动态创建，所以搞清楚它的默认搜索路径和怎么添加路径很重要。下面来简单介绍一下。</p>
+<p>首先，会加载rt.jar中的核心包，包括：java.lang包的所有类，java.util，java.net，java.math，java.nio，java.swing，java.awt，java.lang.reflect，java.lang.invoke。注意，这上面的都是加载单个包下的类，不包括子包里的内，这一点很重要。</p>
+<p>然后介绍一下第三方依赖的搜索情况。</p>
+<p>如果你在pom里导入了依赖，那么你可以通过 pool.get(“org.apache.commons.beanutils.BeanComparator”); 的方式直接获取到类。但是，如果你没有在pom里导入依赖，就需要手动添加类搜索路径，比如添加一个jar包路径：pool.insertClassPath(“D:\repository\commons-beanutils\commons-beanutils\1.9.4\commons-beanutils-1.9.4.jar”); 这样javassist就能找到这个包中的所有类。</p>
+<p>除了在get类的时候有搜索问题，在动态创建方法时也会有问题。首先看一下下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CreateOutPackage</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">        <span class="comment">//insertClassPath影响类搜索范围，pom里导入的依赖，默认在搜索范围</span></span><br><span class="line">        pool.insertClassPath(<span class="string">&quot;D:\\repository\\commons-beanutils\\commons-beanutils\\1.9.4\\commons-beanutils-1.9.4.jar&quot;</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> pool.makeClass(<span class="string">&quot;Test&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">staticBlock</span> <span class="operator">=</span> <span class="string">&quot;BeanComparator beanComparator = new BeanComparator();&quot;</span>;</span><br><span class="line">        ctClass.makeClassInitializer().insertAfter(staticBlock);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是不是觉得没有任何问题？但是运行后会发现报错：<img   src="/2025/05/03/JNI/ssist%E5%88%9D%E8%A7%81/image.png"  alt="img"></p>
+<p>报错原因为：找不到BeanComparator类。这里你可能会想，上面不都insertClassPath了吗，为什么还找不到呢？这是因为，我们没有写全限定名。举个例子，存在两个同名类，com.A和net.A，那么，如果你只写A，javassist怎么知道是哪一个呢？所以我们修改代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CreateOutPackage</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">        <span class="comment">//insertClassPath影响类搜索范围，pom里导入的依赖，默认在搜索范围</span></span><br><span class="line">        pool.insertClassPath(<span class="string">&quot;D:\\repository\\commons-beanutils\\commons-beanutils\\1.9.4\\commons-beanutils-1.9.4.jar&quot;</span>);</span><br><span class="line"></span><br><span class="line">        ctClass = pool.makeClass(<span class="string">&quot;Test&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">staticBlock</span> <span class="operator">=</span> <span class="string">&quot;org.apache.commons.beanutils.BeanComparator beanComparator = new org.apache.commons.beanutils.BeanComparator();&quot;</span>;</span><br><span class="line">        ctClass.makeClassInitializer().insertAfter(staticBlock);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样一来就没有报错了。</p>
+<p>不过，每次都要写全限定名是不是觉得很麻烦？所以，javassist还提供了另外一个方法：pool.importPackage(“org.apache.commons.beanutils”); 这个的效果就相当于每次在类最顶上进行import，回忆一下，当我们import后，是不是只需要写SimpleName就行了？这里importPackage的效果是一样的。</p>
+<p>于是，我们可以再修改代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CreateOutPackage</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">        <span class="comment">//insertClassPath影响类搜索范围，pom里导入的依赖，默认在搜索范围</span></span><br><span class="line">        pool.insertClassPath(<span class="string">&quot;D:\\repository\\commons-beanutils\\commons-beanutils\\1.9.4\\commons-beanutils-1.9.4.jar&quot;</span>);</span><br><span class="line">        <span class="comment">//importPackage影响代码写法，是写全限定名还是写SimpleName</span></span><br><span class="line">        pool.importPackage(<span class="string">&quot;org.apache.commons.beanutils&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> pool.makeClass(<span class="string">&quot;Test&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">staticBlock</span> <span class="operator">=</span> <span class="string">&quot;BeanComparator beanComparator = new BeanComparator();&quot;</span>;</span><br><span class="line">        ctClass.makeClassInitializer().insertAfter(staticBlock);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样看起来是不是简洁很多？</p>
+<h1 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h1><p>在写SpringInterceptor内存马时，遇到一个很奇怪的点。我定义了一个command方法，并在preHandle方法中调用：<img   src="/2025/05/03/JNI/ssist%E5%88%9D%E8%A7%81/99536cad17ffb9a2ff8ac0a3cffe1c8.png"  alt="img"></p>
+<p>但是这样会报错：<img   src="/2025/05/03/JNI/ssist%E5%88%9D%E8%A7%81/cac8a32923b914f0a3001706fd1838c.png"  alt="img"></p>
+<p>当我把最底下的command方法删除后就行了。我一开始以为是command方法的问题，但是后来发现直接照搬方法体到preHandle里竟然可以，于是也不是command方法的问题。</p>
+<p>后来不知怎么灵机一动，把command调用上面的String command改成了String cmd，就好了：<img   src="/2025/05/03/JNI/ssist%E5%88%9D%E8%A7%81/6ca70ad7c3778a45ad3f9adf4ea2eca.png"  alt="img"></p>
+<p>原来这里同一个类里的变量名和方法名不能一样。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://drun1baby.top/2023/12/07/Java-Agent-%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%A6%E4%B9%A0/#Javassist" >https://drun1baby.top/2023/12/07/Java-Agent-%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%A6%E4%B9%A0/#Javassist<i class="fas fa-external-link-alt"></i></a></p>
 
                     
                 </div>
@@ -343,11 +367,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                suctf25-sujava
+                Javassist初见
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/09/suctf25-sujava/
+                2025/07/11/Javassist初见/
             </div>
         </div>
 
@@ -363,7 +387,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-05-09 19:19</div>
+                <div class="content">2025-07-11 16:21</div>
             </div>
 
 
@@ -399,7 +423,7 @@
                             <ul class="post-tags-box border-box">
                                 
                                     <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/CTF-Java/">CTF-Java</a>
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
                                     </li>
                                 
                             </ul>
@@ -415,31 +439,15 @@
                 
                     <div class="post-nav border-box">
                         
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/05/09/CISCN24%E5%86%B3%E8%B5%9B-solonMaster/"
-                                   title="CISCN24决赛-solonMaster"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">CISCN24决赛-solonMaster</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
                         
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/09/CISCN24-ezjava/"
-                                   title="CISCN24_ezjava"
+                                   href="/2025/06/19/2025%E6%9A%91%E6%9C%9F%E9%9D%A2%E8%AF%95%E6%B1%87%E6%80%BB/"
+                                   title="2025暑期面试汇总"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">CISCN24_ezjava</span>
+                                        <span class="post-nav-title-item text-ellipsis">2025暑期面试汇总</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -467,7 +475,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B1%BB%E6%90%9C%E7%B4%A2%E7%9B%B8%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">类搜索相关</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91"><span class="nav-number">4.</span> <span class="nav-text">遇到的坑</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 
@@ -657,7 +665,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B1%BB%E6%90%9C%E7%B4%A2%E7%9B%B8%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">类搜索相关</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91"><span class="nav-number">4.</span> <span class="nav-text">遇到的坑</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 
