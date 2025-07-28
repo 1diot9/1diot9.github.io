@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            开发框架简述 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        开发框架简述
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv3</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-07-28 16:54:57</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Jul 28 2025 16:55:45 GMT+0800">2025-07-28 16:55:45</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%BC%80%E5%8F%91/">Java开发</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>2.4k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>11 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在看代码的过程中，经常会对项目的框架产生很多问题，比如不知道每个配置文件是干什么的。同时，也经常忘记一些名词的含义，比如Mapper，SSM是什么。所以这里来整理一下，方便未来忘记时查阅，同时也可以将新知识不断补充。</p>
+<h1 id="SSM框架"><a href="#SSM框架" class="headerlink" title="SSM框架"></a>SSM框架</h1><p>ssm指：Spring MVC + Spring + Mybatis，而Spring MVC &#x3D; Model + View + Controller</p>
+<p>先来看一下一个SSM例子的总体结构：</p>
+<p><img   src="/%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E7%AE%80%E8%BF%B0/image.png"  alt="img"></p>
+<p>在Java源码包中，是很经典的三层结构：Controller+Service+DAO</p>
+<p>resources包中，是各种组件的配置文件，包括spring的，mybatis的</p>
+<p>spring配置文件这里写成好几个了，但是只是为了更职责分明，其实是可以直接全写到applicationContext里的。</p>
+<p>WEB-INF包中，存有web.xml文件，这个很重要，里面包括了DispatcherServlet的声明，调用的过滤器，以及路由映射（不用注解时才有）。</p>
+<p>这里有一点需要注意，mybatis相关的mapper.xml一般也放在resources里</p>
+<h2 id="各层职责"><a href="#各层职责" class="headerlink" title="各层职责"></a>各层职责</h2><h3 id="1、控制层（Controller）–Spring-MVC"><a href="#1、控制层（Controller）–Spring-MVC" class="headerlink" title="1、控制层（Controller）–Spring MVC"></a>1、控制层（Controller）–Spring MVC</h3><p>主要负责处理来自用户的HTTP请求，然后交给业务层处理。SpringMVC会根据URL映射将请求路由对应到相应的Controller方法。</p>
+<h3 id="2、业务层（Service）–Spring"><a href="#2、业务层（Service）–Spring" class="headerlink" title="2、业务层（Service）–Spring"></a>2、业务层（Service）–Spring</h3><p>通常负责处理具体的业务逻辑，一般会调用DAO层进行数据库操作。业务层与控制层是<strong>松耦合</strong>的，即控制层只调用业务层接口，而不是具体实现类。什么是松耦合后面会讲。</p>
+<h3 id="3、数据访问层（DAO）–Mybatis"><a href="#3、数据访问层（DAO）–Mybatis" class="headerlink" title="3、数据访问层（DAO）–Mybatis"></a>3、数据访问层（DAO）–Mybatis</h3><p>Mybatis有两种方法实现SQL查询与Java方法相映射。（注意，这里是绑定Java方法，还有一种常用的数据查询方式是ORM，即直接将数据映射到对象，通过操作对象来实现SQL查询。）</p>
+<p>一种是通过xml文件，另一种是通过注解</p>
+<p>xml法：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span> ?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">mapper</span></span></span><br><span class="line"><span class="meta">        <span class="keyword">PUBLIC</span> <span class="string">&quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;</span></span></span><br><span class="line"><span class="meta">        <span class="string">&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">mapper</span> <span class="attr">namespace</span>=<span class="string">&quot;com.ssm_project.dao.BookMapper&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--根据id查询,返回一个Book--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&quot;queryBookById&quot;</span> <span class="attr">resultType</span>=<span class="string">&quot;Books&quot;</span>&gt;</span></span><br><span class="line">        select * from ssmbuild.books</span><br><span class="line">        where bookID = #&#123;bookID&#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">mapper</span>&gt;</span></span><br><span class="line">package com.ssm_project.dao;</span><br><span class="line"></span><br><span class="line">import com.ssm_project.pojo.Books;</span><br><span class="line"></span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">public interface BookMapper &#123;</span><br><span class="line">    //根据id查询,返回一个Book</span><br><span class="line">    Books queryBookById(String id);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注解法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">StudentDAO</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Select(&quot;SELECT * FROM students&quot;)</span></span><br><span class="line">    List&lt;Student&gt; <span class="title function_">getAllStudents</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Insert(&quot;INSERT INTO students(name, age) VALUES(#&#123;name&#125;, #&#123;age&#125;)&quot;)</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">addStudent</span><span class="params">(Student student)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4、模型层（Model）"><a href="#4、模型层（Model）" class="headerlink" title="4、模型层（Model）"></a>4、模型层（Model）</h3><p>这里就是常说的POJO，一般用来定义各种类，类字段对应数据库中的表字段</p>
+<h3 id="5、视图层（View）–SpringMVC-JSP"><a href="#5、视图层（View）–SpringMVC-JSP" class="headerlink" title="5、视图层（View）–SpringMVC+JSP"></a>5、视图层（View）–SpringMVC+JSP</h3><p>用于展示数据，在传统SSM中一般用JSP。</p>
+<p>这里有一个Controller返回一个Model视图：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/allBook&quot;)</span></span><br><span class="line"><span class="keyword">public</span> ModelAndView <span class="title function_">list</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">    List&lt;Books&gt; list = bookService.queryAllBook();</span><br><span class="line">   <span class="type">ModelAndView</span> <span class="variable">modelAndView</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ModelAndView</span>();</span><br><span class="line">   modelAndView.addObject(<span class="string">&quot;list&quot;</span>,list);</span><br><span class="line">   modelAndView.setViewName(<span class="string">&quot;allbooks&quot;</span>);</span><br><span class="line">   <span class="keyword">return</span> modelAndView;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里就会对应allbooks.jsp</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;tbody&gt;</span><br><span class="line">&lt;c:forEach <span class="keyword">var</span>=<span class="string">&quot;book&quot;</span> items=<span class="string">&quot;$&#123;requestScope.get(&#x27;list&#x27;)&#125;&quot;</span>&gt;</span><br><span class="line">    &lt;tr&gt;</span><br><span class="line">        &lt;td&gt;$&#123;book.getBookID()&#125;&lt;/td&gt;</span><br><span class="line">        &lt;td&gt;$&#123;book.getBookName()&#125;&lt;/td&gt;</span><br><span class="line">        &lt;td&gt;$&#123;book.getBookCounts()&#125;&lt;/td&gt;</span><br><span class="line">        &lt;td&gt;$&#123;book.getDetail()&#125;&lt;/td&gt;</span><br><span class="line">        &lt;td&gt;</span><br><span class="line">            &lt;a href=<span class="string">&quot;toUpdateBook?id=$&#123;book.getBookID()&#125;&quot;</span>&gt;更改&lt;/a&gt; |</span><br><span class="line">            &lt;a href=<span class="string">&quot;del/$&#123;book.getBookID()&#125;&quot;</span>&gt;删除&lt;/a&gt;</span><br><span class="line">        &lt;/td&gt;</span><br><span class="line">    &lt;/tr&gt;</span><br><span class="line">&lt;/c:forEach&gt;</span><br><span class="line">&lt;/tbody&gt;</span><br></pre></td></tr></table></figure>
+
+<p>为什么能对应到allbooks.jsp，这里要依赖spring配置文件：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 3.配置jsp 显示ViewResolver视图解析器 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;viewClass&quot;</span> <span class="attr">value</span>=<span class="string">&quot;org.springframework.web.servlet.view.JstlView&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;prefix&quot;</span> <span class="attr">value</span>=<span class="string">&quot;/WEB-INF/view/&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;suffix&quot;</span> <span class="attr">value</span>=<span class="string">&quot;.jsp&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="松耦合的解释"><a href="#松耦合的解释" class="headerlink" title="松耦合的解释"></a>松耦合的解释</h2><p>Controller层是直接调用Service接口，而不是具体实现类，那么它怎么知道要使用哪个实现类？</p>
+<p>这里用到了Spring的依赖注入机制，它能够通过@Autowire注解来自动将具体实现类赋值给接口。当实现类唯一时，用@Autowire就够了，不然还需要使用@Qualifier(“BookServiceImpl”)来指定具体实现类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="meta">@Qualifier(&quot;BookServiceImpl&quot;)</span></span><br><span class="line"><span class="keyword">private</span> BookService bookService;</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置文件简介"><a href="#配置文件简介" class="headerlink" title="配置文件简介"></a>配置文件简介</h2><h3 id="Spring配置文件"><a href="#Spring配置文件" class="headerlink" title="Spring配置文件"></a>Spring配置文件</h3><p>1、命名空间和xml文件声明</p>
+<p>这里告诉spring容器能够在配置文件里使用哪些标签，以及如何解析配置文件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans </span></span></span><br></pre></td></tr></table></figure>
+
+<p>第一行允许你通过bean标签定义bean</p>
+<p>2、组件扫描</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;context:component-scan base-<span class="keyword">package</span>=<span class="string">&quot;com.ssm_project.controller&quot;</span> /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这里会自动扫描包下带有@Controller等注解的类并自动注册为bean，这样就不需要手动通过bean标签配置了。这也是为什么可以直接通过@Autowired进行自动注入，因为相应的Service实现类已经被自动注册为Bean了。</p>
+<p>3、数据源配置</p>
+<p>这个对应上面实例项目中的spring-dao</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">&lt;!-- 1.关联数据库文件 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">context:property-placeholder</span> <span class="attr">location</span>=<span class="string">&quot;classpath:database.properties&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 2.数据库连接池 --&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--数据库连接池</span></span><br><span class="line"><span class="comment">dbcp  半自动化操作  不能自动连接</span></span><br><span class="line"><span class="comment">c3p0  自动化操作（自动的加载配置文件 并且设置到对象里面）</span></span><br><span class="line"><span class="comment">    --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;dataSource&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.mchange.v2.c3p0.ComboPooledDataSource&quot;</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 配置连接池属性 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;driverClass&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$&#123;jdbc.driver&#125;&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;jdbcUrl&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$&#123;jdbc.url&#125;&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;user&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$&#123;jdbc.username&#125;&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;password&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$&#123;jdbc.password&#125;&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!-- c3p0连接池的私有属性 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;maxPoolSize&quot;</span> <span class="attr">value</span>=<span class="string">&quot;30&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;minPoolSize&quot;</span> <span class="attr">value</span>=<span class="string">&quot;10&quot;</span>/&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 关闭连接后不自动commit --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;autoCommitOnClose&quot;</span> <span class="attr">value</span>=<span class="string">&quot;false&quot;</span>/&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 获取连接超时时间 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;checkoutTimeout&quot;</span> <span class="attr">value</span>=<span class="string">&quot;10000&quot;</span>/&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 当获取连接失败重试次数 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;acquireRetryAttempts&quot;</span> <span class="attr">value</span>=<span class="string">&quot;2&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Spring会用这个数据源来管理数据库连接，同时注入到需要数据库连接的Bean中。</p>
+<p>4、MyBatis配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;sqlSessionFactory&quot;</span> <span class="attr">class</span>=<span class="string">&quot;org.mybatis.spring.SqlSessionFactoryBean&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;dataSource&quot;</span> <span class="attr">ref</span>=<span class="string">&quot;dataSource&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;configLocation&quot;</span> <span class="attr">value</span>=<span class="string">&quot;classpath:mybatis-config.xml&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这部分主要是指向上面的数据源配置，并导入mybatis的全局配置。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 4.配置扫描Dao接口包，动态实现Dao接口注入到spring容器中 --&gt;</span></span><br><span class="line"><span class="comment">&lt;!--解释 ： https://www.cnblogs.com/jpfss/p/7799806.html--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">&quot;org.mybatis.spring.mapper.MapperScannerConfigurer&quot;</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 注入sqlSessionFactory --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;sqlSessionFactoryBeanName&quot;</span> <span class="attr">value</span>=<span class="string">&quot;sqlSessionFactory&quot;</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 给出需要扫描Dao接口包 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;basePackage&quot;</span> <span class="attr">value</span>=<span class="string">&quot;com.ssm_project.dao&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这部分用于扫描Mapper接口。Mapper接口中的方法都会与SQL查询关联，这是mybatis的特点。</p>
+<h3 id="web-xml"><a href="#web-xml" class="headerlink" title="web.xml"></a>web.xml</h3><p>1、DispatcherServlet</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--DispatcherServlet--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>DispatcherServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>org.springframework.web.servlet.DispatcherServlet<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">init-param</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>contextConfigLocation<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>classpath:applicationContext.xml<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">init-param</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">load-on-startup</span>&gt;</span>1<span class="tag">&lt;/<span class="name">load-on-startup</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>DispatcherServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>DispatcherServlet是SpringMVC的核心组件，负责处理所有的HTTP请求，会根据请求调用Controller，并负责视图解析。</p>
+<p>下面的URL映射代表将哪些请求交给SpringMVC处理。</p>
+<p>2、filter</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  <span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>XSSEscape<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>com.ssm_project.filter.XssFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>XSSEscape<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--    &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;--&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个跟Servlet里的filter一样。</p>
+<h3 id="MyBatis配置"><a href="#MyBatis配置" class="headerlink" title="MyBatis配置"></a>MyBatis配置</h3><p>首先要指定三件东西：Mapper接口，Mapper接口对应的xml，mybatis总配置的xml</p>
+<p>Mapper接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.ssm_project.dao;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.ssm_project.pojo.Books;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">BookMapper</span> &#123;</span><br><span class="line">    <span class="comment">//根据id查询,返回一个Book</span></span><br><span class="line">    Books <span class="title function_">queryBookById</span><span class="params">(String id)</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Mapper接口对应的xml：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span> ?&gt;</span><br><span class="line">&lt;!DOCTYPE mapper</span><br><span class="line">        PUBLIC <span class="string">&quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;</span></span><br><span class="line">        <span class="string">&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;</span>&gt;</span><br><span class="line"></span><br><span class="line">&lt;mapper namespace=<span class="string">&quot;com.ssm_project.dao.BookMapper&quot;</span>&gt;</span><br><span class="line">    &lt;!--根据id查询,返回一个Book--&gt;</span><br><span class="line">    &lt;select id=<span class="string">&quot;queryBookById&quot;</span> resultType=<span class="string">&quot;Books&quot;</span>&gt;</span><br><span class="line">        select * from ssmbuild.books</span><br><span class="line">        <span class="type">where</span> <span class="variable">bookID</span> <span class="operator">=</span> #&#123;bookID&#125;</span><br><span class="line">    &lt;/select&gt;</span><br><span class="line">&lt;/mapper&gt;</span><br></pre></td></tr></table></figure>
+
+<p>mybatis总配置文件：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span> ?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">configuration</span></span></span><br><span class="line"><span class="meta">        <span class="keyword">PUBLIC</span> <span class="string">&quot;-//mybatis.org//DTD Config 3.0//EN&quot;</span></span></span><br><span class="line"><span class="meta">        <span class="string">&quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">settings</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">setting</span> <span class="attr">name</span>=<span class="string">&quot;logImpl&quot;</span> <span class="attr">value</span>=<span class="string">&quot;STDOUT_LOGGING&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">settings</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">typeAliases</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">package</span> <span class="attr">name</span>=<span class="string">&quot;com.ssm_project.pojo&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">typeAliases</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mappers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mapper</span> <span class="attr">resource</span>=<span class="string">&quot;com/ssm_project/dao/BookMapper.xml&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">mappers</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>最主要的就是要把BookMapper.xml注册到总配置里，当然也可以直接扫描包</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">package</span> <span class="attr">name</span>=<span class="string">&quot;com.example.mapper&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>xml名称和Mapper接口的名称需要一致。</p>
+<h2 id="war包"><a href="#war包" class="headerlink" title="war包"></a>war包</h2><p>SSM项目默认是打包成war包，需要放到tomcat容器里才能允许，idea里支持直接配置tomcat并运行。</p>
+<h1 id="SSH框架"><a href="#SSH框架" class="headerlink" title="SSH框架"></a>SSH框架</h1><p>即：Struct2+Spring+Hibernate</p>
+<p>后面遇到具体例子再回来补</p>
+<h1 id="SpringBoot框架"><a href="#SpringBoot框架" class="headerlink" title="SpringBoot框架"></a>SpringBoot框架</h1><p>这里目前没想到写什么，可能是还没遇到结构复杂的项目，之后来补充。</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                开发框架简述
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/07/28/开发框架简述/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-07-28 16:54</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%BC%80%E5%8F%91/">Java开发</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/07/28/WebGoat%E9%9D%B6%E5%9C%BA-XSS/"
+                                   title="WebGoat靶场-XSS"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">WebGoat靶场-XSS</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSM%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">SSM框架</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%84%E5%B1%82%E8%81%8C%E8%B4%A3"><span class="nav-number">2.1.</span> <span class="nav-text">各层职责</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%8E%A7%E5%88%B6%E5%B1%82%EF%BC%88Controller%EF%BC%89%E2%80%93Spring-MVC"><span class="nav-number">2.1.1.</span> <span class="nav-text">1、控制层（Controller）–Spring MVC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E4%B8%9A%E5%8A%A1%E5%B1%82%EF%BC%88Service%EF%BC%89%E2%80%93Spring"><span class="nav-number">2.1.2.</span> <span class="nav-text">2、业务层（Service）–Spring</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE%E5%B1%82%EF%BC%88DAO%EF%BC%89%E2%80%93Mybatis"><span class="nav-number">2.1.3.</span> <span class="nav-text">3、数据访问层（DAO）–Mybatis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E6%A8%A1%E5%9E%8B%E5%B1%82%EF%BC%88Model%EF%BC%89"><span class="nav-number">2.1.4.</span> <span class="nav-text">4、模型层（Model）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E8%A7%86%E5%9B%BE%E5%B1%82%EF%BC%88View%EF%BC%89%E2%80%93SpringMVC-JSP"><span class="nav-number">2.1.5.</span> <span class="nav-text">5、视图层（View）–SpringMVC+JSP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%BE%E8%80%A6%E5%90%88%E7%9A%84%E8%A7%A3%E9%87%8A"><span class="nav-number">2.2.</span> <span class="nav-text">松耦合的解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%AE%80%E4%BB%8B"><span class="nav-number">2.3.</span> <span class="nav-text">配置文件简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.1.</span> <span class="nav-text">Spring配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#web-xml"><span class="nav-number">2.3.2.</span> <span class="nav-text">web.xml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MyBatis%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.3.</span> <span class="nav-text">MyBatis配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#war%E5%8C%85"><span class="nav-number">2.4.</span> <span class="nav-text">war包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSH%E6%A1%86%E6%9E%B6"><span class="nav-number">3.</span> <span class="nav-text">SSH框架</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringBoot%E6%A1%86%E6%9E%B6"><span class="nav-number">4.</span> <span class="nav-text">SpringBoot框架</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">36.8k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSM%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">SSM框架</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%84%E5%B1%82%E8%81%8C%E8%B4%A3"><span class="nav-number">2.1.</span> <span class="nav-text">各层职责</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%8E%A7%E5%88%B6%E5%B1%82%EF%BC%88Controller%EF%BC%89%E2%80%93Spring-MVC"><span class="nav-number">2.1.1.</span> <span class="nav-text">1、控制层（Controller）–Spring MVC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E4%B8%9A%E5%8A%A1%E5%B1%82%EF%BC%88Service%EF%BC%89%E2%80%93Spring"><span class="nav-number">2.1.2.</span> <span class="nav-text">2、业务层（Service）–Spring</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE%E5%B1%82%EF%BC%88DAO%EF%BC%89%E2%80%93Mybatis"><span class="nav-number">2.1.3.</span> <span class="nav-text">3、数据访问层（DAO）–Mybatis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E6%A8%A1%E5%9E%8B%E5%B1%82%EF%BC%88Model%EF%BC%89"><span class="nav-number">2.1.4.</span> <span class="nav-text">4、模型层（Model）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E8%A7%86%E5%9B%BE%E5%B1%82%EF%BC%88View%EF%BC%89%E2%80%93SpringMVC-JSP"><span class="nav-number">2.1.5.</span> <span class="nav-text">5、视图层（View）–SpringMVC+JSP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%BE%E8%80%A6%E5%90%88%E7%9A%84%E8%A7%A3%E9%87%8A"><span class="nav-number">2.2.</span> <span class="nav-text">松耦合的解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%AE%80%E4%BB%8B"><span class="nav-number">2.3.</span> <span class="nav-text">配置文件简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.1.</span> <span class="nav-text">Spring配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#web-xml"><span class="nav-number">2.3.2.</span> <span class="nav-text">web.xml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MyBatis%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.3.</span> <span class="nav-text">MyBatis配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#war%E5%8C%85"><span class="nav-number">2.4.</span> <span class="nav-text">war包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSH%E6%A1%86%E6%9E%B6"><span class="nav-number">3.</span> <span class="nav-text">SSH框架</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringBoot%E6%A1%86%E6%9E%B6"><span class="nav-number">4.</span> <span class="nav-text">SpringBoot框架</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
