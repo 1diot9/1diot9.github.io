@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Tue Oct 21 2025 14:48:06 GMT+0800">2025-10-21 14:48:06</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 17:18:43 GMT+0800">2025-10-21 17:18:43</span>
                 </span>
             
         
@@ -336,7 +336,7 @@
 <p>4、webhandler内存马</p>
 <p>每一个考点单独拿出来还算常规，但是组合起来，且要在断网的情况下做，还是挺麻烦的，需要自己电脑上有各种储备</p>
 <h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="1、hashcode碰撞"><a href="#1、hashcode碰撞" class="headerlink" title="1、hashcode碰撞"></a>1、hashcode碰撞</h2><p>这里自己写个例子调试一下：</p>
-<p><img   src="/2025/05/03/JNI/2025%E7%BA%BF%E4%B8%8B%E8%B5%9B-localSnake/image-1761029132742.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1761029132742.png"  alt="img"></p>
 <p>hashcode的计算逻辑为：</p>
 <p>乘31后，再加上当前字符的ascii码。</p>
 <p>所以，找满足31*73+83&#x3D;31x+y的就行，这里取x&#x3D;72，y&#x3D;114，那就是 HrCC2025。</p>
