@@ -656,13 +656,15 @@
                     
                     <h3 class="home-post-title border-box">
                         <a href="/2025/05/05/postgreSQL/">
-                            postgreSQL
+                            PostgreSql利用分析
                         </a>
                     </h3>
 
                     <div class="home-post-content keep-markdown-body">
                         
-                            构造方法调用DriverManager.getConnection(“jdbc:postgresql:&#x2F;&#x2F;node1&#x2F;test?socketFactory&#x3D;org.springframework.context...
+                            前言PostgreSql主要有两个漏洞，一个是调用任意String或Properties的构造方法，常与ClassPathXml结合；另一个是修改日志路径实现写文件的漏洞，不过文件前后会有脏字符。
+这里简单分析一下两个漏洞并给出利用方法。
+CVE-2...
                         
                     </div>
 
@@ -673,8 +675,8 @@
         
             <span class="meta-info-item border-box">
                 <i class="icon fa-solid fa-history"></i>&nbsp;<span class="home-post-history"
-                                                                                data-updated="Mon May 05 2025 20:09:55 GMT+0800"
-                >2025-05-05 20:09:55</span>
+                                                                                data-updated="Wed Oct 22 2025 18:45:50 GMT+0800"
+                >2025-10-22 18:45:50</span>
             </span>
         
 
@@ -999,7 +1001,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">74.9k</span>
+                    <span class="item-value border-box word">76.2k</span>
                 </span>
             
 

