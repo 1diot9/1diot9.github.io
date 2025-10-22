@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Tue Sep 23 2025 16:37:26 GMT+0800">2025-09-23 16:37:26</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 21:02:02 GMT+0800">2025-10-21 21:02:02</span>
                 </span>
             
         
@@ -330,35 +330,35 @@
 
                     
                          <h1 id="模块化介绍"><a href="#模块化介绍" class="headerlink" title="模块化介绍"></a>模块化介绍</h1><p>这是jdk8的库：</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613724192.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613724192.png"  alt="img"></p>
 <p>这是jdk17的库：</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613724236.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613724236.png"  alt="img"></p>
 <p>从jdk9开始，就引入了模块化机制，旨在提高 Java 的可维护性、可扩展性和安全性，同时改善大型应用程序和库的构建和管理。模块化可以比作建造一座房子，将其分成多个功能明确的房间。每个房间（模块）负责特定的任务，如客厅用于接待、厨房用于做饭等，这样使得整个房子（软件项目）结构清晰、易于理解和维护。模块之间互不干扰，减少了功能冲突，允许独立开发和测试，提升了开发效率。此外，模块化还可以按需加载，节省资源，并使得维护工作变得更加简单，只需修复出现问题的模块，而不影响其他部分。</p>
 <p>不过，jdk9时，模块化机制对我们进行反序列化没有实际影响，只是会打印警告而已，并不会直接报错中断。</p>
 <p>模块化的强封装是从jdk17开始的。任何对java.*代码中的非public变量和方法进行反射会抛出InaccessibleObjectException异常。</p>
 <p>但是每个模块中有一个module-info.java文件，里面定义了模块中的哪些包可以被外部访问，以及本模块依赖于哪些包。</p>
 <p>1、export</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image.png"  alt="img"></p>
 <p>通过 <code>exports</code> 声明的包中的公共类和接口可以被其他模块访问。</p>
 <p>如果没有exports的话，你自己的类都没法去new</p>
 <p>2、requires</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613724224.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613724224.png"  alt="img"></p>
 <p>表示依赖哪个模块。transitive表示隐式依赖。在这种情况下，任何使用了 java.desktop 模块的代码都能隐式的使用 java.xml 模块中的类。例如，如果 java.desktop 模块中某个方法返回了一个来自于 java.xml 模块中的类型，那么使用 java.desktop 模块的代码就间接依赖 java.xml 模块，如果没有 transitive 的话，那么使用 java.desktop 模块的模块就必须显式声明依赖 java.xml 模块才能正常编译，否则 java.xml 模块是不可见的。</p>
 <p>3、opens</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613732364.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613732364.png"  alt="img"></p>
 <p>表示哪些包是对外开放的，即可以被反射调用。有to的话，就是指定对哪个模块开放。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Failed</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException &#123;</span><br><span class="line">        <span class="type">byte</span>[] bytes = Files.readAllBytes(Paths.get(<span class="string">&quot;Calc.class&quot;</span>));</span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> ClassLoader.class.getDeclaredMethod(<span class="string">&quot;defineClass&quot;</span>, String.class, <span class="type">byte</span>[].class, <span class="type">int</span>.class, <span class="type">int</span>.class);</span><br><span class="line">        method.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Class</span> <span class="variable">clazzLoader</span> <span class="operator">=</span> (Class) method.invoke(ClassLoader.getSystemClassLoader(), bytes, <span class="number">0</span>, bytes.length);</span><br><span class="line">        clazzLoader.newInstance();</span><br><span class="line">        <span class="comment">// 抛出：Unable to make protected final java.lang.Class java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int)</span></span><br><span class="line">        <span class="comment">// throws java.lang.ClassFormatError accessible: module java.base does not &quot;opens java.lang&quot; to unnamed module @6f496d9f</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>上面这段代码，在jdk8可以实现构造方法执行，但在jdk17中，会报错。</p>
 <p>从抛出的异常中可以知道，java.base模块中的java.lang包没有对uname模块开放，也就是没有对我们自定义的类开放。</p>
 <h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><p>去看java.lang.reflect.AccessibleObject#checkCanSetAccessible(java.lang.Class<?>, java.lang.Class<?>, boolean)</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613732385.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613732385.png"  alt="img"></p>
 <p>这里有三种方法能返回true：</p>
 <p>1、调用类（自己的类）的模块和被调用类的模块名相同</p>
 <p>2、调用类的模块和Object类的模块相同，即java.base</p>
 <p>3、被调用类的模块是未命名的</p>
 <p>这里我们会选择第一种，因为callerModule是通过caller.getModule获取的，我们也许能直接修改里面的module字段。方法二也可以，但是不通用，setAccessible能通过，但是其他反射调用，比如newInstance的时候就不一定行。</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613744505.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613744505.png"  alt="img"></p>
 <p>往下看，还有三种方法能返回true。前两个的先决条件是：被调用类是public，被调用类所在的包被exports了</p>
 <p>1、被调用的方法或字段是public的</p>
 <p>2、被调用的方法或字段是protect-static的，且调用者是被调用者的子类</p>
@@ -366,17 +366,17 @@
 <p>这三种都不考虑，因为这些都是直接写死在代码里的，没有操作空间。</p>
 <h1 id="绕过方法"><a href="#绕过方法" class="headerlink" title="绕过方法"></a>绕过方法</h1><h2 id="patchModule"><a href="#patchModule" class="headerlink" title="patchModule"></a>patchModule</h2><p>要用到Unsafe类，这个类提供了类似C语言的指针操作，能够直接修改对象中的字段值。</p>
 <p>首先，Unsafe类是opens的：</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613744472.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613744472.png"  alt="img"></p>
 <p>所以咱们可以直接在自己的类中使用。</p>
 <p>Unsafe类中有几个关键方法：</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613752667.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613752667.png"  alt="img"></p>
 <p>objectFieldOffset：获取字段的偏移量</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613752654.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613752654.png"  alt="img"></p>
 <p>getAndSetObject：获取一个对象在特定内存偏移量上的当前值，并将其替换为一个新值。</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613752635.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613752635.png"  alt="img"></p>
 <p>putObject：用于将一个对象（或引用）写入到指定对象的内存偏移量</p>
 <p>putObject和getAndSetObject方法功能很相似，不过<code>getAndSetObject</code>会返回被替换的旧值，当然里面细节也有所不同，比如<code>getAndSetObject</code>会使用原子操作保障同时执行读取和写入。不过就我们修改类的Class对象的moudle属性来说，两者都可以。</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758613752616.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613752616.png"  alt="img"></p>
 <p>这里callerModule是通过caller.getModule()获取的，而caller是一个Class对象。当调用类，也就是我们自己的类加载到JVM时，会产生一个Class对象，这个Class对象是唯一的，里面的Module字段也是唯一的。所以，我们能够保证修改成功。</p>
 <p>最终代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sun.misc.Unsafe;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ModuleBypass</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        patchModule(ModuleBypass.class, ClassLoader.class);</span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] bytes = Files.readAllBytes(Paths.get(<span class="string">&quot;Calc.class&quot;</span>));</span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> ClassLoader.class.getDeclaredMethod(<span class="string">&quot;defineClass&quot;</span>, <span class="type">byte</span>[].class, <span class="type">int</span>.class, <span class="type">int</span>.class);</span><br><span class="line">        method.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Class</span> <span class="variable">clazzLoader</span> <span class="operator">=</span> (Class) method.invoke(ClassLoader.getSystemClassLoader(), bytes, <span class="number">0</span>, bytes.length);</span><br><span class="line">        clazzLoader.newInstance();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">patchModule</span><span class="params">(Class current, Class target)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> Unsafe.class.getDeclaredField(<span class="string">&quot;theUnsafe&quot;</span>);</span><br><span class="line">        field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Unsafe</span> <span class="variable">unsafe</span> <span class="operator">=</span> (Unsafe) field.get(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 所有Class的数据结构都是一样的，相同字段的偏移量也是一样的</span></span><br><span class="line">        <span class="type">long</span> <span class="variable">l</span> <span class="operator">=</span> unsafe.objectFieldOffset(Class.class.getDeclaredField(<span class="string">&quot;module&quot;</span>));</span><br><span class="line">        <span class="type">Module</span> <span class="variable">targetModule</span> <span class="operator">=</span> target.getModule();</span><br><span class="line">        unsafe.putObject(current, l, targetModule);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -384,7 +384,7 @@
 
 
 <h2 id="增加虚拟机参数选项"><a href="#增加虚拟机参数选项" class="headerlink" title="增加虚拟机参数选项"></a>增加虚拟机参数选项</h2><p>由于上面的过程只是为了能够在本地调用其他模块，所以也可以通过添加虚拟机参数选项的方法实现。</p>
-<p><img   src="/2025/05/03/JNI/7%E6%A8%A1%E5%9D%97%E5%8C%96%E7%89%B9%E6%80%A7-%E7%BB%95%E8%BF%87/image-1758616645538.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758616645538.png"  alt="img"></p>
 <p>需要注意的是，如果反序列化过程中，有第三方组件对jdk中的模块进行反射调用，就不能通过这种方式去修改。否则，虽然你本地可以打通，但是远程是打不通的，因为远程的JVM可没有打开这个选项。上面的patchModule也是同样的道理。必须在反序列化过程中，执行patchModule才行。</p>
 <h1 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h1><p>java.lang.reflect.Constructor#newInstance–&gt;java.lang.reflect.AccessibleObject#checkAccess–&gt;java.lang.reflect.AccessibleObject#verifyAccess–&gt;java.lang.reflect.AccessibleObject#slowVerifyAccess–&gt;jdk.internal.reflect.Reflection#verifyModuleAccess–&gt;java.lang.Module#isExported(java.lang.String, java.lang.Module)–&gt;java.lang.Module#implIsExportedOrOpen–&gt;java.lang.Module#isStaticallyExportedOrOpen–&gt;java.lang.Module#allows</p>
 <p>newInstance反射最终是这样绕过的，所以上面patchModule才选择使调用者和被调用者的模块一致，而不是简单地使调用者的模块为java.base</p>
@@ -567,7 +567,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 

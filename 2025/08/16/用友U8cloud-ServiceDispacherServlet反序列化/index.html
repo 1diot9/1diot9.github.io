@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Sat Aug 16 2025 20:14:20 GMT+0800">2025-08-16 20:14:20</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 19:03:50 GMT+0800">2025-10-21 19:03:50</span>
                 </span>
             
         
@@ -341,31 +341,31 @@
 
 <h1 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h1><p>token鉴权可绕过；nc.bs.framework.comn.serv.ServiceDispatcher#invokeBeanMethod可调用能lookup到的类中的任意方法；nc.impl.hr.tools.trans.FileTransImpl#uploadFile写shell到webapps</p>
 <h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="token伪造"><a href="#token伪造" class="headerlink" title="token伪造"></a>token伪造</h2><p>全局搜索，找到路由：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image.png"  alt="img"></p>
 <p>访问&#x2F;ServiceDispatcherServlet后，后进入nc.bs.framework.comn.serv.CommonServletDispatcher#doGet，doGet最终会调用execCall：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755345759023.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345759023.png"  alt="img"></p>
 <p>跟进，在execCall中，会对我们的请求体进行反序列化，不过指定了类型，只能反序列化为InvocationInfo，不过这里要记住，InvocationInfo中的所有字段都是我们可控的：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755345759032.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345759032.png"  alt="img"></p>
 <p>之后在160行打断点，即token鉴权处：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755345758999.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345758999.png"  alt="img"></p>
 <p>跟进去看一下鉴权：</p>
 <p>白名单校验过不了，会进入到nc.bs.framework.server.token.TokenUtil#vertifyTokenIllegal：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755345759041.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345759041.png"  alt="img"></p>
 <p>根据反序列化得到的userCode来genToken，然后和我们请求头中的token进行比较。</p>
 <p>看一下genToken的逻辑：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755345768515.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345768515.png"  alt="img"></p>
 <p>显然是可以伪造的。</p>
 <h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>lookup到类后，反射取出方法，注意用的是getMethod，所以只能取出public方法，然后再invoke，用到的全部参数都是我们在序列化时自行写入的：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755345768448.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345768448.png"  alt="img"></p>
 <h2 id="文件写入"><a href="#文件写入" class="headerlink" title="文件写入"></a>文件写入</h2><p>这里用的是nc.impl.hr.tools.trans.FileTransImpl#uploadFile，esnserver接口漏洞的同一个类。因为如果对n8c不熟悉的话，找一个能用的类还是有难度的。所以，不妨去以前的老漏洞中拿一个用，这也是漏洞复现的意义。</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755345768497.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345768497.png"  alt="img"></p>
 <h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>首先是tokenseed的文件改了：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346456687.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346456687.png"  alt="img"></p>
 <p>但是这个文件默认是不存在的，所以seed还是固定。</p>
 <p>二是增加了trustServiceList.conf，这个不知道有啥用：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346456640.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346456640.png"  alt="img"></p>
 <p>三是修改了nc.impl.hr.tools.trans.FileTransImpl#uploadFile，这是最关键的，不允许写入webapps了：</p>
-<p><img   src="/2025/05/03/JNI/cloud-ServiceDispacherServlet%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346456652.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346456652.png"  alt="img"></p>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/gwdzmBCu5PjYdzVeWEcpDQ" >用友U8Cloud最新前台RCE漏洞挖掘过程分享<i class="fas fa-external-link-alt"></i></a></p>
 
                     
@@ -547,7 +547,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 

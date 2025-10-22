@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Tue Sep 23 2025 16:37:55 GMT+0800">2025-09-23 16:37:55</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 21:08:32 GMT+0800">2025-10-21 21:08:32</span>
                 </span>
             
         
@@ -332,29 +332,29 @@
                          <p>先直接放原作者的文章：</p>
 <p><a class="link"   target="_blank" rel="noopener" href="https://jiecub3.github.io/zh/posts/java/chain/jdk17cc%E9%93%BE%E4%B8%8B%E5%88%A9%E7%94%A8templatesimpl/" >https://jiecub3.github.io/zh/posts/java/chain/jdk17cc%E9%93%BE%E4%B8%8B%E5%88%A9%E7%94%A8templatesimpl/<i class="fas fa-external-link-alt"></i></a></p>
 <p>文章里以及写的很清楚了，我就简单整理一下看文章时遇到的问题和学到的东西。</p>
-<h1 id="1、为什么恶意类不继承AbstractTranslet"><a href="#1、为什么恶意类不继承AbstractTranslet" class="headerlink" title="1、为什么恶意类不继承AbstractTranslet"></a>1、为什么恶意类不继承AbstractTranslet</h1><p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613854236.png"  alt="img"></p>
+<h1 id="1、为什么恶意类不继承AbstractTranslet"><a href="#1、为什么恶意类不继承AbstractTranslet" class="headerlink" title="1、为什么恶意类不继承AbstractTranslet"></a>1、为什么恶意类不继承AbstractTranslet</h1><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613854236.png"  alt="img"></p>
 <p>作者说这里没有继承AbstractTranslet，因为模块检测会报错，我这里试了一下继承，结果报错：</p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613854241.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613854241.png"  alt="img"></p>
 <p>本来想着能不能在静态代码块里通过Unsafe去patchModule，试了一下发现还是不行，突然想到，这个superClass的判断，应该是比静态代码还要优先执行的，所以这个方法不奏效。</p>
 <p>所以，作者选择的是，添加两个bytecodes来防止空指针报错：</p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613854243.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613863687.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613854243.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613863687.png"  alt="img"></p>
 <p>将_transletIndex设置为0，防止抛出报错，且加载第一个bytecodes：</p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613870165.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613870169.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613870165.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613870169.png"  alt="img"></p>
 <h1 id="2、Unsafe实现"><a href="#2、Unsafe实现" class="headerlink" title="2、Unsafe实现"></a>2、Unsafe实现</h1><p>获取Unsafe大概是这样：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Field</span> <span class="variable">theUnsafe</span> <span class="operator">=</span> Unsafe.class.getDeclaredField(<span class="string">&quot;theUnsafe&quot;</span>);</span><br><span class="line">theUnsafe.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">Unsafe</span> <span class="variable">unsafe</span> <span class="operator">=</span> (Unsafe) theUnsafe.get(<span class="literal">null</span>);</span><br></pre></td></tr></table></figure>
 
 <p>CC链里，invokerTransformer是通过ChainedTransformer顺序调用的。这里的特点就是，上一次transform的结果，会变成下一次transform的input。但是我们这里的Field theUnsafe要用两次，但是执行theUnsafe.setAccessible(true);返回的是void，而不是我们想要的theUnsafe。所以，我们需要找一个另外的transform方法。类似：</p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613876143.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613876143.png"  alt="img"></p>
 <p>这样就能先通过invokeTransformer执行setAccessible，并且返回的还是一个theUnsafe对象。</p>
 <p>作者最终选择的组合：</p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613876136.png"  alt="img"></p>
-<h1 id="3、isName"><a href="#3、isName" class="headerlink" title="3、isName()"></a>3、isName()</h1><p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613890419.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613876136.png"  alt="img"></p>
+<h1 id="3、isName"><a href="#3、isName" class="headerlink" title="3、isName()"></a>3、isName()</h1><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613890419.png"  alt="img"></p>
 <p>作者这里说，Module类的字段是无法通过反射获取的，这里试了一下：</p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613890441.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613890441.png"  alt="img"></p>
 <p>确实无法获取。</p>
-<h1 id="4、Module全为null"><a href="#4、Module全为null" class="headerlink" title="4、Module全为null"></a>4、Module全为null</h1><p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758613890461.png"  alt="img"></p>
+<h1 id="4、Module全为null"><a href="#4、Module全为null" class="headerlink" title="4、Module全为null"></a>4、Module全为null</h1><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758613890461.png"  alt="img"></p>
 <p>作者最后提到，把InstantiateTransformer和TrAXFilter的module全部改成null也能实现绕过。</p>
 <p>只要加一个ConstantTransformer，重新获取一遍Unsafe就行了。</p>
 <p>修改后的poc如下：</p>
@@ -370,7 +370,7 @@
 
 <p>来生成templatesImpl对象。</p>
 <p>除了直接使用patchModule方法，我们还可以在虚拟机选项中添加参数：</p>
-<p><img   src="/2025/05/03/JNI/7%E5%88%A9%E7%94%A8TemplatesImpl/image-1758616674715.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1758616674715.png"  alt="img"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--add-opens=java.xml/com.sun.org.apache.xalan.internal.xsltc.trax=ALL-UNNAMED</span><br></pre></td></tr></table></figure>
 
 <p>这样也能实现patchModule的效果。</p>
@@ -553,7 +553,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 

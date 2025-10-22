@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Sat Aug 16 2025 20:01:44 GMT+0800">2025-08-16 20:01:44</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 19:06:12 GMT+0800">2025-10-21 19:06:12</span>
                 </span>
             
         
@@ -337,18 +337,18 @@
 
 <h1 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h1><p>token加密密钥硬编码，加密流程固定，可绕过鉴权；EsnServlet的调用链中，存在任意方法调用。其实不是任意方法，而是能被nc.bs.framework.common.NCLocator找到的类。</p>
 <h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>访问&#x2F;service&#x2F;esnserver后，会进入EsnServlet，最终都会进入doAction。不知道为什么要访问这个路由的，看我之前写的环境搭建那篇文章。</p>
-<p><img   src="/2025/05/03/JNI/cloud-esnserver%E6%8E%A5%E5%8F%A3RCE/image.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image.png"  alt="img"></p>
 <p>先会做一个json字符串的解析，然后把传入的内容存储到jsonObject中。</p>
 <p>然后会根据传入的invocationInfo进行一系列赋值，这里面最重要的是ucode，其他无所谓。</p>
 <p>接着进入token鉴权。tokenSeed就是上面传入的ucode，拼接后形成硬编码的密钥，然后调用com.nc.mobile.bo.DigestUtil#signatureByMD5计算token。所以我们完全可以伪造token来绕过鉴权。</p>
 <p>之后跟进service.processBusi：</p>
-<p><img   src="/2025/05/03/JNI/cloud-esnserver%E6%8E%A5%E5%8F%A3RCE/image-1755345699613.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345699613.png"  alt="img"></p>
 <p>这里就是一个很典型的method.invoke任意方法调用。</p>
 <p>这里可以调用nc.impl.hr.tools.trans.FileTransImpl#uploadFile，实现任意写文件。不过要注意，文件的生成是有要求的：</p>
-<p><img   src="/2025/05/03/JNI/cloud-esnserver%E6%8E%A5%E5%8F%A3RCE/image-1755345699636.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345699636.png"  alt="img"></p>
 <p>要和这里的解压过程相对应。</p>
 <h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>限制反射调用的包名前缀：</p>
-<p><img   src="/2025/05/03/JNI/cloud-esnserver%E6%8E%A5%E5%8F%A3RCE/image-1755345699633.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755345699633.png"  alt="img"></p>
 
                     
                 </div>
@@ -529,7 +529,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 

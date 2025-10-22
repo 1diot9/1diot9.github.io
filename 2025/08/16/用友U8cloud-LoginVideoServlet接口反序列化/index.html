@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Sat Aug 16 2025 20:22:10 GMT+0800">2025-08-16 20:22:10</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 19:05:27 GMT+0800">2025-10-21 19:05:27</span>
                 </span>
             
         
@@ -339,27 +339,27 @@
 
 <h1 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h1><p>很直接的反序列化，只不过要绕一下黑名单和白名单</p>
 <h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>通过everything查找，找到对应的路由：</p>
-<p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image.png"  alt="img"></p>
 <p>或者用之前调试时得到的映射关系，不知道的话去看我之前的文章</p>
 <p><a class="link"   target="_blank" rel="noopener" href="https://1diot9.github.io/2025/08/16/U8Cloud%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" >用友U8Cloud环境搭建 | 1diot9’s Blog<i class="fas fa-external-link-alt"></i></a></p>
-<p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346923437.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346923437.png"  alt="img"></p>
 <p>漏洞点就是readObject：</p>
-<p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346923433.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346923433.png"  alt="img"></p>
 <p>但是需要着重关注一下上面的FilteredObjectInputStream：</p>
-<p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346923400.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346923400.png"  alt="img"></p>
 <p>这里把HashMap作为了白名单，所以反序列化链必须以HashMap开头。</p>
 <p>但是这还不够，如果你直接用cc6打，会在cmd的日志里发现REJECT。</p>
 <p>这是因为还有黑名单过滤：</p>
-<p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346929626.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346929626.png"  alt="img"></p>
 <p>黑名单通过配置文件加载：</p>
-<p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346929587.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346929610.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346929587.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346929610.png"  alt="img"></p>
 <p>没打补丁前的黑名单并不多。</p>
 <p>能发现有fastjson1.2.83依赖和spring依赖。所以这里选择：</p>
 <p>HashMap.readObject–&gt;HotSwappableTargetSource.equals–&gt;XString.equals–&gt;JSONArray.toString–&gt;getter–&gt;TemplatesImpl</p>
 <p>fastjson利用时也需要绕一下黑名单，可以参考：</p>
 <p><a class="link"   target="_blank" rel="noopener" href="https://y4tacker.github.io/2023/04/26/year/2023/4/FastJson%E4%B8%8E%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-%E4%BA%8C/" >FastJson与原生反序列化(二)<i class="fas fa-external-link-alt"></i></a></p>
-<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p><img   src="/2025/05/03/JNI/cloud-LoginVideoServlet%E6%8E%A5%E5%8F%A3%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/image-1755346929627.png"  alt="img"></p>
+<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755346929627.png"  alt="img"></p>
 <p>新增resolveClass，只允许反序列化HashMap和String，而不是只检查最外层是不是HashMap</p>
 
                     
@@ -541,7 +541,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 

@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon Aug 18 2025 11:20:45 GMT+0800">2025-08-18 11:20:45</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 19:01:45 GMT+0800">2025-10-21 19:01:45</span>
                 </span>
             
         
@@ -341,36 +341,36 @@
 <p>首先是看了一篇文章，知道了url是：&#x2F;u8cloud&#x2F;openapi&#x2F;so.saleorder.briefing?appcode&#x3D;huo&amp;isEncrypt&#x3D;N，也知道了漏洞类：u8c.bs.so.saleorder.action.SaleOrderBriefingAction</p>
 <p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/nwSs8mU_H-OBWTk2ZBxC9w" >https://mp.weixin.qq.com/s/nwSs8mU_H-OBWTk2ZBxC9w<i class="fas fa-external-link-alt"></i></a></p>
 <p>之后去idea全局搜索u8cloud&#x2F;openapi：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487212798.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487212798.png"  alt="img"></p>
 <p>找到了对应的servlet：nc.bs.framework.server.extsys.ExtSystemInvokerServlet</p>
 <p>之后给漏洞类打上断点：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image.png"  alt="img"></p>
 <p>然后就能慢慢分析前面的调用栈了。</p>
 <p>现在去找为什么so.saleorder.briefing能映射到漏洞类。看漏洞类前一个调用栈：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487223526.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487223526.png"  alt="img"></p>
 <p>断点处，从so.saleorder.briefing找到了对应的漏洞类，于是跟进方法u8c.bs.invoke.bp.JSONInvokeBP#queryConfigVO：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487223483.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487223483.png"  alt="img"></p>
 <p>再跟进u8c.bs.config.BillConfigFileParse#queryConfigVO：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487223443.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487223443.png"  alt="img"></p>
 <p>发现是从&#x2F;api&#x2F;config里取，用everything搜索一下：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487223533.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487223533.png"  alt="img"></p>
 <p>成功找到：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487233862.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487233862.png"  alt="img"></p>
 <p>最后用环境搭建时的bat脚本，把所有.config文件copy到一起再添加到idea库中，方便后续直接在idea中查询：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487233792.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487233792.png"  alt="img"></p>
 <h2 id="请求参数分析"><a href="#请求参数分析" class="headerlink" title="请求参数分析"></a>请求参数分析</h2><p>注意到，请求中是有get参数的：?appcode&#x3D;huo&amp;isEncrypt&#x3D;N</p>
 <p>分析一下这两个参数的作用。</p>
 <p>具体逻辑在u8c.server.APIOpenController#forWard</p>
 <p>首先是appcode，必须和枚举类当中的一个相等：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487233837.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487233773.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487233837.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487233773.png"  alt="img"></p>
 <p>接下来是isEncrypt参数，具体逻辑如下：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487242240.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487242240.png"  alt="img"></p>
 <p>会对我们的数据进行一次解密，isEncrypt代表原数据是否加密，不加密的话就会直接返回原数据。所以需要传入N。</p>
 <h2 id="SQL注入"><a href="#SQL注入" class="headerlink" title="SQL注入"></a>SQL注入</h2><p>都是简单的拼接，唯一要注意的就是用SQL Server的语法注入，然后由于执行三次查询，所以延时注入的时间会变成3倍：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487242264.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487242264.png"  alt="img"></p>
 <h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>用了参数化查询，做了预编译：</p>
-<p><img   src="/2025/05/03/JNI/cloud-so-saleorder-briefing%E6%8E%A5%E5%8F%A3SQL%E6%B3%A8%E5%85%A5/image-1755487242299.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1755487242299.png"  alt="img"></p>
 
                     
                 </div>
@@ -551,7 +551,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 

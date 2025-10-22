@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Thu Oct 16 2025 11:14:21 GMT+0800">2025-10-16 11:14:21</span>
+                    <span class="datetime" data-updated="Tue Oct 21 2025 19:18:39 GMT+0800">2025-10-21 19:18:39</span>
                 </span>
             
         
@@ -331,7 +331,7 @@
                     
                          <h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.7.15<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-thymeleaf<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.2.12.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image.png"  alt="img"></p>
 <p>对应的版本是3.0.11，而漏洞范围是3.0.0~3.0.11，符合。3.0.12，3.0.13，3.0.14存在绕过。3.0.15彻底修复。</p>
 <p>最新的3.1.2存在绕过。</p>
 <p>对应版本</p>
@@ -345,7 +345,7 @@
 
 
 <p>另外，讲一下三种依赖的区别，直接搬运：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584217048.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584217048.png"  alt="img"></p>
 <h1 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h1><p>HelloController，用于学习基本用法：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test.controller;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.test.pojo.User;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Controller;</span><br><span class="line"><span class="keyword">import</span> org.springframework.ui.Model;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.GetMapping;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;hello&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">show1</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        model.addAttribute(<span class="string">&quot;msg&quot;</span>, <span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;add&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">addUser</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>();</span><br><span class="line">        user.setAge(<span class="number">20</span>);</span><br><span class="line">        user.setName(<span class="string">&quot;&lt;p&gt;baka123&lt;/p&gt;&quot;</span>);</span><br><span class="line">        model.addAttribute(<span class="string">&quot;user&quot;</span>, user);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;user&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;date&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">date</span><span class="params">(Model model)</span>&#123;</span><br><span class="line">        model.addAttribute(<span class="string">&quot;today&quot;</span>, <span class="keyword">new</span> <span class="title class_">Date</span>());</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;date&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;page&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">page</span><span class="params">(Model model)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;page&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -382,8 +382,8 @@
 
 
 <p>大部分的用法我都写在注释里了，这里再总结搬运一下：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584232590.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584232609.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584232590.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584232609.png"  alt="img"></p>
 <p>我们在Controller里会有这种写法：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;hello&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">show1</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">    model.addAttribute(<span class="string">&quot;msg&quot;</span>, <span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -394,54 +394,54 @@
 
 
 <p>这里要注意一点，如果是GET传参，需要URL编码，否则在tomcat9.x中会报错，不支持&amp;_等字符：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584242841.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584242841.png"  alt="img"></p>
 <p>payload一般用这个就行：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__$&#123;<span class="keyword">new</span> <span class="title class_">java</span>.util.Scanner(T(java.lang.Runtime).getRuntime().exec(<span class="string">&quot;calc&quot;</span>).getInputStream(),<span class="string">&quot;GBK&quot;</span>).useDelimiter(<span class="string">&quot;asdasdasd&quot;</span>).next()&#125;__::.x</span><br></pre></td></tr></table></figure>
 
 <p>但是&#x2F;vul4 我一直测试失败，跟进发现是解析表达式时，没有找到{，因为当时还是URL编码形式，后面会讲。</p>
 <h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>本质是SPEL，先看最终调用点：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584261582.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584261582.png"  alt="img"></p>
 <p>这个调用和之前学习SPEL时是一模一样的。</p>
 <p>那现在的问题是，为什么能够进入SPEL解析。之前学习SPEL注入时，我们的定界符用的是#{}，为什么到这里就变成__${}__这种了呢？用#行不行？为什么要有 __:: 这种？这些都是后面要搞清楚的问题。</p>
 <p>首先来看一张图：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584261611.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584261611.png"  alt="img"></p>
 <p>这张图在学习内存马的时候也出现过，对我们理解spring如何处理一个请求并回显有很大帮助。后面分析时，可以时不时回头看一眼。</p>
 <p>当我们想自己调试时，可以在Runtime.exec这种命令执行点，或者com.test.controller.vul.TestController#vul1 这种业务处理点下断点，这样就能够大致了解完整的调用栈，方便我们分析参数是如何传递的。</p>
 <p>不过这里，我直接跟着网上文章分析，但是<strong>从后往前</strong>，即先看里漏洞触发最近的方法。</p>
 <p>首先要知道，一个请求最终都会走到org.springframework.web.servlet.DispatcherServlet#doDispatch，里面有三个重要方法。</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584279122.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584279122.png"  alt="img"></p>
 <p>下面的分析都基于&#x2F;vul1</p>
 <h2 id="processDispatchResult漏洞触发"><a href="#processDispatchResult漏洞触发" class="headerlink" title="processDispatchResult漏洞触发"></a>processDispatchResult漏洞触发</h2><p>先在org.springframework.web.servlet.DispatcherServlet#processDispatchResult打断点，走到render：</p>
-<p><img   src="https://cdn.nlark.com/yuque/0/2025/png/53465197/1760518496363-a6f20473-d2f9-4cb9-b878-92e7db305157.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1760518496363-a6f20473-d2f9-4cb9-b878-92e7db305157.png"  alt="img"></p>
 <p>这里已经被controller处理过了，view就是返回的视图名称，model就是我们自己addAttribute的内容。</p>
 <p>跟进render：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584279117.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584279117.png"  alt="img"></p>
 <p>先对视图处理，获取view对象。继续往下：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584279097.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584279097.png"  alt="img"></p>
 <p>这里拿刚刚获取的view对象进行进一步的渲染，跟进，直到renderFragment：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584288651.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584288651.png"  alt="img"></p>
 <p>这里getTemplateName获取的值是test&#x2F;…..&#x2F;ttt，这就是我们在controller里返回的。这里能证实，返回的内容，就是会被当作模板解析，跟~{xxx}的效果是一样的。继续往下：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584288625.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584288625.png"  alt="img"></p>
 <p>首先看上面的if，判断有没有双冒号，这就是为什么我们payload里要加双冒号的原因。其实双冒号只需要加在__${}__外的任何地方都行。其次，看到下面的~{ + … + } 。这再次印证了，controller里return的内容，会被作为fragment处理。</p>
 <p>然后会产生两个分支。</p>
 <h3 id="分支1"><a href="#分支1" class="headerlink" title="分支1"></a>分支1</h3><p>跟进parseExpression：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584295930.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584295930.png"  alt="img"></p>
 <p>这里跟进preprocess：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584295969.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584295969.png"  alt="img"></p>
 <p>这里有个很重要的操作，获取两个双下划线内的值，最后获取的就是${xxx}：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584295952.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584295952.png"  alt="img"></p>
 <p>跟进parseExpression：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584295943.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584295943.png"  alt="img"></p>
 <p>然后跟进parse：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584303220.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584303220.png"  alt="img"></p>
 <p>然后跟进decompose：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584303215.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584303215.png"  alt="img"></p>
 <p>直到进入org.thymeleaf.standard.expression.ExpressionParsingUtil#decomposeSimpleExpressions，这里第一次会进入这个if：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584303238.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584303238.png"  alt="img"></p>
 <p>判断第一个字符是不是$, *, #, @, ~，第二个字符是不是{ 。接下来就是一直往currentFragment里添加，直到遇见}，进入这个if：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584315680.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584315680.png"  alt="img"></p>
 <p>这里应该进入第一个case，跟进：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584315651.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584315651.png"  alt="img"></p>
 <p>这里也是很重要的操作，把${}里的内容取出了，这样的话，表达式就跟学SPEL时一样了。</p>
 <p>同时，能发现这里还有一个if，会取出{}里的内容，所以payload也可以写成：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__$&#123;&#123;<span class="keyword">new</span> <span class="title class_">java</span>.util.Scanner(T(java.lang.Runtime).getRuntime().exec(<span class="string">&quot;calc&quot;</span>).getInputStream(),<span class="string">&quot;GBK&quot;</span>).useDelimiter(<span class="string">&quot;asdasdasd&quot;</span>).next()&#125;&#125;__::.x</span><br></pre></td></tr></table></figure>
@@ -450,32 +450,32 @@
 
 <p>这里补充一下，__<em>{}<strong>形式的payload也是可以的，因为里面的解析步骤跟${}时一样。而其他的就不行了，因为解析时好像会根据()来切片，最终payload全乱了，可以自己跟进调试一下。</strong></em>{}__也许能用来绕waf。</p>
 <p>回到preprocess方法，最终会在excute实现表达式解析：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584323692.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584323692.png"  alt="img"></p>
 <p>可以看一眼调用栈：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584323717.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584323717.png"  alt="img"></p>
 <h3 id="分支2"><a href="#分支2" class="headerlink" title="分支2"></a>分支2</h3><p>有时候，我们的payload中可以没有双下划线。比如访问&#x2F;vul2，此时payload&#x3D;${new+java.util.Scanner(T(java.lang.Runtime).getRuntime().exec(“calc”).getInputStream(),”GBK”).useDelimiter(“asdasdasd”).next()}</p>
 <p>这时候进入preprocess时，由于没有找到下划线，会直接返回input：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584333290.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584333290.png"  alt="img"></p>
 <p>在decompose的时候会进入最后一个case，从而把fragment和selector分离：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584333297.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584333297.png"  alt="img"></p>
 <p>接着回到renderFragment，会进入FragmentExpression.createExecutedFragmentExpression(context, fragmentExpression); ：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584333293.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584333293.png"  alt="img"></p>
 <p>跟进到org.thymeleaf.standard.expression.FragmentExpression#doCreateExecutedFragmentExpression：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584343160.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584343090.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584343160.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584343090.png"  alt="img"></p>
 <p>这里会分别获取templateName和selector，并执行表达式解析。</p>
 <p>所以payload里有时候也可以不带双下划线。</p>
 <h2 id="applyDefaultViewName漏洞触发"><a href="#applyDefaultViewName漏洞触发" class="headerlink" title="applyDefaultViewName漏洞触发"></a>applyDefaultViewName漏洞触发</h2><p>这里会触发url路径中的payload。</p>
 <p>跟进getDefaultViewName，再跟进getViewName，再跟进transformPath：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584343025.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584343025.png"  alt="img"></p>
 <p>这里会去掉path头尾的&#x2F;，以及扩展名，即最后一个. 后面的内容，这就是为什么要加上 .x ，否则payload就乱了。但是就&#x2F;vul4 情况一定要加 .x 其他就随便了。</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584354547.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584354547.png"  alt="img"></p>
 <p>回到applyDefaultViewName，之后就是往mv里设置处理过的viewName了。再后面就会调用processDispatchResult。跟上面的过程就一样了。所以关键是mv对象中的viewName是什么。</p>
 <p>然而，这里有一个问题：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584354587.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584354587.png"  alt="img"></p>
 <p>就是要提取${}里面的内容时，{ 还是URL编码，导致无法正常取出，这样返回的还是原本的input，从而触发不了。似乎是springboot版本的问题，2.7.15不行，但是2.5.3可以。<strong>2.6及以下的好像才行</strong>。</p>
 <p>调试了一下：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584354640.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584354640.png"  alt="img"></p>
 <p>两个版本走的if不一样，导致了解析差异。而为什么有差异，我还不清楚。</p>
 <h2 id="ha-handle"><a href="#ha-handle" class="headerlink" title="ha.handle"></a>ha.handle</h2><p>这里主要是获取controller的返回值，然后设置到mavContainer里，最后再从里面获取，文章里写的很清楚了，这里不赘述。</p>
 <h2 id="无法利用的情况"><a href="#无法利用的情况" class="headerlink" title="无法利用的情况"></a>无法利用的情况</h2><p>如果用@RestController或者给Controller加上@ResponseBody就失去了视图渲染功能，就不会触发漏洞</p>
@@ -497,13 +497,13 @@
 
 <p>3.0.15后暂时无绕过</p>
 <p>这里还有一个可以看看：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584369818.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584369818.png"  alt="img"></p>
 <h2 id="3-1-2"><a href="#3-1-2" class="headerlink" title="3.1.2"></a>3.1.2</h2><p>参考：<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14196" >https://xz.aliyun.com/news/14196<i class="fas fa-external-link-alt"></i></a></p>
 <p>这里先记录payload：可以直接写到html页面里加载，适用于能文件上传写模板的时候；也可以像上面一样打，记得URL编码</p>
 <p>直接写入html模板，相当于：</p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584378118.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584378101.png"  alt="img"></p>
-<p><img   src="/2025/05/03/JNI/eleaf-SSTI/image-1760584378111.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584378118.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584378101.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/image-1760584378111.png"  alt="img"></p>
 <p>上面的两张图片，大致解释了为什么要用[[]]或者[()]包裹，具体还是没搞明白。</p>
 <p>[[]] &#x3D; th:text   [()] &#x3D; th:utext</p>
 <p>这个好像叫内联表达式，在realworldCTF chatterbox里出现过，能够绕过&lt;&gt;等符号</p>
@@ -706,7 +706,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">71.7k</span>
+                    <span class="item-value border-box word">74.9k</span>
                 </span>
             
 
