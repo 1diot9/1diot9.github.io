@@ -272,7 +272,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Tue Feb 03 2026 00:25:35 GMT+0800">2026-02-03 00:25:35</span>
+                    <span class="datetime" data-updated="Tue Feb 03 2026 13:44:27 GMT+0800">2026-02-03 13:44:27</span>
                 </span>
             
         
@@ -515,8 +515,8 @@
 <p>然后跟进executeCall：</p>
 <p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1770019177326-cf8c4d39-aea9-40fb-9ebf-3838c5177901.png"  alt="img"></p>
 <p>最终是在这里触发。上面的case代表出现了报错，也就是恶意Registry通过返回恶意的报错从而攻击Client。</p>
-<p>这里有个规律，只要一个对象被RemoteObjectInvocationHandler（里面的ref指向恶意jrmp）动态代理了，那么这个对象执行任意方法时，都会走RemoteObjectInvocationHandler#invoke，最终走到StreamRemoteCall#executeCall，然后就可以反序列化恶意报错对象。</p>
-<p>被RemoteObjectInvocationHandler代理的对象有个条件，必须实现Remote接口，理由如图：</p>
+<p>这里有个规律，只要一个接口被RemoteObjectInvocationHandler（里面的ref，一般是UnicastRef指向恶意jrmp）动态代理了，那么这个对象执行任意方法时，都会走RemoteObjectInvocationHandler#invoke，最终走到UnicastRef#invoke–&gt;StreamRemoteCall#executeCall，然后就可以反序列化恶意报错对象。</p>
+<p>被RemoteObjectInvocationHandler代理的接口有个条件，必须实现Remote接口，理由如图：</p>
 <p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1770048738647-ebf3e51d-47a1-4d70-aa8f-caa129216842.png"  alt="img">invoke会走到这里，代理如果没实现Remote接口，就会报错。</p>
 <h2 id="RMI"><a href="#RMI" class="headerlink" title="RMI"></a>RMI</h2><h3 id="Registry返回恶意stub"><a href="#Registry返回恶意stub" class="headerlink" title="Registry返回恶意stub"></a>Registry返回恶意stub</h3><p>registry返回的stub会直接被client反序列化，所以可以构造恶意stub来实现攻击。</p>
 <p>我们知道，在高版本jdk中，如jdk17.0.16，默认不允许ldap反序列化数据：</p>
@@ -747,7 +747,7 @@
             
                 <span class="count-item border-box word">
                     <span class="item-type border-box">总字数</span>
-                    <span class="item-value border-box word">109.4k</span>
+                    <span class="item-value border-box word">111.2k</span>
                 </span>
             
 
